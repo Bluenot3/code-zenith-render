@@ -157,7 +157,8 @@ export const CanvasStage = () => {
         
         <Environment preset="night" />
         
-        {postFX.bloom && (
+        {/* Temporarily disabled Bloom to isolate error */}
+        {/* {postFX.bloom && (
           <EffectComposer>
             <Bloom
               intensity={postFX.bloomStrength}
@@ -165,7 +166,7 @@ export const CanvasStage = () => {
               luminanceSmoothing={0.9}
             />
           </EffectComposer>
-        )}
+        )} */}
       </Suspense>
     </Canvas>
   );
