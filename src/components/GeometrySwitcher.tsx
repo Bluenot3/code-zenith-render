@@ -43,23 +43,11 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
     
     switch (geometry.type) {
       case 'text':
-        // Map font families to available font files
-        const fontMap: Record<string, string> = {
-          'JetBrains Mono': '/fonts/helvetiker_regular.typeface.json',
-          'Orbitron': '/fonts/helvetiker_regular.typeface.json',
-          'Anton': '/fonts/helvetiker_regular.typeface.json',
-          'Montserrat': '/fonts/helvetiker_regular.typeface.json',
-          'Bebas Neue': '/fonts/helvetiker_regular.typeface.json',
-          'Unbounded': '/fonts/helvetiker_regular.typeface.json',
-        };
-        
-        const fontPath = fontMap[geometry.fontFamily] || '/fonts/helvetiker_regular.typeface.json';
-        
         return (
-          <Center key={`${geometry.fontFamily}-${geometry.text}`}>
+          <Center key={`text-${geometry.fontFamily}-${geometry.text}-${geometry.size}`}>
             <Text3D
               {...props}
-              font={fontPath}
+              font="/fonts/helvetiker_regular.typeface.json"
               size={geometry.size}
               height={geometry.depth}
               curveSegments={geometry.curveSegments}

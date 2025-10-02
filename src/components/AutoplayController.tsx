@@ -3,52 +3,64 @@ import { useStore } from '@/state/useStore';
 
 const PRESETS = [
   {
-    geometry: { type: 'text' as const },
+    geometry: { type: 'text' as const, fontFamily: 'JetBrains Mono' as const },
     material: { preset: 'glass' as const },
     theme: { preset: 'crystal' as const },
-    animation: { spin: true, float: false, orbit: false, speed: 1 },
+    animation: { spin: false, float: false, orbit: false, speed: 0.5 },
   },
   {
     geometry: { type: 'cube' as const },
     material: { preset: 'neon' as const },
     theme: { preset: 'cyberpunk' as const },
-    animation: { spin: true, float: true, orbit: false, speed: 1.5 },
+    animation: { spin: false, float: false, orbit: false, speed: 0.5 },
   },
   {
     geometry: { type: 'sphere' as const },
     material: { preset: 'crystal' as const },
     theme: { preset: 'aqua' as const },
-    animation: { spin: false, float: true, orbit: true, speed: 0.8 },
+    animation: { spin: false, float: false, orbit: false, speed: 0.5 },
   },
   {
     geometry: { type: 'torus' as const },
     material: { preset: 'hologram' as const },
     theme: { preset: 'holo' as const },
-    animation: { spin: true, float: false, orbit: false, speed: 2 },
+    animation: { spin: false, float: false, orbit: false, speed: 0.5 },
   },
   {
     geometry: { type: 'torusKnot' as const },
     material: { preset: 'metal' as const },
     theme: { preset: 'dark' as const },
-    animation: { spin: true, float: true, orbit: false, speed: 1.2 },
+    animation: { spin: false, float: false, orbit: false, speed: 0.5 },
   },
   {
     geometry: { type: 'icosahedron' as const },
     material: { preset: 'water' as const },
     theme: { preset: 'zen' as const },
-    animation: { spin: false, float: true, orbit: true, speed: 0.5 },
+    animation: { spin: false, float: false, orbit: false, speed: 0.5 },
   },
   {
     geometry: { type: 'dodecahedron' as const },
     material: { preset: 'carbon' as const },
     theme: { preset: 'midnight' as const },
-    animation: { spin: true, float: false, orbit: false, speed: 1 },
+    animation: { spin: false, float: false, orbit: false, speed: 0.5 },
   },
   {
     geometry: { type: 'cylinder' as const },
     material: { preset: 'code' as const },
     theme: { preset: 'neon' as const },
-    animation: { spin: false, float: true, orbit: false, speed: 1.8 },
+    animation: { spin: false, float: false, orbit: false, speed: 0.5 },
+  },
+  {
+    geometry: { type: 'text' as const, fontFamily: 'Orbitron' as const },
+    material: { preset: 'hologram' as const },
+    theme: { preset: 'holo' as const },
+    animation: { spin: false, float: false, orbit: false, speed: 0.5 },
+  },
+  {
+    geometry: { type: 'text' as const, fontFamily: 'Anton' as const },
+    material: { preset: 'neon' as const },
+    theme: { preset: 'cyberpunk' as const },
+    animation: { spin: false, float: false, orbit: false, speed: 0.5 },
   },
 ];
 
@@ -74,23 +86,21 @@ export const AutoplayController = () => {
     const cyclePresets = () => {
       const preset = PRESETS[currentIndexRef.current];
       
-      // Smooth transition: fade animations
-      setAnimation({ spin: false, float: false, orbit: false });
+      // Keep animations off for centered view
+      setAnimation({ spin: false, float: false, orbit: false, speed: 0.5 });
       
       setTimeout(() => {
-        // Apply new preset
+        // Apply new preset smoothly
         setGeometry(preset.geometry);
         setMaterial(preset.material);
         setTheme(preset.theme);
         
         setTimeout(() => {
-          setAnimation(preset.animation);
-          
-          // Smooth camera movement
-          const fov = 60 + Math.sin(currentIndexRef.current) * 15;
-          setCamera({ fov });
-        }, 300);
-      }, 400);
+          // Keep camera steady but with subtle variation
+          const fov = 70 + Math.sin(currentIndexRef.current * 0.5) * 5;
+          setCamera({ fov, autoRotate: false });
+        }, 200);
+      }, 300);
 
       currentIndexRef.current = (currentIndexRef.current + 1) % PRESETS.length;
       
