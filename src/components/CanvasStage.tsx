@@ -1,7 +1,6 @@
 import { Suspense, useEffect, useState, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
-import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import { GeometrySwitcher } from './GeometrySwitcher';
 import { Particles } from './Particles';
 import { CodeTextureGenerator } from '@/utils/codeTexture';
@@ -160,6 +159,8 @@ export const CanvasStage = () => {
           texture={codeTexture.getTexture()} 
           onClick={handleMeshClick}
         />
+        
+        <Particles />
         
         <OrbitControls
           autoRotate={camera.autoRotate}

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { CanvasStage } from '@/components/CanvasStage';
 import { HUD } from '@/components/HUD';
+import { CodeSettings } from '@/components/CodeSettings';
 import { useControls, button, folder } from 'leva';
 import { useStore } from '@/state/useStore';
 import { toast } from '@/hooks/use-toast';
@@ -290,9 +291,10 @@ const Index = () => {
     <div className="relative w-full h-screen overflow-hidden">
       <CanvasStage />
       <HUD />
+      <CodeSettings />
       
       {/* Footer */}
-      <div className="fixed bottom-4 right-4 z-10 font-code text-xs">
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-10 font-code text-xs">
         <div className="bg-card/80 backdrop-blur-sm px-4 py-2 rounded border border-border space-x-4">
           <a 
             href="https://zenarena.ai" 

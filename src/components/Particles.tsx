@@ -4,98 +4,92 @@ import * as THREE from 'three';
 import { useStore } from '@/state/useStore';
 
 export const Particles = () => {
+  const pointsRef = useRef<THREE.Points>(null);
   const particles = useStore((state) => state.particles);
   const theme = useStore((state) => state.theme);
-  const pointsRef = useRef<THREE.Points>(null);
   
-  const { geometry, initialPositions } = useMemo(() => {
+  const [positions, colors, sizes] = useMemo(() => {
     const count = particles.density;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const sizes = new Float32Array(count);
-    const initPos = new Float32Array(count * 3);
     
     const color = new THREE.Color(theme.background);
+    const glowColor = color.clone().offsetHSL(0, 0, 0.3);
     
     for (let i = 0; i < count; i++) {
-      const radius = 5 + Math.random() * 10;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
+      const i3 = i * 3;
       
-      const x = radius * Math.sin(phi) * Math.cos(theta);
-      const y = radius * Math.sin(phi) * Math.sin(theta);
-      const z = radius * Math.cos(phi);
+      positions[i3] = (Math.random() - 0.5) * 20;
+      positions[i3 + 1] = (Math.random() - 0.5) * 20;
+      positions[i3 + 2] = (Math.random() - 0.5) * 20;
       
-      positions[i * 3] = x;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = z;
+      colors[i3] = glowColor.r;
+      colors[i3 + 1] = glowColor.g;
+      colors[i3 + 2] = glowColor.b;
       
-      initPos[i * 3] = x;
-      initPos[i * 3 + 1] = y;
-      initPos[i * 3 + 2] = z;
-      
-      colors[i * 3] = Math.min(1, Math.max(0, color.r + (Math.random() - 0.5) * 0.3));
-      colors[i * 3 + 1] = Math.min(1, Math.max(0, color.g + (Math.random() - 0.5) * 0.3));
-      colors[i * 3 + 2] = Math.min(1, Math.max(0, color.b + (Math.random() - 0.5) * 0.3));
-      
-      sizes[i] = Math.random() * 2 + 0.5;
+      sizes[i] = Math.random() * 0.5 + 0.1;
     }
     
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-    
-    return { geometry: geo, initialPositions: initPos };
+    return [positions, colors, sizes];
   }, [particles.density, theme.background]);
   
   useFrame((state) => {
-    if (!particles.enabled || !geometry) return;
+    if (!pointsRef.current) return;
     
-    const positions = geometry.attributes.position.array as Float32Array;
-    const sizes = geometry.attributes.size?.array as Float32Array;
-    const time = state.clock.elapsedTime * particles.driftSpeed;
+    const geo = pointsRef.current.geometry;
+    const positions = geo.attributes.position.array as Float32Array;
+    const sizes = geo.attributes.size.array as Float32Array;
     
-    if (particles.orbitMode) {
-      const count = positions.length / 3;
-      for (let i = 0; i < count; i++) {
-        const i3 = i * 3;
-        const x = initialPositions[i3];
-        const z = initialPositions[i3 + 2];
-        const angle = time * 0.1;
-        
-        positions[i3] = x * Math.cos(angle) - z * Math.sin(angle);
-        positions[i3 + 2] = x * Math.sin(angle) + z * Math.cos(angle);
-      }
-    } else {
-      const count = positions.length / 3;
-      for (let i = 0; i < count; i++) {
-        const i3 = i * 3;
-        positions[i3 + 1] -= 0.01 * particles.driftSpeed;
-        
-        if (positions[i3 + 1] < -15) {
-          positions[i3 + 1] = 15;
+    for (let i = 0; i < positions.length; i += 3) {
+      if (particles.orbitMode) {
+        const angle = state.clock.elapsedTime * 0.1;
+        const radius = 10;
+        positions[i] = Math.cos(angle + i) * radius;
+        positions[i + 2] = Math.sin(angle + i) * radius;
+      } else {
+        positions[i + 1] -= 0.01 * particles.driftSpeed;
+        if (positions[i + 1] < -10) {
+          positions[i + 1] = 10;
         }
       }
-    }
-    
-    if (particles.twinkle && sizes) {
-      const count = sizes.length;
-      for (let i = 0; i < count; i++) {
-        sizes[i] = Math.abs(Math.sin(time + i * 0.1)) * 2 + 0.5;
+      
+      if (particles.twinkle) {
+        const sizeIndex = i / 3;
+        sizes[sizeIndex] = Math.abs(Math.sin(state.clock.elapsedTime + i)) * 0.5 + 0.1;
       }
-      geometry.attributes.size.needsUpdate = true;
     }
     
-    geometry.attributes.position.needsUpdate = true;
+    geo.attributes.position.needsUpdate = true;
+    geo.attributes.size.needsUpdate = true;
   });
   
   if (!particles.enabled) return null;
   
   return (
-    <points ref={pointsRef} geometry={geometry}>
+    <points ref={pointsRef}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={positions.length / 3}
+          array={positions}
+          itemSize={3}
+        />
+        <bufferAttribute
+          attach="attributes-color"
+          count={colors.length / 3}
+          array={colors}
+          itemSize={3}
+        />
+        <bufferAttribute
+          attach="attributes-size"
+          count={sizes.length}
+          array={sizes}
+          itemSize={1}
+        />
+      </bufferGeometry>
       <pointsMaterial
-        size={1}
+        size={0.8}
         vertexColors
         transparent
         opacity={0.6}
