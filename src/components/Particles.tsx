@@ -8,12 +8,12 @@ export const Particles = () => {
   const theme = useStore((state) => state.theme);
   const pointsRef = useRef<THREE.Points>(null);
   
-  const particleData = useMemo(() => {
+  const { geometry, initialPositions } = useMemo(() => {
     const count = particles.density;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const sizes = new Float32Array(count);
-    const velocities = new Float32Array(count * 3);
+    const initPos = new Float32Array(count * 3);
     
     const color = new THREE.Color(theme.background);
     
@@ -22,13 +22,17 @@ export const Particles = () => {
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
       
-      positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-      positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-      positions[i * 3 + 2] = radius * Math.cos(phi);
+      const x = radius * Math.sin(phi) * Math.cos(theta);
+      const y = radius * Math.sin(phi) * Math.sin(theta);
+      const z = radius * Math.cos(phi);
       
-      velocities[i * 3] = positions[i * 3];
-      velocities[i * 3 + 1] = positions[i * 3 + 1];
-      velocities[i * 3 + 2] = positions[i * 3 + 2];
+      positions[i * 3] = x;
+      positions[i * 3 + 1] = y;
+      positions[i * 3 + 2] = z;
+      
+      initPos[i * 3] = x;
+      initPos[i * 3 + 1] = y;
+      initPos[i * 3 + 2] = z;
       
       colors[i * 3] = Math.min(1, Math.max(0, color.r + (Math.random() - 0.5) * 0.3));
       colors[i * 3 + 1] = Math.min(1, Math.max(0, color.g + (Math.random() - 0.5) * 0.3));
@@ -37,29 +41,35 @@ export const Particles = () => {
       sizes[i] = Math.random() * 2 + 0.5;
     }
     
-    return { positions, colors, sizes, velocities, count };
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+    
+    return { geometry: geo, initialPositions: initPos };
   }, [particles.density, theme.background]);
   
   useFrame((state) => {
-    if (!particles.enabled || !pointsRef.current) return;
+    if (!particles.enabled || !geometry) return;
     
-    const geometry = pointsRef.current.geometry;
     const positions = geometry.attributes.position.array as Float32Array;
     const sizes = geometry.attributes.size?.array as Float32Array;
     const time = state.clock.elapsedTime * particles.driftSpeed;
     
     if (particles.orbitMode) {
-      for (let i = 0; i < particleData.count; i++) {
+      const count = positions.length / 3;
+      for (let i = 0; i < count; i++) {
         const i3 = i * 3;
-        const x = particleData.velocities[i3];
-        const z = particleData.velocities[i3 + 2];
+        const x = initialPositions[i3];
+        const z = initialPositions[i3 + 2];
         const angle = time * 0.1;
         
         positions[i3] = x * Math.cos(angle) - z * Math.sin(angle);
         positions[i3 + 2] = x * Math.sin(angle) + z * Math.cos(angle);
       }
     } else {
-      for (let i = 0; i < particleData.count; i++) {
+      const count = positions.length / 3;
+      for (let i = 0; i < count; i++) {
         const i3 = i * 3;
         positions[i3 + 1] -= 0.01 * particles.driftSpeed;
         
@@ -70,7 +80,8 @@ export const Particles = () => {
     }
     
     if (particles.twinkle && sizes) {
-      for (let i = 0; i < particleData.count; i++) {
+      const count = sizes.length;
+      for (let i = 0; i < count; i++) {
         sizes[i] = Math.abs(Math.sin(time + i * 0.1)) * 2 + 0.5;
       }
       geometry.attributes.size.needsUpdate = true;
@@ -82,27 +93,7 @@ export const Particles = () => {
   if (!particles.enabled) return null;
   
   return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={particleData.count}
-          array={particleData.positions}
-          itemSize={3}
-        />
-        <bufferAttribute
-          attach="attributes-color"
-          count={particleData.count}
-          array={particleData.colors}
-          itemSize={3}
-        />
-        <bufferAttribute
-          attach="attributes-size"
-          count={particleData.count}
-          array={particleData.sizes}
-          itemSize={1}
-        />
-      </bufferGeometry>
+    <points ref={pointsRef} geometry={geometry}>
       <pointsMaterial
         size={1}
         vertexColors
