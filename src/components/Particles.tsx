@@ -1,15 +1,13 @@
-import { useRef, useMemo, useEffect } from 'react';
+import { useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useStore } from '@/state/useStore';
 
 export const Particles = () => {
-  const particlesRef = useRef<THREE.Points>(null);
-  const geometryRef = useRef<THREE.BufferGeometry>(null);
   const particles = useStore((state) => state.particles);
   const theme = useStore((state) => state.theme);
   
-  const attributes = useMemo(() => {
+  const geometry = useMemo(() => {
     const count = particles.density;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
@@ -18,7 +16,6 @@ export const Particles = () => {
     const color = new THREE.Color(theme.background);
     
     for (let i = 0; i < count; i++) {
-      // Random position in sphere
       const radius = 5 + Math.random() * 10;
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
@@ -27,34 +24,28 @@ export const Particles = () => {
       positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
       positions[i * 3 + 2] = radius * Math.cos(phi);
       
-      // Random color variation
       colors[i * 3] = color.r + (Math.random() - 0.5) * 0.3;
       colors[i * 3 + 1] = color.g + (Math.random() - 0.5) * 0.3;
       colors[i * 3 + 2] = color.b + (Math.random() - 0.5) * 0.3;
       
-      // Random size
       sizes[i] = Math.random() * 2 + 0.5;
     }
     
-    return { positions, colors, sizes };
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+    
+    return geo;
   }, [particles.density, theme.background]);
   
-  useEffect(() => {
-    if (!geometryRef.current) return;
-    
-    geometryRef.current.setAttribute('position', new THREE.BufferAttribute(attributes.positions, 3));
-    geometryRef.current.setAttribute('color', new THREE.BufferAttribute(attributes.colors, 3));
-    geometryRef.current.setAttribute('size', new THREE.BufferAttribute(attributes.sizes, 1));
-  }, [attributes]);
-  
-  useFrame((state) => {
-    if (!particlesRef.current || !particles.enabled) return;
+  useFrame((state, delta, frame) => {
+    if (!particles.enabled || !frame || !geometry.attributes.position) return;
     
     const time = state.clock.elapsedTime * particles.driftSpeed;
-    const positions = particlesRef.current.geometry.attributes.position.array as Float32Array;
+    const positions = geometry.attributes.position.array as Float32Array;
     
     if (particles.orbitMode) {
-      // Orbit around center
       for (let i = 0; i < positions.length; i += 3) {
         const x = positions[i];
         const z = positions[i + 2];
@@ -64,34 +55,30 @@ export const Particles = () => {
         positions[i + 2] = x * Math.sin(angle) + z * Math.cos(angle);
       }
     } else {
-      // Linear drift
       for (let i = 0; i < positions.length; i += 3) {
         positions[i + 1] -= 0.01 * particles.driftSpeed;
         
-        // Reset if too low
         if (positions[i + 1] < -15) {
           positions[i + 1] = 15;
         }
       }
     }
     
-    // Twinkle effect
-    if (particles.twinkle) {
-      const sizes = particlesRef.current.geometry.attributes.size.array as Float32Array;
+    if (particles.twinkle && geometry.attributes.size) {
+      const sizes = geometry.attributes.size.array as Float32Array;
       for (let i = 0; i < sizes.length; i++) {
         sizes[i] = Math.abs(Math.sin(time + i * 0.1)) * 2 + 0.5;
       }
-      particlesRef.current.geometry.attributes.size.needsUpdate = true;
+      geometry.attributes.size.needsUpdate = true;
     }
     
-    particlesRef.current.geometry.attributes.position.needsUpdate = true;
+    geometry.attributes.position.needsUpdate = true;
   });
   
   if (!particles.enabled) return null;
   
   return (
-    <points ref={particlesRef}>
-      <bufferGeometry ref={geometryRef} />
+    <points geometry={geometry}>
       <pointsMaterial
         size={1}
         vertexColors
