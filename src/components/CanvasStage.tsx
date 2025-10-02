@@ -137,16 +137,19 @@ export const CanvasStage = () => {
       style={{ background: themeConfig.sceneBackground }}
     >
       <Suspense fallback={null}>
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
-        <pointLight position={[-10, -10, -5]} intensity={0.5} color={themeConfig.particleColor} />
+        <ambientLight intensity={1.5} />
+        <directionalLight position={[10, 10, 5]} intensity={2} castShadow />
+        <directionalLight position={[-10, -10, -5]} intensity={1.5} />
+        <pointLight position={[0, 5, 5]} intensity={2} color="#00FFD5" />
+        <pointLight position={[-10, -10, -5]} intensity={1.5} color={themeConfig.particleColor} />
+        <spotLight position={[0, 10, 0]} intensity={2} angle={0.6} penumbra={1} castShadow />
         
-        <GeometrySwitcher 
+        <GeometrySwitcher
           texture={codeTexture.getTexture()} 
           onClick={handleMeshClick}
         />
         
-        {/* <Particles /> */}
+        <Particles />
         
         <OrbitControls
           autoRotate={camera.autoRotate}
@@ -155,10 +158,9 @@ export const CanvasStage = () => {
           dampingFactor={camera.damping}
         />
         
-        <Environment preset="night" />
+        <Environment preset="city" />
         
-        {/* Temporarily disabled Bloom to isolate error */}
-        {/* {postFX.bloom && (
+        {postFX.bloom && (
           <EffectComposer>
             <Bloom
               intensity={postFX.bloomStrength}
@@ -166,7 +168,7 @@ export const CanvasStage = () => {
               luminanceSmoothing={0.9}
             />
           </EffectComposer>
-        )} */}
+        )}
       </Suspense>
     </Canvas>
   );
