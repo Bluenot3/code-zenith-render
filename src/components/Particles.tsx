@@ -1,11 +1,11 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { BufferAttribute } from 'three';
 import { useStore } from '@/state/useStore';
 
 export const Particles = () => {
   const particlesRef = useRef<THREE.Points>(null);
+  const geometryRef = useRef<THREE.BufferGeometry>(null);
   const particles = useStore((state) => state.particles);
   const theme = useStore((state) => state.theme);
   
@@ -36,12 +36,16 @@ export const Particles = () => {
       sizes[i] = Math.random() * 2 + 0.5;
     }
     
-    return {
-      position: new BufferAttribute(positions, 3),
-      color: new BufferAttribute(colors, 3),
-      size: new BufferAttribute(sizes, 1),
-    };
+    return { positions, colors, sizes };
   }, [particles.density, theme.background]);
+  
+  useEffect(() => {
+    if (!geometryRef.current) return;
+    
+    geometryRef.current.setAttribute('position', new THREE.BufferAttribute(attributes.positions, 3));
+    geometryRef.current.setAttribute('color', new THREE.BufferAttribute(attributes.colors, 3));
+    geometryRef.current.setAttribute('size', new THREE.BufferAttribute(attributes.sizes, 1));
+  }, [attributes]);
   
   useFrame((state) => {
     if (!particlesRef.current || !particles.enabled) return;
@@ -87,11 +91,7 @@ export const Particles = () => {
   
   return (
     <points ref={particlesRef}>
-      <bufferGeometry>
-        <bufferAttribute attach='attributes-position' {...attributes.position} />
-        <bufferAttribute attach='attributes-color' {...attributes.color} />
-        <bufferAttribute attach='attributes-size' {...attributes.size} />
-      </bufferGeometry>
+      <bufferGeometry ref={geometryRef} />
       <pointsMaterial
         size={1}
         vertexColors
