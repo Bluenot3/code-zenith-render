@@ -155,20 +155,11 @@ export const CanvasStage = () => {
           intensity={lighting.rimIntensity} 
           color={themeConfig.particleColor} 
         />
-        <spotLight 
-          position={[0, 10, 0]} 
-          intensity={lighting.keyIntensity * 0.5} 
-          angle={0.6} 
-          penumbra={1} 
-          castShadow 
-        />
         
         <GeometrySwitcher 
           texture={codeTexture.getTexture()} 
           onClick={handleMeshClick}
         />
-        
-        <Particles />
         
         <OrbitControls
           autoRotate={camera.autoRotate}
@@ -178,16 +169,6 @@ export const CanvasStage = () => {
         />
         
         <Environment preset="city" />
-        
-        {postFX.bloom && (
-          <EffectComposer>
-            <Bloom
-              intensity={postFX.bloomStrength}
-              luminanceThreshold={postFX.bloomThreshold}
-              luminanceSmoothing={0.9}
-            />
-          </EffectComposer>
-        )}
       </Suspense>
     </Canvas>
   );
