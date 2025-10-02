@@ -51,7 +51,7 @@ export type FontFamily =
 
 export type CodeDirection = 'down' | 'right' | 'spiral';
 
-interface GeometryState {
+export interface GeometryState {
   type: GeometryType;
   text: string;
   fontFamily: FontFamily;
@@ -65,7 +65,7 @@ interface GeometryState {
   wireframe: boolean;
 }
 
-interface MaterialState {
+export interface MaterialState {
   preset: MaterialType;
   roughness: number;
   metalness: number;

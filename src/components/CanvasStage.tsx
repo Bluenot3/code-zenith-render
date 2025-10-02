@@ -14,6 +14,7 @@ export const CanvasStage = () => {
   const code = useStore((state) => state.code);
   const camera = useStore((state) => state.camera);
   const postFX = useStore((state) => state.postFX);
+  const lighting = useStore((state) => state.lighting);
   const material = useStore((state) => state.material);
   const setMaterial = useStore((state) => state.setMaterial);
   const geometry = useStore((state) => state.geometry);
@@ -137,13 +138,37 @@ export const CanvasStage = () => {
       style={{ background: themeConfig.sceneBackground }}
     >
       <Suspense fallback={null}>
-        <ambientLight intensity={1.5} />
-        <directionalLight position={[10, 10, 5]} intensity={2} castShadow />
+        <ambientLight intensity={lighting.envIntensity} />
+        <directionalLight 
+          position={[10, 10, 5]} 
+          intensity={lighting.keyIntensity} 
+          color={themeConfig.codeTextColor}
+          castShadow 
+        />
+        <directionalLight 
+          position={[-10, -10, -5]} 
+          intensity={lighting.fillIntensity}
+          color={themeConfig.codeTextColor}
+        />
+        <pointLight 
+          position={[0, 5, 5]} 
+          intensity={lighting.rimIntensity} 
+          color={themeConfig.particleColor} 
+        />
+        <spotLight 
+          position={[0, 10, 0]} 
+          intensity={lighting.keyIntensity * 0.5} 
+          angle={0.6} 
+          penumbra={1} 
+          castShadow 
+        />
         
         <GeometrySwitcher 
           texture={codeTexture.getTexture()} 
           onClick={handleMeshClick}
         />
+        
+        <Particles />
         
         <OrbitControls
           autoRotate={camera.autoRotate}
@@ -153,6 +178,16 @@ export const CanvasStage = () => {
         />
         
         <Environment preset="city" />
+        
+        {postFX.bloom && (
+          <EffectComposer>
+            <Bloom
+              intensity={postFX.bloomStrength}
+              luminanceThreshold={postFX.bloomThreshold}
+              luminanceSmoothing={0.9}
+            />
+          </EffectComposer>
+        )}
       </Suspense>
     </Canvas>
   );

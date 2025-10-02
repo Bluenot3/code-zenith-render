@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { Text3D, Center } from '@react-three/drei';
 import * as THREE from 'three';
 import { useStore, GeometryType } from '@/state/useStore';
+import { MaterialSwitcher } from './MaterialSwitcher';
 
 interface GeometrySwitcherProps {
   texture: THREE.Texture;
@@ -57,11 +58,9 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
               bevelSegments={5}
             >
               {geometry.text}
-              <meshStandardMaterial 
-                map={texture}
-                emissive={material.tint}
-                emissiveMap={texture}
-                emissiveIntensity={material.emissiveGain}
+              <MaterialSwitcher 
+                texture={texture}
+                material={material}
                 wireframe={geometry.wireframe}
               />
             </Text3D>
@@ -72,11 +71,9 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
         return (
           <mesh {...props}>
             <boxGeometry args={[geometry.size * 2, geometry.size * 2, geometry.size * 2]} />
-            <meshStandardMaterial 
-              map={texture}
-              emissive={material.tint}
-              emissiveMap={texture}
-              emissiveIntensity={material.emissiveGain}
+            <MaterialSwitcher 
+              texture={texture}
+              material={material}
               wireframe={geometry.wireframe}
             />
           </mesh>
@@ -86,11 +83,9 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
         return (
           <mesh {...props}>
             <sphereGeometry args={[geometry.size, 64, 64]} />
-            <meshStandardMaterial 
-              map={texture}
-              emissive={material.tint}
-              emissiveMap={texture}
-              emissiveIntensity={material.emissiveGain}
+            <MaterialSwitcher 
+              texture={texture}
+              material={material}
               wireframe={geometry.wireframe}
             />
           </mesh>
@@ -100,11 +95,9 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
         return (
           <mesh {...props}>
             <torusGeometry args={[geometry.size, geometry.size * 0.4, 32, 100]} />
-            <meshStandardMaterial 
-              map={texture}
-              emissive={material.tint}
-              emissiveMap={texture}
-              emissiveIntensity={material.emissiveGain}
+            <MaterialSwitcher 
+              texture={texture}
+              material={material}
               wireframe={geometry.wireframe}
             />
           </mesh>
@@ -114,11 +107,9 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
         return (
           <mesh {...props}>
             <cylinderGeometry args={[geometry.size, geometry.size, geometry.size * 2, 32]} />
-            <meshStandardMaterial 
-              map={texture}
-              emissive={material.tint}
-              emissiveMap={texture}
-              emissiveIntensity={material.emissiveGain}
+            <MaterialSwitcher 
+              texture={texture}
+              material={material}
               wireframe={geometry.wireframe}
             />
           </mesh>
@@ -128,13 +119,10 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
         return (
           <mesh {...props}>
             <planeGeometry args={[geometry.size * 2, geometry.size * 2, 32, 32]} />
-            <meshStandardMaterial 
-              map={texture}
-              emissive={material.tint}
-              emissiveMap={texture}
-              emissiveIntensity={material.emissiveGain}
+            <MaterialSwitcher 
+              texture={texture}
+              material={material}
               wireframe={geometry.wireframe}
-              side={THREE.DoubleSide}
             />
           </mesh>
         );
@@ -143,11 +131,9 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
         return (
           <mesh {...props}>
             <tetrahedronGeometry args={[geometry.size, 0]} />
-            <meshStandardMaterial 
-              map={texture}
-              emissive={material.tint}
-              emissiveMap={texture}
-              emissiveIntensity={material.emissiveGain}
+            <MaterialSwitcher 
+              texture={texture}
+              material={material}
               wireframe={geometry.wireframe}
             />
           </mesh>
@@ -157,11 +143,9 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
         return (
           <mesh {...props}>
             <torusKnotGeometry args={[geometry.size * 0.6, geometry.size * 0.2, 128, 16]} />
-            <meshStandardMaterial 
-              map={texture}
-              emissive={material.tint}
-              emissiveMap={texture}
-              emissiveIntensity={material.emissiveGain}
+            <MaterialSwitcher 
+              texture={texture}
+              material={material}
               wireframe={geometry.wireframe}
             />
           </mesh>
@@ -171,11 +155,9 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
         return (
           <mesh {...props}>
             <icosahedronGeometry args={[geometry.size, 0]} />
-            <meshStandardMaterial 
-              map={texture}
-              emissive={material.tint}
-              emissiveMap={texture}
-              emissiveIntensity={material.emissiveGain}
+            <MaterialSwitcher 
+              texture={texture}
+              material={material}
               wireframe={geometry.wireframe}
             />
           </mesh>
@@ -185,11 +167,9 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
         return (
           <mesh {...props}>
             <dodecahedronGeometry args={[geometry.size, 0]} />
-            <meshStandardMaterial 
-              map={texture}
-              emissive={material.tint}
-              emissiveMap={texture}
-              emissiveIntensity={material.emissiveGain}
+            <MaterialSwitcher 
+              texture={texture}
+              material={material}
               wireframe={geometry.wireframe}
             />
           </mesh>
