@@ -15,15 +15,18 @@ export const MaterialSwitcher = ({ texture, material, wireframe }: MaterialSwitc
       return (
         <meshPhysicalMaterial
           map={texture}
-          roughness={material.roughness * 0.1}
+          roughness={0.05}
           metalness={0}
-          transmission={material.transmission}
-          thickness={0.5}
-          ior={material.ior}
-          clearcoat={material.clearcoat}
-          clearcoatRoughness={0.1}
+          transmission={0.95}
+          thickness={0.8}
+          ior={1.5}
+          clearcoat={1}
+          clearcoatRoughness={0.05}
           transparent
-          opacity={0.9}
+          opacity={1}
+          reflectivity={1}
+          envMapIntensity={2}
+          side={THREE.DoubleSide}
           wireframe={wireframe}
         />
       );
@@ -48,15 +51,19 @@ export const MaterialSwitcher = ({ texture, material, wireframe }: MaterialSwitc
       return (
         <meshPhysicalMaterial
           map={texture}
-          roughness={material.roughness * 0.2}
-          metalness={0.1}
-          transmission={material.transmission * 0.5}
-          thickness={1}
-          ior={material.ior}
-          clearcoat={material.clearcoat}
+          roughness={0}
+          metalness={0.2}
+          transmission={0.6}
+          thickness={1.5}
+          ior={2.4}
+          clearcoat={1}
           clearcoatRoughness={0}
           emissive={tintColor}
-          emissiveIntensity={material.emissiveGain * 0.5}
+          emissiveIntensity={0.8}
+          reflectivity={1}
+          envMapIntensity={3}
+          sheen={1}
+          sheenColor={tintColor}
           wireframe={wireframe}
         />
       );
@@ -67,37 +74,47 @@ export const MaterialSwitcher = ({ texture, material, wireframe }: MaterialSwitc
           map={texture}
           roughness={0}
           metalness={0}
-          transmission={material.transmission * 0.9}
+          transmission={0.98}
           thickness={2}
           ior={1.33}
           clearcoat={1}
-          clearcoatRoughness={0.1}
+          clearcoatRoughness={0}
           color={tintColor}
+          reflectivity={0.5}
+          envMapIntensity={1.5}
+          side={THREE.DoubleSide}
           wireframe={wireframe}
         />
       );
     
     case 'metal':
       return (
-        <meshStandardMaterial
+        <meshPhysicalMaterial
           map={texture}
-          roughness={material.roughness}
-          metalness={material.metalness}
+          roughness={0.15}
+          metalness={1}
+          clearcoat={1}
+          clearcoatRoughness={0.1}
+          reflectivity={1}
+          envMapIntensity={2.5}
           emissive={tintColor}
-          emissiveIntensity={material.emissiveGain * 0.3}
+          emissiveIntensity={0.3}
           wireframe={wireframe}
         />
       );
     
     case 'neon':
       return (
-        <meshStandardMaterial
+        <meshPhysicalMaterial
           map={texture}
           emissive={tintColor}
           emissiveMap={texture}
-          emissiveIntensity={material.neonGlow}
-          roughness={0.3}
-          metalness={0.8}
+          emissiveIntensity={3}
+          roughness={0.2}
+          metalness={0.9}
+          clearcoat={1}
+          clearcoatRoughness={0.1}
+          reflectivity={1}
           wireframe={wireframe}
         />
       );

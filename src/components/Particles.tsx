@@ -67,7 +67,7 @@ export const Particles = () => {
   if (!particles.enabled) return null;
   
   return (
-    <points ref={pointsRef}>
+    <points ref={pointsRef} renderOrder={-1}>
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
@@ -89,12 +89,13 @@ export const Particles = () => {
         />
       </bufferGeometry>
       <pointsMaterial
-        size={0.8}
+        size={0.05}
         vertexColors
         transparent
-        opacity={0.6}
+        opacity={0.4}
         sizeAttenuation
         blending={THREE.AdditiveBlending}
+        depthWrite={false}
       />
     </points>
   );

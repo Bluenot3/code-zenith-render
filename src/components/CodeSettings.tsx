@@ -5,6 +5,7 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Settings, X } from 'lucide-react';
 
 export const CodeSettings = () => {
@@ -13,6 +14,10 @@ export const CodeSettings = () => {
   const setCode = useStore((state) => state.setCode);
   const particles = useStore((state) => state.particles);
   const setParticles = useStore((state) => state.setParticles);
+  const geometry = useStore((state) => state.geometry);
+  const setGeometry = useStore((state) => state.setGeometry);
+  const material = useStore((state) => state.material);
+  const setMaterial = useStore((state) => state.setMaterial);
   
   if (!isOpen) {
     return (
@@ -44,6 +49,22 @@ export const CodeSettings = () => {
             className="mt-1 font-mono text-xs"
             rows={4}
           />
+        </div>
+        
+        <div>
+          <Label>Font Family</Label>
+          <Select value={code.fontFamily} onValueChange={(v) => setCode({ fontFamily: v })}>
+            <SelectTrigger className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="JetBrains Mono">JetBrains Mono</SelectItem>
+              <SelectItem value="Fira Code">Fira Code</SelectItem>
+              <SelectItem value="Source Code Pro">Source Code Pro</SelectItem>
+              <SelectItem value="Consolas">Consolas</SelectItem>
+              <SelectItem value="Monaco">Monaco</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         
         <div>
@@ -120,6 +141,47 @@ export const CodeSettings = () => {
             checked={code.proofOverlay}
             onCheckedChange={(v) => setCode({ proofOverlay: v })}
           />
+        </div>
+        
+        <hr className="border-border" />
+        
+        <h4 className="font-semibold">Material & Geometry</h4>
+        
+        <div>
+          <Label>Material Preset</Label>
+          <Select value={material.preset} onValueChange={(v: any) => setMaterial({ preset: v })}>
+            <SelectTrigger className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="code">Code</SelectItem>
+              <SelectItem value="glass">Glass</SelectItem>
+              <SelectItem value="hologram">Hologram</SelectItem>
+              <SelectItem value="crystal">Crystal</SelectItem>
+              <SelectItem value="water">Water</SelectItem>
+              <SelectItem value="metal">Metal</SelectItem>
+              <SelectItem value="matte">Matte</SelectItem>
+              <SelectItem value="neon">Neon</SelectItem>
+              <SelectItem value="carbon">Carbon</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div>
+          <Label>3D Font Family</Label>
+          <Select value={geometry.fontFamily} onValueChange={(v: any) => setGeometry({ fontFamily: v })}>
+            <SelectTrigger className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="JetBrains Mono">JetBrains Mono</SelectItem>
+              <SelectItem value="Orbitron">Orbitron</SelectItem>
+              <SelectItem value="Anton">Anton</SelectItem>
+              <SelectItem value="Montserrat">Montserrat</SelectItem>
+              <SelectItem value="Bebas Neue">Bebas Neue</SelectItem>
+              <SelectItem value="Unbounded">Unbounded</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         
         <hr className="border-border" />
