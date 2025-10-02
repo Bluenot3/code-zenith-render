@@ -146,7 +146,7 @@ export const CanvasStage = () => {
           onClick={handleMeshClick}
         />
         
-        <Particles />
+        {/* <Particles /> */}
         
         <OrbitControls
           autoRotate={camera.autoRotate}
