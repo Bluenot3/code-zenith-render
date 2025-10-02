@@ -1,6 +1,7 @@
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { BufferAttribute } from 'three';
 import { useStore } from '@/state/useStore';
 
 export const Particles = () => {
@@ -8,7 +9,7 @@ export const Particles = () => {
   const particles = useStore((state) => state.particles);
   const theme = useStore((state) => state.theme);
   
-  const [positions, colors, sizes] = useMemo(() => {
+  const attributes = useMemo(() => {
     const count = particles.density;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
@@ -35,7 +36,11 @@ export const Particles = () => {
       sizes[i] = Math.random() * 2 + 0.5;
     }
     
-    return [positions, colors, sizes];
+    return {
+      position: new BufferAttribute(positions, 3),
+      color: new BufferAttribute(colors, 3),
+      size: new BufferAttribute(sizes, 1),
+    };
   }, [particles.density, theme.background]);
   
   useFrame((state) => {
@@ -83,24 +88,9 @@ export const Particles = () => {
   return (
     <points ref={particlesRef}>
       <bufferGeometry>
-        <bufferAttribute
-          attach="attributes.position"
-          count={positions.length / 3}
-          array={positions}
-          itemSize={3}
-        />
-        <bufferAttribute
-          attach="attributes.color"
-          count={colors.length / 3}
-          array={colors}
-          itemSize={3}
-        />
-        <bufferAttribute
-          attach="attributes.size"
-          count={sizes.length}
-          array={sizes}
-          itemSize={1}
-        />
+        <bufferAttribute attach='attributes-position' {...attributes.position} />
+        <bufferAttribute attach='attributes-color' {...attributes.color} />
+        <bufferAttribute attach='attributes-size' {...attributes.size} />
       </bufferGeometry>
       <pointsMaterial
         size={1}
