@@ -84,19 +84,19 @@ export const Particles = () => {
     <points ref={particlesRef}>
       <bufferGeometry>
         <bufferAttribute
-          attach="attributes-position"
+          attach="attributes.position"
           count={positions.length / 3}
           array={positions}
           itemSize={3}
         />
         <bufferAttribute
-          attach="attributes-color"
+          attach="attributes.color"
           count={colors.length / 3}
           array={colors}
           itemSize={3}
         />
         <bufferAttribute
-          attach="attributes-size"
+          attach="attributes.size"
           count={sizes.length}
           array={sizes}
           itemSize={1}
