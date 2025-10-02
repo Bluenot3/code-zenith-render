@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { CanvasStage } from '@/components/CanvasStage';
 import { HUD } from '@/components/HUD';
 import { CodeSettings } from '@/components/CodeSettings';
+import { AutoplayController } from '@/components/AutoplayController';
 import { useControls, button, folder } from 'leva';
 import { useStore } from '@/state/useStore';
 import { toast } from '@/hooks/use-toast';
@@ -292,6 +293,7 @@ const Index = () => {
       <CanvasStage />
       <HUD />
       <CodeSettings />
+      <AutoplayController />
       
       {/* Footer */}
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-10 font-code text-xs">

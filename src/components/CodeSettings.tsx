@@ -235,6 +235,38 @@ export const CodeSettings = () => {
             onCheckedChange={(v) => setParticles({ twinkle: v })}
           />
         </div>
+        
+        <hr className="border-border" />
+        
+        <h4 className="font-semibold">Autoplay Tour</h4>
+        
+        <div className="flex items-center justify-between">
+          <Label>Enable Autoplay</Label>
+          <Switch
+            checked={useStore((state) => state.autoplay.enabled)}
+            onCheckedChange={(v) => useStore.getState().setAutoplay({ enabled: v })}
+          />
+        </div>
+        
+        <div>
+          <Label>Transition Time: {useStore((state) => state.autoplay.transitionTime)}s</Label>
+          <Slider
+            value={[useStore((state) => state.autoplay.transitionTime)]}
+            onValueChange={([v]) => useStore.getState().setAutoplay({ transitionTime: v })}
+            min={3}
+            max={20}
+            step={1}
+            className="mt-2"
+          />
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <Label>Loop</Label>
+          <Switch
+            checked={useStore((state) => state.autoplay.loop)}
+            onCheckedChange={(v) => useStore.getState().setAutoplay({ loop: v })}
+          />
+        </div>
       </div>
     </div>
   );
