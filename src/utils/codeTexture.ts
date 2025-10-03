@@ -47,21 +47,34 @@ export class CodeTextureGenerator {
     const style = this.config.generationStyle;
     let processedText = text;
     
-    // Apply generation style transformations
+    // Apply DRAMATIC generation style transformations
     if (style === 'dense') {
-      // Add more lines, compress spacing
-      processedText = text.split('\n').flatMap(line => [line, line.replace(/\s+/g, ' ')]).join('\n');
+      // Triple the lines, super compressed
+      const lines = text.split('\n');
+      processedText = lines.flatMap(line => [
+        line,
+        line.replace(/\s+/g, ''),
+        line.toUpperCase()
+      ]).join('\n');
     } else if (style === 'sparse') {
-      // Add empty lines between code lines
-      processedText = text.split('\n').join('\n\n');
+      // Triple spacing between lines
+      processedText = text.split('\n').join('\n\n\n');
     } else if (style === 'matrix') {
-      // More random characters mixed in
-      processedText = text.split('\n').map(line => {
-        return line.split('').map(char => Math.random() > 0.9 ? String.fromCharCode(33 + Math.random() * 93) : char).join('');
+      // Heavy glitch effect with random chars
+      processedText = text.split('\n').flatMap(line => {
+        const glitched = line.split('').map(char => 
+          Math.random() > 0.7 ? String.fromCharCode(33 + Math.random() * 93) : char
+        ).join('');
+        return [line, glitched];
       }).join('\n');
     } else if (style === 'minimal') {
-      // Only essential lines, remove comments
-      processedText = text.split('\n').filter(line => !line.trim().startsWith('//')).join('\n');
+      // Only keep non-comment, non-empty lines
+      processedText = text.split('\n')
+        .filter(line => {
+          const trimmed = line.trim();
+          return trimmed && !trimmed.startsWith('//') && trimmed !== '{' && trimmed !== '}';
+        })
+        .join('\n');
     }
     
     this.lines = processedText.split('\n');
@@ -139,18 +152,20 @@ export class CodeTextureGenerator {
     let adjustedTypeSpeed = typeSpeed;
     
     if (generationStyle === 'dense') {
-      adjustedFontSize = fontSize * 0.8;
-      adjustedLineHeight = lineHeight * 0.8;
-      adjustedTypeSpeed = typeSpeed * 1.5;
+      adjustedFontSize = fontSize * 0.6; // Much smaller
+      adjustedLineHeight = lineHeight * 0.6; // Much tighter
+      adjustedTypeSpeed = typeSpeed * 3; // Much faster
     } else if (generationStyle === 'sparse') {
-      adjustedFontSize = fontSize * 1.2;
-      adjustedLineHeight = lineHeight * 1.8;
-      adjustedTypeSpeed = typeSpeed * 0.7;
+      adjustedFontSize = fontSize * 1.5; // Much larger
+      adjustedLineHeight = lineHeight * 2.5; // Much more spacing
+      adjustedTypeSpeed = typeSpeed * 0.4; // Much slower
     } else if (generationStyle === 'matrix') {
-      adjustedTypeSpeed = typeSpeed * 2;
+      adjustedTypeSpeed = typeSpeed * 4; // Super fast
+      adjustedLineHeight = lineHeight * 0.8;
     } else if (generationStyle === 'minimal') {
-      adjustedLineHeight = lineHeight * 1.3;
-      adjustedTypeSpeed = typeSpeed * 0.8;
+      adjustedFontSize = fontSize * 1.3;
+      adjustedLineHeight = lineHeight * 1.6;
+      adjustedTypeSpeed = typeSpeed * 0.6;
     }
     
     const lineHeightPx = adjustedFontSize * adjustedLineHeight;

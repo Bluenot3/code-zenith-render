@@ -128,22 +128,23 @@ export const CodeSettings = () => {
         </div>
         
         <div>
-          <Label>Generation Style</Label>
+          <Label className="text-base font-semibold">🎨 Code Generation Style</Label>
           <Select 
             value={(code as any).generationStyle || 'standard'} 
             onValueChange={(v) => setCode({ generationStyle: v } as any)}
           >
-            <SelectTrigger className="mt-1">
-              <SelectValue />
+            <SelectTrigger className="mt-2 h-12 text-base font-medium">
+              <SelectValue placeholder="Select style..." />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="standard">Standard</SelectItem>
-              <SelectItem value="dense">Dense</SelectItem>
-              <SelectItem value="sparse">Sparse</SelectItem>
-              <SelectItem value="matrix">Matrix</SelectItem>
-              <SelectItem value="minimal">Minimal</SelectItem>
+            <SelectContent className="bg-card/95 backdrop-blur-md border-2">
+              <SelectItem value="standard" className="text-base py-3">📝 Standard - Balanced flow</SelectItem>
+              <SelectItem value="dense" className="text-base py-3">🔥 Dense - Packed & intense</SelectItem>
+              <SelectItem value="sparse" className="text-base py-3">💎 Sparse - Spacious & clean</SelectItem>
+              <SelectItem value="matrix" className="text-base py-3">⚡ Matrix - Glitch chaos</SelectItem>
+              <SelectItem value="minimal" className="text-base py-3">✨ Minimal - Pure essence</SelectItem>
             </SelectContent>
           </Select>
+          <p className="text-xs text-muted-foreground mt-1">Changes how code appears on the 3D texture</p>
         </div>
         
         <div className="flex items-center justify-between">
