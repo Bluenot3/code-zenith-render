@@ -41,6 +41,14 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
       'Montserrat': '/fonts/optimer_regular.typeface.json',
       'Bebas Neue': '/fonts/helvetiker_bold.typeface.json',
       'Unbounded': '/fonts/gentilis_bold.typeface.json',
+      'Exo 2': '/fonts/helvetiker_bold.typeface.json',
+      'Russo One': '/fonts/gentilis_bold.typeface.json',
+      'Audiowide': '/fonts/helvetiker_bold.typeface.json',
+      'Saira Extra Condensed': '/fonts/optimer_regular.typeface.json',
+      'Righteous': '/fonts/helvetiker_bold.typeface.json',
+      'Bangers': '/fonts/helvetiker_bold.typeface.json',
+      'Black Ops One': '/fonts/gentilis_bold.typeface.json',
+      'Press Start 2P': '/fonts/droid_sans_regular.typeface.json',
     };
     return fontMap[fontFamily] || '/fonts/helvetiker_regular.typeface.json';
   };

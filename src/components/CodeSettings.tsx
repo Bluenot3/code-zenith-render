@@ -127,6 +127,25 @@ export const CodeSettings = () => {
           />
         </div>
         
+        <div>
+          <Label>Generation Style</Label>
+          <Select 
+            value={(code as any).generationStyle || 'standard'} 
+            onValueChange={(v) => setCode({ generationStyle: v } as any)}
+          >
+            <SelectTrigger className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="standard">Standard</SelectItem>
+              <SelectItem value="dense">Dense</SelectItem>
+              <SelectItem value="sparse">Sparse</SelectItem>
+              <SelectItem value="matrix">Matrix</SelectItem>
+              <SelectItem value="minimal">Minimal</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
         <div className="flex items-center justify-between">
           <Label>Syntax Coloring</Label>
           <Switch
@@ -180,6 +199,14 @@ export const CodeSettings = () => {
               <SelectItem value="Montserrat">Montserrat</SelectItem>
               <SelectItem value="Bebas Neue">Bebas Neue</SelectItem>
               <SelectItem value="Unbounded">Unbounded</SelectItem>
+              <SelectItem value="Exo 2">Exo 2</SelectItem>
+              <SelectItem value="Russo One">Russo One</SelectItem>
+              <SelectItem value="Audiowide">Audiowide</SelectItem>
+              <SelectItem value="Saira Extra Condensed">Saira Extra Condensed</SelectItem>
+              <SelectItem value="Righteous">Righteous</SelectItem>
+              <SelectItem value="Bangers">Bangers</SelectItem>
+              <SelectItem value="Black Ops One">Black Ops One</SelectItem>
+              <SelectItem value="Press Start 2P">Press Start 2P</SelectItem>
             </SelectContent>
           </Select>
         </div>

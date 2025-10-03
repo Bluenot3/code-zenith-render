@@ -47,7 +47,11 @@ export type FontFamily =
   | 'Unbounded' 
   | 'Exo 2' 
   | 'Russo One' 
-  | 'Audiowide';
+  | 'Audiowide'
+  | 'Righteous'
+  | 'Bangers'
+  | 'Black Ops One'
+  | 'Press Start 2P';
 
 export type CodeDirection = 'down' | 'right' | 'spiral';
 
@@ -94,6 +98,7 @@ interface CodeState {
   syntaxColoring: boolean;
   seed: number;
   proofOverlay: boolean;
+  generationStyle?: 'standard' | 'dense' | 'sparse' | 'matrix' | 'minimal';
 }
 
 interface ThemeState {
@@ -220,6 +225,7 @@ export const FACTORY_DEFAULTS: Omit<StoreState, 'setGeometry' | 'setMaterial' | 
     syntaxColoring: true,
     seed: 42,
     proofOverlay: false,
+    generationStyle: 'standard',
   },
   theme: {
     preset: 'dark',

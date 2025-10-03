@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const GeometrySchema = z.object({
   type: z.enum(['text', 'cube', 'sphere', 'torus', 'cylinder', 'plane', 'pyramid', 'torusKnot', 'icosahedron', 'dodecahedron']),
   text: z.string(),
-  fontFamily: z.enum(['JetBrains Mono', 'Orbitron', 'Anton', 'Montserrat', 'Saira Extra Condensed', 'Bebas Neue', 'Unbounded', 'Exo 2', 'Russo One', 'Audiowide']),
+  fontFamily: z.enum(['JetBrains Mono', 'Orbitron', 'Anton', 'Montserrat', 'Saira Extra Condensed', 'Bebas Neue', 'Unbounded', 'Exo 2', 'Russo One', 'Audiowide', 'Righteous', 'Bangers', 'Black Ops One', 'Press Start 2P']),
   fontWeight: z.number().min(100).max(900),
   size: z.number().min(0.1).max(10),
   depth: z.number().min(0.1).max(2),
@@ -38,6 +38,7 @@ export const CodeSchema = z.object({
   inkColor: z.string(),
   bgMix: z.number().min(0).max(1),
   direction: z.enum(['down', 'right', 'spiral']),
+  generationStyle: z.enum(['standard', 'dense', 'sparse', 'matrix', 'minimal']).optional(),
   typeSpeed: z.number().min(1).max(500),
   scrollSpeed: z.number().min(0.1).max(10),
   syntaxColoring: z.boolean(),
