@@ -22,7 +22,7 @@ const Index = () => {
     },
     fontFamily: {
       value: store.geometry.fontFamily,
-      options: ['JetBrains Mono', 'Orbitron', 'Anton', 'Montserrat', 'Saira Extra Condensed', 'Bebas Neue', 'Unbounded', 'Exo 2', 'Russo One', 'Audiowide'],
+      options: ['JetBrains Mono', 'Orbitron', 'Anton', 'Montserrat', 'Bebas Neue', 'Unbounded', 'Exo 2', 'Russo One', 'Audiowide', 'Saira Extra Condensed', 'Righteous', 'Bangers', 'Black Ops One', 'Press Start 2P'],
       onChange: (v) => store.setGeometry({ fontFamily: v as any }),
     },
     size: {
@@ -85,6 +85,17 @@ const Index = () => {
   
   // Code controls
   useControls('Code Stream', {
+    '🎨 Generation Style': {
+      value: (store.code as any).generationStyle || 'standard',
+      options: {
+        '📝 Standard': 'standard',
+        '🔥 Dense - Packed': 'dense',
+        '💎 Sparse - Spacious': 'sparse',
+        '⚡ Matrix - Glitch': 'matrix',
+        '✨ Minimal - Pure': 'minimal',
+      },
+      onChange: (v) => store.setCode({ generationStyle: v } as any),
+    },
     fontSize: {
       value: store.code.fontSize,
       min: 8,
