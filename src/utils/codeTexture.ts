@@ -25,6 +25,7 @@ export class CodeTextureGenerator {
     scrollSpeed: 1,
     syntaxColoring: true,
     direction: 'down' as 'down' | 'right' | 'spiral',
+    generationStyle: 'standard' as 'standard' | 'dense' | 'sparse' | 'matrix' | 'minimal',
   };
   
   constructor(inputText: string) {
@@ -43,7 +44,27 @@ export class CodeTextureGenerator {
   }
   
   setInputText(text: string) {
-    this.lines = text.split('\n');
+    const style = this.config.generationStyle;
+    let processedText = text;
+    
+    // Apply generation style transformations
+    if (style === 'dense') {
+      // Add more lines, compress spacing
+      processedText = text.split('\n').flatMap(line => [line, line.replace(/\s+/g, ' ')]).join('\n');
+    } else if (style === 'sparse') {
+      // Add empty lines between code lines
+      processedText = text.split('\n').join('\n\n');
+    } else if (style === 'matrix') {
+      // More random characters mixed in
+      processedText = text.split('\n').map(line => {
+        return line.split('').map(char => Math.random() > 0.9 ? String.fromCharCode(33 + Math.random() * 93) : char).join('');
+      }).join('\n');
+    } else if (style === 'minimal') {
+      // Only essential lines, remove comments
+      processedText = text.split('\n').filter(line => !line.trim().startsWith('//')).join('\n');
+    }
+    
+    this.lines = processedText.split('\n');
     if (this.lines.length === 0) {
       this.lines = ['// Empty code'];
     }
@@ -110,16 +131,37 @@ export class CodeTextureGenerator {
     // Clear and draw background
     this.drawBackground();
     
-    const { fontSize, lineHeight, fontFamily, inkColor, typeSpeed, scrollSpeed } = this.config;
-    const lineHeightPx = fontSize * lineHeight;
+    const { fontSize, lineHeight, fontFamily, inkColor, typeSpeed, scrollSpeed, generationStyle } = this.config;
+    
+    // Adjust parameters based on generation style
+    let adjustedFontSize = fontSize;
+    let adjustedLineHeight = lineHeight;
+    let adjustedTypeSpeed = typeSpeed;
+    
+    if (generationStyle === 'dense') {
+      adjustedFontSize = fontSize * 0.8;
+      adjustedLineHeight = lineHeight * 0.8;
+      adjustedTypeSpeed = typeSpeed * 1.5;
+    } else if (generationStyle === 'sparse') {
+      adjustedFontSize = fontSize * 1.2;
+      adjustedLineHeight = lineHeight * 1.8;
+      adjustedTypeSpeed = typeSpeed * 0.7;
+    } else if (generationStyle === 'matrix') {
+      adjustedTypeSpeed = typeSpeed * 2;
+    } else if (generationStyle === 'minimal') {
+      adjustedLineHeight = lineHeight * 1.3;
+      adjustedTypeSpeed = typeSpeed * 0.8;
+    }
+    
+    const lineHeightPx = adjustedFontSize * adjustedLineHeight;
     const maxLines = Math.floor(this.canvas.height / lineHeightPx);
     
-    this.ctx.font = `${fontSize}px ${fontFamily}, monospace`;
+    this.ctx.font = `${adjustedFontSize}px ${fontFamily}, monospace`;
     this.ctx.textBaseline = 'top';
     
     // Type animation
     if (this.currentLine < this.lines.length) {
-      this.currentChar += (typeSpeed / 1000) * (delta / 16);
+      this.currentChar += (adjustedTypeSpeed / 1000) * (delta / 16);
       if (this.currentChar >= this.lines[this.currentLine].length) {
         this.currentChar = 0;
         this.currentLine++;
@@ -161,7 +203,7 @@ export class CodeTextureGenerator {
         this.cursorBlink = (this.cursorBlink + delta) % 1000;
         if (this.cursorBlink < 500) {
           this.ctx.fillStyle = inkColor;
-          this.ctx.fillRect(x, y + 10, 2, fontSize);
+          this.ctx.fillRect(x, y + 10, 2, adjustedFontSize);
         }
       }
     }

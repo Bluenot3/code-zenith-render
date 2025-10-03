@@ -41,6 +41,7 @@ export const CanvasStage = () => {
       scrollSpeed: code.scrollSpeed,
       syntaxColoring: code.syntaxColoring,
       direction: code.direction,
+      generationStyle: (code as any).generationStyle || 'standard',
     });
     
     setCodeTexture(generator);
@@ -48,7 +49,7 @@ export const CanvasStage = () => {
     return () => {
       generator.dispose();
     };
-  }, [theme.preset, code.inputText, code.fontSize, code.lineHeight, code.bgMix, code.typeSpeed, code.scrollSpeed, code.syntaxColoring, code.direction]);
+  }, [theme.preset, code.inputText, code.fontSize, code.lineHeight, code.bgMix, code.typeSpeed, code.scrollSpeed, code.syntaxColoring, code.direction, (code as any).generationStyle]);
   
   useEffect(() => {
     if (!codeTexture) return;
