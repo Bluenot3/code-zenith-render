@@ -33,6 +33,18 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
     }
   });
   
+  const getFontPath = (fontFamily: string): string => {
+    const fontMap: Record<string, string> = {
+      'JetBrains Mono': '/fonts/helvetiker_regular.typeface.json',
+      'Orbitron': '/fonts/helvetiker_bold.typeface.json',
+      'Anton': '/fonts/gentilis_bold.typeface.json',
+      'Montserrat': '/fonts/optimer_regular.typeface.json',
+      'Bebas Neue': '/fonts/helvetiker_bold.typeface.json',
+      'Unbounded': '/fonts/gentilis_bold.typeface.json',
+    };
+    return fontMap[fontFamily] || '/fonts/helvetiker_regular.typeface.json';
+  };
+  
   const geometryNode = useMemo(() => {
     const props = {
       ref: meshRef,
@@ -44,10 +56,10 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
     switch (geometry.type) {
       case 'text':
         return (
-          <Center key={`text-${geometry.fontFamily}-${geometry.text}-${geometry.size}`}>
+          <Center key={`text-${geometry.fontFamily}-${geometry.text}-${geometry.size}-${getFontPath(geometry.fontFamily)}`}>
             <Text3D
               {...props}
-              font="/fonts/helvetiker_regular.typeface.json"
+              font={getFontPath(geometry.fontFamily)}
               size={geometry.size}
               height={geometry.depth}
               curveSegments={geometry.curveSegments}

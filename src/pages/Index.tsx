@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { CanvasStage } from '@/components/CanvasStage';
-import { HUD } from '@/components/HUD';
 import { CodeSettings } from '@/components/CodeSettings';
 import { AutoplayController } from '@/components/AutoplayController';
 import { useControls, button, folder } from 'leva';
@@ -291,7 +290,6 @@ const Index = () => {
   return (
     <div className="relative w-full h-screen overflow-hidden">
       <CanvasStage />
-      <HUD />
       <CodeSettings />
       <AutoplayController />
       
