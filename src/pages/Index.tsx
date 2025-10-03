@@ -96,6 +96,37 @@ const Index = () => {
       },
       onChange: (v) => store.setCode({ generationStyle: v } as any),
     },
+    '📐 Coverage Mode': {
+      value: (store.code as any).coverageMode || 'wrap',
+      options: {
+        '🌀 Wrap - Natural flow': 'wrap',
+        '📏 Fit - Full coverage': 'fit',
+        '🔲 Tile - Repeat pattern': 'tile',
+        '↔️ Stretch - Fill surface': 'stretch',
+      },
+      onChange: (v) => store.setCode({ coverageMode: v } as any),
+    },
+    'Texture Scale': {
+      value: (store.code as any).textureScale || 1,
+      min: 0.2,
+      max: 5,
+      step: 0.1,
+      onChange: (v) => store.setCode({ textureScale: v } as any),
+    },
+    'Repeat X': {
+      value: (store.code as any).textureRepeatX || 1,
+      min: 0.5,
+      max: 10,
+      step: 0.5,
+      onChange: (v) => store.setCode({ textureRepeatX: v } as any),
+    },
+    'Repeat Y': {
+      value: (store.code as any).textureRepeatY || 1,
+      min: 0.5,
+      max: 10,
+      step: 0.5,
+      onChange: (v) => store.setCode({ textureRepeatY: v } as any),
+    },
     fontSize: {
       value: store.code.fontSize,
       min: 8,

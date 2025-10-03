@@ -99,6 +99,10 @@ interface CodeState {
   seed: number;
   proofOverlay: boolean;
   generationStyle?: 'standard' | 'dense' | 'sparse' | 'matrix' | 'minimal';
+  textureScale: number;
+  textureRepeatX: number;
+  textureRepeatY: number;
+  coverageMode: 'wrap' | 'fit' | 'tile' | 'stretch';
 }
 
 interface ThemeState {
@@ -226,6 +230,10 @@ export const FACTORY_DEFAULTS: Omit<StoreState, 'setGeometry' | 'setMaterial' | 
     seed: 42,
     proofOverlay: false,
     generationStyle: 'standard',
+    textureScale: 1,
+    textureRepeatX: 1,
+    textureRepeatY: 1,
+    coverageMode: 'wrap',
   },
   theme: {
     preset: 'dark',

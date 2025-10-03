@@ -5,16 +5,56 @@ interface MaterialSwitcherProps {
   texture: THREE.Texture;
   material: MaterialState;
   wireframe: boolean;
+  textureScale?: number;
+  textureRepeatX?: number;
+  textureRepeatY?: number;
+  coverageMode?: 'wrap' | 'fit' | 'tile' | 'stretch';
 }
 
-export const MaterialSwitcher = ({ texture, material, wireframe }: MaterialSwitcherProps) => {
+export const MaterialSwitcher = ({ 
+  texture, 
+  material, 
+  wireframe,
+  textureScale = 1,
+  textureRepeatX = 1,
+  textureRepeatY = 1,
+  coverageMode = 'wrap'
+}: MaterialSwitcherProps) => {
   const tintColor = new THREE.Color(material.tint);
+  
+  // Apply texture transformations
+  const processedTexture = texture.clone();
+  processedTexture.repeat.set(textureRepeatX, textureRepeatY);
+  
+  // Apply coverage mode
+  switch (coverageMode) {
+    case 'wrap':
+      processedTexture.wrapS = THREE.RepeatWrapping;
+      processedTexture.wrapT = THREE.RepeatWrapping;
+      break;
+    case 'fit':
+      processedTexture.wrapS = THREE.ClampToEdgeWrapping;
+      processedTexture.wrapT = THREE.ClampToEdgeWrapping;
+      break;
+    case 'tile':
+      processedTexture.wrapS = THREE.RepeatWrapping;
+      processedTexture.wrapT = THREE.RepeatWrapping;
+      processedTexture.repeat.multiplyScalar(textureScale);
+      break;
+    case 'stretch':
+      processedTexture.wrapS = THREE.ClampToEdgeWrapping;
+      processedTexture.wrapT = THREE.ClampToEdgeWrapping;
+      processedTexture.repeat.set(1, 1);
+      break;
+  }
+  
+  processedTexture.needsUpdate = true;
   
   switch (material.preset) {
     case 'glass':
       return (
         <meshPhysicalMaterial
-          map={texture}
+          map={processedTexture}
           roughness={0.05}
           metalness={0}
           transmission={0.95}
@@ -34,9 +74,9 @@ export const MaterialSwitcher = ({ texture, material, wireframe }: MaterialSwitc
     case 'hologram':
       return (
         <meshStandardMaterial
-          map={texture}
+          map={processedTexture}
           emissive={tintColor}
-          emissiveMap={texture}
+          emissiveMap={processedTexture}
           emissiveIntensity={material.emissiveGain * 2}
           roughness={1}
           metalness={0}
@@ -50,7 +90,7 @@ export const MaterialSwitcher = ({ texture, material, wireframe }: MaterialSwitc
     case 'crystal':
       return (
         <meshPhysicalMaterial
-          map={texture}
+          map={processedTexture}
           roughness={0}
           metalness={0.2}
           transmission={0.6}
@@ -71,7 +111,7 @@ export const MaterialSwitcher = ({ texture, material, wireframe }: MaterialSwitc
     case 'water':
       return (
         <meshPhysicalMaterial
-          map={texture}
+          map={processedTexture}
           roughness={0}
           metalness={0}
           transmission={0.98}
@@ -90,7 +130,7 @@ export const MaterialSwitcher = ({ texture, material, wireframe }: MaterialSwitc
     case 'metal':
       return (
         <meshPhysicalMaterial
-          map={texture}
+          map={processedTexture}
           roughness={0.15}
           metalness={1}
           clearcoat={1}
@@ -106,9 +146,9 @@ export const MaterialSwitcher = ({ texture, material, wireframe }: MaterialSwitc
     case 'neon':
       return (
         <meshPhysicalMaterial
-          map={texture}
+          map={processedTexture}
           emissive={tintColor}
-          emissiveMap={texture}
+          emissiveMap={processedTexture}
           emissiveIntensity={3}
           roughness={0.2}
           metalness={0.9}
@@ -122,7 +162,7 @@ export const MaterialSwitcher = ({ texture, material, wireframe }: MaterialSwitc
     case 'carbon':
       return (
         <meshStandardMaterial
-          map={texture}
+          map={processedTexture}
           roughness={material.roughness * 0.8}
           metalness={0.2}
           color="#1a1a1a"
@@ -135,7 +175,7 @@ export const MaterialSwitcher = ({ texture, material, wireframe }: MaterialSwitc
     case 'matte':
       return (
         <meshStandardMaterial
-          map={texture}
+          map={processedTexture}
           roughness={1}
           metalness={0}
           emissive={tintColor}
@@ -148,9 +188,9 @@ export const MaterialSwitcher = ({ texture, material, wireframe }: MaterialSwitc
     default:
       return (
         <meshStandardMaterial
-          map={texture}
+          map={processedTexture}
           emissive={tintColor}
-          emissiveMap={texture}
+          emissiveMap={processedTexture}
           emissiveIntensity={material.emissiveGain}
           roughness={material.roughness}
           metalness={material.metalness}

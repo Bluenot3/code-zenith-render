@@ -15,6 +15,12 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
   const geometry = useStore((state) => state.geometry);
   const animation = useStore((state) => state.animation);
   const material = useStore((state) => state.material);
+  const code = useStore((state) => state.code);
+  
+  const textureScale = (code as any).textureScale || 1;
+  const textureRepeatX = (code as any).textureRepeatX || 1;
+  const textureRepeatY = (code as any).textureRepeatY || 1;
+  const coverageMode = (code as any).coverageMode || 'wrap';
   
   useFrame((state, delta) => {
     if (!meshRef.current) return;
@@ -83,6 +89,10 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
                 texture={texture}
                 material={material}
                 wireframe={geometry.wireframe}
+                textureScale={textureScale}
+                textureRepeatX={textureRepeatX}
+                textureRepeatY={textureRepeatY}
+                coverageMode={coverageMode}
               />
             </Text3D>
           </Center>
@@ -96,6 +106,10 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
               texture={texture}
               material={material}
               wireframe={geometry.wireframe}
+              textureScale={textureScale}
+              textureRepeatX={textureRepeatX}
+              textureRepeatY={textureRepeatY}
+              coverageMode={coverageMode}
             />
           </mesh>
         );
@@ -108,6 +122,10 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
               texture={texture}
               material={material}
               wireframe={geometry.wireframe}
+              textureScale={textureScale}
+              textureRepeatX={textureRepeatX}
+              textureRepeatY={textureRepeatY}
+              coverageMode={coverageMode}
             />
           </mesh>
         );
@@ -120,6 +138,10 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
               texture={texture}
               material={material}
               wireframe={geometry.wireframe}
+              textureScale={textureScale}
+              textureRepeatX={textureRepeatX}
+              textureRepeatY={textureRepeatY}
+              coverageMode={coverageMode}
             />
           </mesh>
         );
@@ -132,6 +154,10 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
               texture={texture}
               material={material}
               wireframe={geometry.wireframe}
+              textureScale={textureScale}
+              textureRepeatX={textureRepeatX}
+              textureRepeatY={textureRepeatY}
+              coverageMode={coverageMode}
             />
           </mesh>
         );
@@ -144,6 +170,10 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
               texture={texture}
               material={material}
               wireframe={geometry.wireframe}
+              textureScale={textureScale}
+              textureRepeatX={textureRepeatX}
+              textureRepeatY={textureRepeatY}
+              coverageMode={coverageMode}
             />
           </mesh>
         );
@@ -156,6 +186,10 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
               texture={texture}
               material={material}
               wireframe={geometry.wireframe}
+              textureScale={textureScale}
+              textureRepeatX={textureRepeatX}
+              textureRepeatY={textureRepeatY}
+              coverageMode={coverageMode}
             />
           </mesh>
         );
@@ -168,6 +202,10 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
               texture={texture}
               material={material}
               wireframe={geometry.wireframe}
+              textureScale={textureScale}
+              textureRepeatX={textureRepeatX}
+              textureRepeatY={textureRepeatY}
+              coverageMode={coverageMode}
             />
           </mesh>
         );
@@ -180,6 +218,10 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
               texture={texture}
               material={material}
               wireframe={geometry.wireframe}
+              textureScale={textureScale}
+              textureRepeatX={textureRepeatX}
+              textureRepeatY={textureRepeatY}
+              coverageMode={coverageMode}
             />
           </mesh>
         );
@@ -192,6 +234,10 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
               texture={texture}
               material={material}
               wireframe={geometry.wireframe}
+              textureScale={textureScale}
+              textureRepeatX={textureRepeatX}
+              textureRepeatY={textureRepeatY}
+              coverageMode={coverageMode}
             />
           </mesh>
         );
