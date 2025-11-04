@@ -11,10 +11,12 @@ export class CodeTextureGenerator {
   private cursorBlink = 0;
   private lastUpdate = 0;
   private animationFrame: number | null = null;
+  private fillProgress = 0; // 0 to 1, tracks vertical fill progress
+  private cycleComplete = false;
   
   private config = {
-    width: 1024,
-    height: 1024,
+    width: 2048, // Higher resolution for better quality
+    height: 2048,
     fontFamily: 'JetBrains Mono',
     fontSize: 14,
     lineHeight: 1.5,
@@ -26,18 +28,24 @@ export class CodeTextureGenerator {
     syntaxColoring: true,
     direction: 'down' as 'down' | 'right' | 'spiral',
     generationStyle: 'standard' as 'standard' | 'dense' | 'sparse' | 'matrix' | 'minimal',
+    fillSpeed: 0.003, // How fast the canvas fills from top to bottom
   };
   
   constructor(inputText: string) {
     this.canvas = document.createElement('canvas');
     this.canvas.width = this.config.width;
     this.canvas.height = this.config.height;
-    this.ctx = this.canvas.getContext('2d')!;
+    this.ctx = this.canvas.getContext('2d', {
+      alpha: true,
+      willReadFrequently: false,
+      desynchronized: true
+    })!;
     
     this.texture = new THREE.CanvasTexture(this.canvas);
-    this.texture.anisotropy = 16;
+    this.texture.anisotropy = 16; // Maximum anisotropic filtering for quality
     this.texture.minFilter = THREE.LinearMipMapLinearFilter;
     this.texture.magFilter = THREE.LinearFilter;
+    this.texture.generateMipmaps = true;
     
     this.setInputText(inputText);
     this.start();
@@ -146,6 +154,14 @@ export class CodeTextureGenerator {
     
     const { fontSize, lineHeight, fontFamily, inkColor, typeSpeed, scrollSpeed, generationStyle } = this.config;
     
+    // Update fill progress
+    if (!this.cycleComplete) {
+      this.fillProgress = Math.min(1, this.fillProgress + this.config.fillSpeed);
+      if (this.fillProgress >= 1) {
+        this.cycleComplete = true;
+      }
+    }
+    
     // Adjust parameters based on generation style
     let adjustedFontSize = fontSize;
     let adjustedLineHeight = lineHeight;
@@ -170,6 +186,7 @@ export class CodeTextureGenerator {
     
     const lineHeightPx = adjustedFontSize * adjustedLineHeight;
     const maxLines = Math.floor(this.canvas.height / lineHeightPx);
+    const maxVisibleHeight = this.canvas.height * this.fillProgress;
     
     this.ctx.font = `${adjustedFontSize}px ${fontFamily}, monospace`;
     this.ctx.textBaseline = 'top';
@@ -182,13 +199,25 @@ export class CodeTextureGenerator {
         this.currentLine++;
       }
     } else {
-      // Reset for loop
-      this.scrollOffset += (scrollSpeed / 10) * (delta / 16);
-      if (this.scrollOffset > lineHeightPx) {
-        this.scrollOffset = 0;
-        this.currentLine = 0;
+      // Reset for loop when cycle is complete
+      if (this.cycleComplete) {
+        this.scrollOffset += (scrollSpeed / 10) * (delta / 16);
+        if (this.scrollOffset > lineHeightPx * this.lines.length) {
+          // Restart the entire cycle
+          this.scrollOffset = 0;
+          this.currentLine = 0;
+          this.currentChar = 0;
+          this.fillProgress = 0;
+          this.cycleComplete = false;
+        }
       }
     }
+    
+    // Create clipping region based on fill progress
+    this.ctx.save();
+    this.ctx.beginPath();
+    this.ctx.rect(0, 0, this.canvas.width, maxVisibleHeight);
+    this.ctx.clip();
     
     // Draw lines
     const startLine = Math.floor(this.scrollOffset / lineHeightPx);
@@ -196,12 +225,14 @@ export class CodeTextureGenerator {
       const lineIndex = (startLine + i) % this.lines.length;
       const y = i * lineHeightPx - (this.scrollOffset % lineHeightPx);
       
-      if (y > this.canvas.height) break;
+      if (y > maxVisibleHeight || y + lineHeightPx < 0) continue;
       
       const line = this.lines[lineIndex];
       const displayText = lineIndex === this.currentLine 
         ? line.substring(0, Math.floor(this.currentChar))
-        : line;
+        : (lineIndex < this.currentLine ? line : '');
+      
+      if (!displayText) continue;
       
       // Syntax highlighting
       const tokens = this.highlightSyntax(displayText);
@@ -214,7 +245,7 @@ export class CodeTextureGenerator {
       });
       
       // Cursor blink
-      if (lineIndex === this.currentLine) {
+      if (lineIndex === this.currentLine && !this.cycleComplete) {
         this.cursorBlink = (this.cursorBlink + delta) % 1000;
         if (this.cursorBlink < 500) {
           this.ctx.fillStyle = inkColor;
@@ -223,14 +254,17 @@ export class CodeTextureGenerator {
       }
     }
     
+    this.ctx.restore();
+    
     // CPS/LPS overlay (if enabled)
     if (this.config.syntaxColoring) {
       const cps = Math.round(typeSpeed / 16);
       const lps = scrollSpeed.toFixed(1);
+      const progress = Math.round(this.fillProgress * 100);
       this.ctx.font = `10px ${fontFamily}, monospace`;
       this.ctx.fillStyle = inkColor;
       this.ctx.globalAlpha = 0.5;
-      this.ctx.fillText(`CPS: ${cps} | LPS: ${lps}`, 10, this.canvas.height - 20);
+      this.ctx.fillText(`CPS: ${cps} | LPS: ${lps} | FILL: ${progress}%`, 10, this.canvas.height - 20);
       this.ctx.globalAlpha = 1;
     }
     
