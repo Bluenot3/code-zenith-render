@@ -22,12 +22,7 @@ export type MaterialType =
   | 'metal' 
   | 'matte' 
   | 'neon' 
-  | 'carbon'
-  | 'diamond'
-  | 'jade'
-  | 'opal'
-  | 'chrome'
-  | 'obsidian';
+  | 'carbon';
 
 export type ThemeType = 
   | 'dark' 
@@ -207,7 +202,7 @@ export const FACTORY_DEFAULTS: Omit<StoreState, 'setGeometry' | 'setMaterial' | 
     wireframe: false,
   },
   material: {
-    preset: 'glass',
+    preset: 'code',
     roughness: 0.3,
     metalness: 0.1,
     transmission: 0,
@@ -270,7 +265,7 @@ export const FACTORY_DEFAULTS: Omit<StoreState, 'setGeometry' | 'setMaterial' | 
   },
   animation: {
     spin: false,
-    float: false,
+    float: true,
     orbit: false,
     speed: 1,
   },

@@ -15,7 +15,7 @@ export const GeometrySchema = z.object({
 });
 
 export const MaterialSchema = z.object({
-  preset: z.enum(['code', 'glass', 'hologram', 'crystal', 'water', 'metal', 'matte', 'neon', 'carbon', 'diamond', 'jade', 'opal', 'chrome', 'obsidian']),
+  preset: z.enum(['code', 'glass', 'hologram', 'crystal', 'water', 'metal', 'matte', 'neon', 'carbon']),
   roughness: z.number().min(0).max(1),
   metalness: z.number().min(0).max(1),
   transmission: z.number().min(0).max(1),

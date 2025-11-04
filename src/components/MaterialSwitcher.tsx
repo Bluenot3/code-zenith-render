@@ -55,21 +55,19 @@ export const MaterialSwitcher = ({
       return (
         <meshPhysicalMaterial
           map={processedTexture}
-          roughness={0.02}
+          roughness={0.05}
           metalness={0}
-          transmission={0.98}
-          thickness={1.2}
-          ior={1.52}
+          transmission={0.95}
+          thickness={0.8}
+          ior={1.5}
           clearcoat={1}
-          clearcoatRoughness={0.02}
+          clearcoatRoughness={0.05}
           transparent
           opacity={1}
-          reflectivity={1.5}
-          envMapIntensity={3}
+          reflectivity={1}
+          envMapIntensity={2}
           side={THREE.DoubleSide}
           wireframe={wireframe}
-          attenuationDistance={0.5}
-          attenuationColor={new THREE.Color('#ffffff')}
         />
       );
     
@@ -182,106 +180,6 @@ export const MaterialSwitcher = ({
           metalness={0}
           emissive={tintColor}
           emissiveIntensity={material.emissiveGain * 0.5}
-          wireframe={wireframe}
-        />
-      );
-    
-    case 'diamond':
-      return (
-        <meshPhysicalMaterial
-          map={processedTexture}
-          roughness={0}
-          metalness={0}
-          transmission={0.99}
-          thickness={2}
-          ior={2.42}
-          clearcoat={1}
-          clearcoatRoughness={0}
-          reflectivity={1}
-          envMapIntensity={4}
-          emissive={tintColor}
-          emissiveIntensity={0.5}
-          sheen={1}
-          sheenColor={new THREE.Color('#ffffff')}
-          specularIntensity={1}
-          specularColor={new THREE.Color('#ffffff')}
-          wireframe={wireframe}
-        />
-      );
-    
-    case 'jade':
-      return (
-        <meshPhysicalMaterial
-          map={processedTexture}
-          roughness={0.1}
-          metalness={0}
-          transmission={0.7}
-          thickness={1.8}
-          ior={1.66}
-          clearcoat={1}
-          clearcoatRoughness={0.1}
-          color={new THREE.Color('#4ade80')}
-          emissive={tintColor}
-          emissiveIntensity={0.3}
-          sheen={0.8}
-          sheenColor={tintColor}
-          envMapIntensity={2}
-          wireframe={wireframe}
-        />
-      );
-    
-    case 'opal':
-      return (
-        <meshPhysicalMaterial
-          map={processedTexture}
-          roughness={0.15}
-          metalness={0.1}
-          transmission={0.5}
-          thickness={1}
-          ior={1.45}
-          clearcoat={1}
-          clearcoatRoughness={0.2}
-          iridescence={1}
-          iridescenceIOR={1.8}
-          iridescenceThicknessRange={[100, 800]}
-          sheen={1}
-          sheenColor={tintColor}
-          envMapIntensity={2.5}
-          wireframe={wireframe}
-        />
-      );
-    
-    case 'chrome':
-      return (
-        <meshPhysicalMaterial
-          map={processedTexture}
-          roughness={0.05}
-          metalness={1}
-          clearcoat={1}
-          clearcoatRoughness={0}
-          reflectivity={1}
-          envMapIntensity={3}
-          color={new THREE.Color('#e5e7eb')}
-          wireframe={wireframe}
-        />
-      );
-    
-    case 'obsidian':
-      return (
-        <meshPhysicalMaterial
-          map={processedTexture}
-          roughness={0.1}
-          metalness={0.3}
-          transmission={0.2}
-          thickness={2}
-          ior={1.5}
-          clearcoat={1}
-          clearcoatRoughness={0.05}
-          color={new THREE.Color('#1a1a1a')}
-          emissive={tintColor}
-          emissiveIntensity={0.8}
-          sheen={0.5}
-          sheenColor={tintColor}
           wireframe={wireframe}
         />
       );

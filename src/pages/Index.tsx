@@ -53,7 +53,7 @@ const Index = () => {
   useControls('Material', {
     preset: {
       value: store.material.preset,
-      options: ['code', 'glass', 'hologram', 'crystal', 'water', 'metal', 'matte', 'neon', 'carbon', 'diamond', 'jade', 'opal', 'chrome', 'obsidian'],
+      options: ['code', 'glass', 'hologram', 'crystal', 'water', 'metal', 'matte', 'neon', 'carbon'],
       onChange: (v) => store.setMaterial({ preset: v as any }),
     },
     tint: {
@@ -314,7 +314,7 @@ const Index = () => {
         const nextIndex = (currentIndex + 1) % geometries.length;
         store.setGeometry({ type: geometries[nextIndex] });
       } else if (e.key.toLowerCase() === 'm') {
-        const materials: typeof store.material.preset[] = ['code', 'glass', 'hologram', 'crystal', 'water', 'metal', 'matte', 'neon', 'carbon', 'diamond', 'jade', 'opal', 'chrome', 'obsidian'];
+        const materials: typeof store.material.preset[] = ['code', 'glass', 'hologram', 'crystal', 'water', 'metal', 'matte', 'neon', 'carbon'];
         const currentIndex = materials.indexOf(store.material.preset);
         const nextIndex = (currentIndex + 1) % materials.length;
         store.setMaterial({ preset: materials[nextIndex] });
