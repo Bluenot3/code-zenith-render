@@ -16,11 +16,11 @@ export class CodeTextureGenerator {
     width: 2048,
     height: 2048,
     fontFamily: 'JetBrains Mono',
-    fontSize: 14,
+    fontSize: 18,
     lineHeight: 1.5,
     inkColor: '#FFFFFF',
     bgColor: '#0A0F1A',
-    bgMix: 0.05,
+    bgMix: 0.02,
     typeSpeed: 50,
     scrollSpeed: 1,
     syntaxColoring: true,
@@ -96,14 +96,14 @@ export class CodeTextureGenerator {
     const g = parseInt(bgColor.slice(3, 5), 16);
     const b = parseInt(bgColor.slice(5, 7), 16);
     
-    // Mix with slight brightness
-    const mixed = `rgb(${r + bgMix * 255}, ${g + bgMix * 255}, ${b + bgMix * 255})`;
+    // Mix with slight brightness - ensure it stays dark for contrast
+    const mixed = `rgb(${Math.min(255, r + bgMix * 100)}, ${Math.min(255, g + bgMix * 100)}, ${Math.min(255, b + bgMix * 100)})`;
     
     this.ctx.fillStyle = mixed;
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     
-    // Subtle scanlines
-    this.ctx.globalAlpha = 0.05;
+    // Very subtle scanlines
+    this.ctx.globalAlpha = 0.02;
     for (let i = 0; i < this.canvas.height; i += 4) {
       this.ctx.fillStyle = '#000000';
       this.ctx.fillRect(0, i, this.canvas.width, 2);
@@ -209,8 +209,12 @@ export class CodeTextureGenerator {
       let x = 10;
       
       tokens.forEach(token => {
+        // Add subtle glow for better visibility
+        this.ctx.shadowColor = token.color;
+        this.ctx.shadowBlur = 2;
         this.ctx.fillStyle = token.color;
         this.ctx.fillText(token.text, x, y + 10);
+        this.ctx.shadowBlur = 0;
         x += this.ctx.measureText(token.text).width;
       });
       
