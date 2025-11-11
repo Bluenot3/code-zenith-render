@@ -132,7 +132,7 @@ export class CodeTextureGenerator {
     // Clear and draw background
     this.drawBackground();
     
-    const { fontSize, lineHeight, fontFamily, inkColor, typeSpeed, scrollSpeed, generationStyle } = this.config;
+    const { fontSize, lineHeight, fontFamily, typeSpeed, scrollSpeed, generationStyle } = this.config;
     
     // Adjust parameters based on generation style
     let adjustedFontSize = fontSize;
@@ -162,60 +162,36 @@ export class CodeTextureGenerator {
     this.ctx.font = `${adjustedFontSize}px ${fontFamily}, monospace`;
     this.ctx.textBaseline = 'top';
     
-    // Type animation
-    if (this.currentLine < this.lines.length) {
-      this.currentChar += (adjustedTypeSpeed / 1000) * (delta / 16);
-      if (this.currentChar >= this.lines[this.currentLine].length) {
-        this.currentChar = 0;
-        this.currentLine++;
-      }
-    } else {
-      // Reset for loop
-      this.scrollOffset += (scrollSpeed / 10) * (delta / 16);
-      if (this.scrollOffset > lineHeightPx) {
-        this.scrollOffset = 0;
-        this.currentLine = 0;
-      }
+    // Continuous scroll animation
+    this.scrollOffset += (scrollSpeed / 10) * (delta / 16);
+    if (this.scrollOffset > lineHeightPx) {
+      this.scrollOffset = 0;
     }
     
-    // Draw lines - show all lines that have been typed
+    // Draw lines - ALWAYS show ALL text fully visible
     const startLine = Math.floor(this.scrollOffset / lineHeightPx);
-    for (let i = 0; i < maxLines + 1; i++) {
+    for (let i = 0; i < maxLines + 2; i++) {
       const lineIndex = (startLine + i) % this.lines.length;
       const y = i * lineHeightPx - (this.scrollOffset % lineHeightPx);
       
       if (y > this.canvas.height) break;
+      if (y + lineHeightPx < 0) continue;
       
       const line = this.lines[lineIndex];
-      // Show full text for lines already typed, partial for current line
-      const displayText = lineIndex < this.currentLine
-        ? line
-        : (lineIndex === this.currentLine 
-          ? line.substring(0, Math.floor(this.currentChar))
-          : '');
       
-      // Syntax highlighting
-      const tokens = this.highlightSyntax(displayText);
+      // Syntax highlighting - ALWAYS show full line
+      const tokens = this.highlightSyntax(line);
       let x = 10;
       
       tokens.forEach(token => {
         // Add subtle glow for better visibility
         this.ctx.shadowColor = token.color;
-        this.ctx.shadowBlur = 2;
+        this.ctx.shadowBlur = 3;
         this.ctx.fillStyle = token.color;
         this.ctx.fillText(token.text, x, y + 10);
         this.ctx.shadowBlur = 0;
         x += this.ctx.measureText(token.text).width;
       });
-      
-      // Cursor blink
-      if (lineIndex === this.currentLine) {
-        this.cursorBlink = (this.cursorBlink + delta) % 1000;
-        if (this.cursorBlink < 500) {
-          this.ctx.fillStyle = inkColor;
-          this.ctx.fillRect(x, y + 10, 2, adjustedFontSize);
-        }
-      }
     }
     
     // CPS/LPS overlay (if enabled)
@@ -223,7 +199,7 @@ export class CodeTextureGenerator {
       const cps = Math.round(typeSpeed / 16);
       const lps = scrollSpeed.toFixed(1);
       this.ctx.font = `10px ${fontFamily}, monospace`;
-      this.ctx.fillStyle = inkColor;
+      this.ctx.fillStyle = this.config.inkColor;
       this.ctx.globalAlpha = 0.5;
       this.ctx.fillText(`CPS: ${cps} | LPS: ${lps}`, 10, this.canvas.height - 20);
       this.ctx.globalAlpha = 1;
