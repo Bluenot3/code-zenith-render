@@ -11,8 +11,6 @@ export class CodeTextureGenerator {
   private cursorBlink = 0;
   private lastUpdate = 0;
   private animationFrame: number | null = null;
-  private fillProgress = 0; // 0 to 1, tracks how much of the canvas is filled
-  private isResetting = false;
   
   private config = {
     width: 2048,
@@ -155,15 +153,15 @@ export class CodeTextureGenerator {
     let adjustedTypeSpeed = typeSpeed;
     
     if (generationStyle === 'dense') {
-      adjustedFontSize = fontSize * 0.6;
-      adjustedLineHeight = lineHeight * 0.6;
-      adjustedTypeSpeed = typeSpeed * 3;
+      adjustedFontSize = fontSize * 0.6; // Much smaller
+      adjustedLineHeight = lineHeight * 0.6; // Much tighter
+      adjustedTypeSpeed = typeSpeed * 3; // Much faster
     } else if (generationStyle === 'sparse') {
-      adjustedFontSize = fontSize * 1.5;
-      adjustedLineHeight = lineHeight * 2.5;
-      adjustedTypeSpeed = typeSpeed * 0.4;
+      adjustedFontSize = fontSize * 1.5; // Much larger
+      adjustedLineHeight = lineHeight * 2.5; // Much more spacing
+      adjustedTypeSpeed = typeSpeed * 0.4; // Much slower
     } else if (generationStyle === 'matrix') {
-      adjustedTypeSpeed = typeSpeed * 4;
+      adjustedTypeSpeed = typeSpeed * 4; // Super fast
       adjustedLineHeight = lineHeight * 0.8;
     } else if (generationStyle === 'minimal') {
       adjustedFontSize = fontSize * 1.3;
@@ -177,45 +175,34 @@ export class CodeTextureGenerator {
     this.ctx.font = `${adjustedFontSize}px ${fontFamily}, monospace`;
     this.ctx.textBaseline = 'top';
     
-    // Progressive fill animation - fill from top to bottom
-    if (this.fillProgress < 1) {
-      // Filling phase - progressively reveal more lines
-      this.fillProgress += (adjustedTypeSpeed / 1000) * (delta / 16) / Math.max(this.lines.length, 1);
-      this.fillProgress = Math.min(this.fillProgress, 1);
-    } else if (!this.isResetting) {
-      // Hold for a moment before resetting
-      this.isResetting = true;
-      setTimeout(() => {
-        this.fillProgress = 0;
-        this.currentLine = 0;
+    // Type animation
+    if (this.currentLine < this.lines.length) {
+      this.currentChar += (adjustedTypeSpeed / 1000) * (delta / 16);
+      if (this.currentChar >= this.lines[this.currentLine].length) {
         this.currentChar = 0;
-        this.isResetting = false;
-      }, 1000); // 1 second pause before restart
+        this.currentLine++;
+      }
+    } else {
+      // Reset for loop
+      this.scrollOffset += (scrollSpeed / 10) * (delta / 16);
+      if (this.scrollOffset > lineHeightPx) {
+        this.scrollOffset = 0;
+        this.currentLine = 0;
+      }
     }
     
-    // Calculate how many lines to show based on fill progress
-    const visibleLineCount = Math.floor(this.fillProgress * this.lines.length);
-    
-    // Type animation for current line being typed
-    if (this.currentLine < visibleLineCount && this.currentLine < this.lines.length) {
-      const currentLineProgress = (this.fillProgress * this.lines.length) - this.currentLine;
-      this.currentChar = Math.floor(currentLineProgress * this.lines[this.currentLine].length);
-    }
-    
-    // Draw visible lines from top
-    for (let i = 0; i < Math.min(visibleLineCount + 1, this.lines.length); i++) {
-      const y = i * lineHeightPx;
+    // Draw lines
+    const startLine = Math.floor(this.scrollOffset / lineHeightPx);
+    for (let i = 0; i < maxLines + 1; i++) {
+      const lineIndex = (startLine + i) % this.lines.length;
+      const y = i * lineHeightPx - (this.scrollOffset % lineHeightPx);
       
       if (y > this.canvas.height) break;
       
-      const line = this.lines[i];
-      let displayText = line;
-      
-      // Show typing effect on the current line being filled
-      if (i === visibleLineCount && visibleLineCount < this.lines.length) {
-        const lineProgress = (this.fillProgress * this.lines.length) - visibleLineCount;
-        displayText = line.substring(0, Math.floor(lineProgress * line.length));
-      }
+      const line = this.lines[lineIndex];
+      const displayText = lineIndex === this.currentLine 
+        ? line.substring(0, Math.floor(this.currentChar))
+        : line;
       
       // Syntax highlighting
       const tokens = this.highlightSyntax(displayText);
@@ -231,8 +218,8 @@ export class CodeTextureGenerator {
         x += this.ctx.measureText(token.text).width;
       });
       
-      // Cursor blink on current typing line
-      if (i === visibleLineCount && visibleLineCount < this.lines.length) {
+      // Cursor blink
+      if (lineIndex === this.currentLine) {
         this.cursorBlink = (this.cursorBlink + delta) % 1000;
         if (this.cursorBlink < 500) {
           this.ctx.fillStyle = inkColor;
@@ -241,13 +228,14 @@ export class CodeTextureGenerator {
       }
     }
     
-    // Progress overlay (if enabled)
+    // CPS/LPS overlay (if enabled)
     if (this.config.syntaxColoring) {
-      const progress = Math.round(this.fillProgress * 100);
+      const cps = Math.round(typeSpeed / 16);
+      const lps = scrollSpeed.toFixed(1);
       this.ctx.font = `10px ${fontFamily}, monospace`;
       this.ctx.fillStyle = inkColor;
       this.ctx.globalAlpha = 0.5;
-      this.ctx.fillText(`Progress: ${progress}% | Speed: ${adjustedTypeSpeed.toFixed(0)}`, 10, this.canvas.height - 20);
+      this.ctx.fillText(`CPS: ${cps} | LPS: ${lps}`, 10, this.canvas.height - 20);
       this.ctx.globalAlpha = 1;
     }
     
