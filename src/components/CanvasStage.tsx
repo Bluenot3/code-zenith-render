@@ -5,7 +5,9 @@ import { GeometrySwitcher } from './GeometrySwitcher';
 import { Particles } from './Particles';
 import { InteractiveCharacters } from './InteractiveCharacters';
 import { MeteorTrails } from './MeteorTrails';
-import { FloatingOrbs } from './FloatingOrbs';
+import { EnergyWaves } from './EnergyWaves';
+import { SpaceDebris } from './SpaceDebris';
+import { PlasmaFields } from './PlasmaFields';
 import { CodeTextureGenerator } from '@/utils/codeTexture';
 import { useStore } from '@/state/useStore';
 import { applyTheme } from '@/utils/themes';
@@ -207,7 +209,9 @@ export const CanvasStage = () => {
         />
         
         <MeteorTrails />
-        <FloatingOrbs />
+        <EnergyWaves />
+        <SpaceDebris />
+        <PlasmaFields />
         <Particles />
         <InteractiveCharacters />
         
