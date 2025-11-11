@@ -337,7 +337,7 @@ export const useStore = create<StoreState>()(
       },
     }),
     {
-      name: 'zen-3d-storage',
+      name: 'zen-3d-storage-v2',
       partialize: (state) => ({
         geometry: state.geometry,
         material: state.material,
