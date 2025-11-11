@@ -23,7 +23,7 @@ export const QuantumRift = () => {
     });
     
     const riftMesh = new THREE.Mesh(riftGeometry, riftMaterial);
-    riftMesh.position.set(-8, 5, -10);
+    riftMesh.position.set(-15, 3, -18);
     riftMesh.rotation.x = Math.PI / 4;
     riftMeshRef.current = riftMesh;
     groupRef.current.add(riftMesh);

@@ -16,11 +16,11 @@ export class CodeTextureGenerator {
     width: 2048,
     height: 2048,
     fontFamily: 'JetBrains Mono',
-    fontSize: 18,
-    lineHeight: 1.5,
+    fontSize: 20,
+    lineHeight: 1.6,
     inkColor: '#FFFFFF',
-    bgColor: '#0A0F1A',
-    bgMix: 0.02,
+    bgColor: '#000000',
+    bgMix: 0.0,
     typeSpeed: 50,
     scrollSpeed: 1,
     syntaxColoring: true,
@@ -93,26 +93,9 @@ export class CodeTextureGenerator {
   }
   
   private drawBackground() {
-    const { bgColor, bgMix } = this.config;
-    
-    // Parse hex color
-    const r = parseInt(bgColor.slice(1, 3), 16);
-    const g = parseInt(bgColor.slice(3, 5), 16);
-    const b = parseInt(bgColor.slice(5, 7), 16);
-    
-    // Mix with slight brightness - ensure it stays dark for contrast
-    const mixed = `rgb(${Math.min(255, r + bgMix * 100)}, ${Math.min(255, g + bgMix * 100)}, ${Math.min(255, b + bgMix * 100)})`;
-    
-    this.ctx.fillStyle = mixed;
+    // Pure black background for maximum contrast
+    this.ctx.fillStyle = '#000000';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    
-    // Very subtle scanlines
-    this.ctx.globalAlpha = 0.02;
-    for (let i = 0; i < this.canvas.height; i += 4) {
-      this.ctx.fillStyle = '#000000';
-      this.ctx.fillRect(0, i, this.canvas.width, 2);
-    }
-    this.ctx.globalAlpha = 1;
   }
   
   private highlightSyntax(text: string): { text: string; color: string }[] {
@@ -126,15 +109,15 @@ export class CodeTextureGenerator {
     
     words.forEach(word => {
       if (keywords.includes(word)) {
-        tokens.push({ text: word, color: '#FF6B9D' }); // Keywords pink
+        tokens.push({ text: word, color: '#FF80C0' }); // Bright keywords pink
       } else if (word.match(/^["'].*["']$/)) {
-        tokens.push({ text: word, color: '#A5FF90' }); // Strings green
+        tokens.push({ text: word, color: '#C0FFB0' }); // Bright strings green
       } else if (word.match(/^\/\/.*/)) {
-        tokens.push({ text: word, color: '#7AA2F7' }); // Comments blue
+        tokens.push({ text: word, color: '#A0C8FF' }); // Bright comments blue
       } else if (word.match(/^\d+$/)) {
-        tokens.push({ text: word, color: '#FF9E64' }); // Numbers orange
+        tokens.push({ text: word, color: '#FFBB80' }); // Bright numbers orange
       } else {
-        tokens.push({ text: word, color: this.config.inkColor });
+        tokens.push({ text: word, color: '#FFFFFF' }); // Pure white for maximum visibility
       }
     });
     
