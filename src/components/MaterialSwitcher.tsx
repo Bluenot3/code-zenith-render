@@ -202,9 +202,9 @@ export const MaterialSwitcher = ({
           map={processedTexture}
           roughness={material.roughness}
           metalness={material.metalness}
-          emissive={tintColor}
+          emissive={new THREE.Color('#ffffff')}
           emissiveMap={processedTexture}
-          emissiveIntensity={material.emissiveGain}
+          emissiveIntensity={2.5}
           wireframe={wireframe}
         />
       );
