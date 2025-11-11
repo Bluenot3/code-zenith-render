@@ -1,13 +1,14 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { CanvasStage } from '@/components/CanvasStage';
 import { CodeSettings } from '@/components/CodeSettings';
 import { AutoplayController } from '@/components/AutoplayController';
-import { useControls, button, folder } from 'leva';
+import { useControls, button, folder, Leva } from 'leva';
 import { useStore } from '@/state/useStore';
 import { toast } from '@/hooks/use-toast';
 
 const Index = () => {
   const store = useStore();
+  const [levaHidden, setLevaHidden] = useState(true);
   
   // Geometry controls
   useControls('Geometry', {
@@ -350,8 +351,9 @@ const Index = () => {
   
   return (
     <div className="relative w-full h-screen overflow-hidden">
+      <Leva hidden={levaHidden} />
       <CanvasStage />
-      <CodeSettings />
+      <CodeSettings onToggleLeva={() => setLevaHidden(!levaHidden)} levaHidden={levaHidden} />
       <AutoplayController />
       
       {/* Footer */}
