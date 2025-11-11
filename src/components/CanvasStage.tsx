@@ -4,6 +4,7 @@ import { OrbitControls, Environment } from '@react-three/drei';
 import { GeometrySwitcher } from './GeometrySwitcher';
 import { Particles } from './Particles';
 import { InteractiveCharacters } from './InteractiveCharacters';
+import { MeteorTrails } from './MeteorTrails';
 import { CodeTextureGenerator } from '@/utils/codeTexture';
 import { useStore } from '@/state/useStore';
 import { applyTheme } from '@/utils/themes';
@@ -204,6 +205,7 @@ export const CanvasStage = () => {
           texture={codeTexture.getTexture()}
         />
         
+        <MeteorTrails />
         <Particles />
         <InteractiveCharacters />
         

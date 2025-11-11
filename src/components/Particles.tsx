@@ -28,7 +28,7 @@ export const Particles = () => {
       colors[i3 + 1] = glowColor.g;
       colors[i3 + 2] = glowColor.b;
       
-      sizes[i] = Math.random() * 0.5 + 0.1;
+      sizes[i] = Math.random() * 0.2 + 0.05;
     }
     
     return [positions, colors, sizes];
@@ -56,7 +56,7 @@ export const Particles = () => {
       
       if (particles.twinkle) {
         const sizeIndex = i / 3;
-        sizes[sizeIndex] = Math.abs(Math.sin(state.clock.elapsedTime + i)) * 0.5 + 0.1;
+        sizes[sizeIndex] = Math.abs(Math.sin(state.clock.elapsedTime + i)) * 0.2 + 0.05;
       }
     }
     
@@ -89,7 +89,7 @@ export const Particles = () => {
         />
       </bufferGeometry>
       <pointsMaterial
-        size={0.05}
+        size={0.03}
         vertexColors
         transparent
         opacity={0.4}
