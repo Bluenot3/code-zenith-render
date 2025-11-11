@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { X } from 'lucide-react';
 
 export const CodeSettings = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false); // Start closed with Z button
   const [sparks, setSparks] = useState<Array<{ id: number; x: number; y: number }>>([]);
   const code = useStore((state) => state.code);
   const setCode = useStore((state) => state.setCode);
