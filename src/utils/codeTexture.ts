@@ -39,8 +39,12 @@ export class CodeTextureGenerator {
     this.texture.minFilter = THREE.LinearMipMapLinearFilter;
     this.texture.magFilter = THREE.LinearFilter;
     this.texture.generateMipmaps = true;
+    this.texture.wrapS = THREE.RepeatWrapping;
+    this.texture.wrapT = THREE.RepeatWrapping;
     
     this.setInputText(inputText);
+    this.lastUpdate = Date.now();
+    this.render(); // Initial render to make code immediately visible
     this.start();
   }
   
@@ -139,7 +143,7 @@ export class CodeTextureGenerator {
   
   private render() {
     const now = Date.now();
-    const delta = now - this.lastUpdate;
+    const delta = Math.max(16, now - this.lastUpdate); // Ensure minimum delta
     this.lastUpdate = now;
     
     // Clear and draw background
@@ -191,7 +195,7 @@ export class CodeTextureGenerator {
       }
     }
     
-    // Draw lines
+    // Draw lines - show all lines that have been typed
     const startLine = Math.floor(this.scrollOffset / lineHeightPx);
     for (let i = 0; i < maxLines + 1; i++) {
       const lineIndex = (startLine + i) % this.lines.length;
@@ -200,9 +204,12 @@ export class CodeTextureGenerator {
       if (y > this.canvas.height) break;
       
       const line = this.lines[lineIndex];
-      const displayText = lineIndex === this.currentLine 
-        ? line.substring(0, Math.floor(this.currentChar))
-        : line;
+      // Show full text for lines already typed, partial for current line
+      const displayText = lineIndex < this.currentLine
+        ? line
+        : (lineIndex === this.currentLine 
+          ? line.substring(0, Math.floor(this.currentChar))
+          : '');
       
       // Syntax highlighting
       const tokens = this.highlightSyntax(displayText);
