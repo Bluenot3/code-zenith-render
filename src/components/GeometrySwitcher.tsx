@@ -7,10 +7,9 @@ import { MaterialSwitcher } from './MaterialSwitcher';
 
 interface GeometrySwitcherProps {
   texture: THREE.Texture;
-  onClick?: () => void;
 }
 
-export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) => {
+export const GeometrySwitcher = ({ texture }: GeometrySwitcherProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const geometry = useStore((state) => state.geometry);
   const animation = useStore((state) => state.animation);
@@ -62,7 +61,6 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
   const geometryNode = useMemo(() => {
     const props = {
       ref: meshRef,
-      onClick,
       castShadow: true,
       receiveShadow: true,
     };
@@ -245,7 +243,7 @@ export const GeometrySwitcher = ({ texture, onClick }: GeometrySwitcherProps) =>
       default:
         return null;
     }
-  }, [geometry, texture, animation, material, onClick]);
+  }, [geometry, texture, animation, material]);
   
   return <>{geometryNode}</>;
 };

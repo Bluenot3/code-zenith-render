@@ -55,17 +55,19 @@ export const MaterialSwitcher = ({
       return (
         <meshPhysicalMaterial
           map={processedTexture}
-          roughness={0.05}
+          roughness={0.02}
           metalness={0}
-          transmission={0.95}
-          thickness={0.8}
-          ior={1.5}
+          transmission={0.98}
+          thickness={1.2}
+          ior={1.52}
           clearcoat={1}
-          clearcoatRoughness={0.05}
+          clearcoatRoughness={0.02}
           transparent
           opacity={1}
-          reflectivity={1}
-          envMapIntensity={2}
+          reflectivity={1.5}
+          envMapIntensity={3}
+          attenuationDistance={0.5}
+          attenuationColor={new THREE.Color('#ffffff')}
           side={THREE.DoubleSide}
           wireframe={wireframe}
         />
@@ -73,15 +75,20 @@ export const MaterialSwitcher = ({
     
     case 'hologram':
       return (
-        <meshStandardMaterial
+        <meshPhysicalMaterial
           map={processedTexture}
           emissive={tintColor}
           emissiveMap={processedTexture}
-          emissiveIntensity={material.emissiveGain * 2}
-          roughness={1}
-          metalness={0}
+          emissiveIntensity={material.emissiveGain * 3}
+          roughness={0.8}
+          metalness={0.2}
+          transmission={0.3}
+          thickness={0.5}
+          ior={1.2}
           transparent
-          opacity={0.7}
+          opacity={0.75}
+          reflectivity={0.8}
+          envMapIntensity={2}
           wireframe={wireframe}
           side={THREE.DoubleSide}
         />
@@ -92,18 +99,20 @@ export const MaterialSwitcher = ({
         <meshPhysicalMaterial
           map={processedTexture}
           roughness={0}
-          metalness={0.2}
-          transmission={0.6}
-          thickness={1.5}
-          ior={2.4}
+          metalness={0.3}
+          transmission={0.7}
+          thickness={2}
+          ior={2.42}
           clearcoat={1}
           clearcoatRoughness={0}
           emissive={tintColor}
-          emissiveIntensity={0.8}
-          reflectivity={1}
-          envMapIntensity={3}
-          sheen={1}
+          emissiveIntensity={1.2}
+          reflectivity={1.5}
+          envMapIntensity={4}
+          sheen={1.5}
           sheenColor={tintColor}
+          attenuationDistance={1}
+          attenuationColor={tintColor}
           wireframe={wireframe}
         />
       );
@@ -131,14 +140,17 @@ export const MaterialSwitcher = ({
       return (
         <meshPhysicalMaterial
           map={processedTexture}
-          roughness={0.15}
+          roughness={0.08}
           metalness={1}
           clearcoat={1}
-          clearcoatRoughness={0.1}
-          reflectivity={1}
-          envMapIntensity={2.5}
+          clearcoatRoughness={0.05}
+          reflectivity={1.5}
+          envMapIntensity={3.5}
           emissive={tintColor}
-          emissiveIntensity={0.3}
+          emissiveIntensity={0.5}
+          sheen={0.5}
+          sheenRoughness={0.2}
+          sheenColor={tintColor}
           wireframe={wireframe}
         />
       );
@@ -149,12 +161,14 @@ export const MaterialSwitcher = ({
           map={processedTexture}
           emissive={tintColor}
           emissiveMap={processedTexture}
-          emissiveIntensity={3}
-          roughness={0.2}
-          metalness={0.9}
+          emissiveIntensity={4}
+          roughness={0.15}
+          metalness={0.95}
           clearcoat={1}
-          clearcoatRoughness={0.1}
-          reflectivity={1}
+          clearcoatRoughness={0.05}
+          reflectivity={1.5}
+          sheen={2}
+          sheenColor={tintColor}
           wireframe={wireframe}
         />
       );

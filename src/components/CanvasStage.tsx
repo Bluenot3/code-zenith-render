@@ -1,12 +1,14 @@
 import { Suspense, useEffect, useState, useRef } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
 import { GeometrySwitcher } from './GeometrySwitcher';
 import { Particles } from './Particles';
+import { InteractiveCharacters } from './InteractiveCharacters';
 import { CodeTextureGenerator } from '@/utils/codeTexture';
 import { useStore } from '@/state/useStore';
 import { applyTheme } from '@/utils/themes';
 import { toast } from '@/hooks/use-toast';
+import * as THREE from 'three';
 
 export const CanvasStage = () => {
   const theme = useStore((state) => state.theme);
@@ -61,27 +63,47 @@ export const CanvasStage = () => {
     });
   }, [theme.preset, codeTexture]);
   
-  const handleMeshClick = () => {
-    // Pulse animation (handled by CSS)
-    toast({
-      title: "Interaction!",
-      description: "Click detected - mesh pulse activated",
-      duration: 1000,
-    });
+  const handleCanvasClick = (event: MouseEvent) => {
+    if ((window as any).__spawnCharacter && event.detail === 1) {
+      // Single click - spawn special characters
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+      const canvas = event.target as HTMLCanvasElement;
+      const rect = canvas.getBoundingClientRect();
+      
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      
+      // Spawn at a point in 3D space near the click
+      const spawnPoint = new THREE.Vector3(
+        mouse.x * 3,
+        mouse.y * 3,
+        Math.random() * 2 - 1
+      );
+      
+      (window as any).__spawnCharacter(spawnPoint, false);
+    }
   };
-  
-  const handleMeshDoubleClick = () => {
-    // Cycle material
-    const materials: typeof material.preset[] = ['code', 'glass', 'hologram', 'crystal', 'water', 'metal', 'matte', 'neon', 'carbon'];
-    const currentIndex = materials.indexOf(material.preset);
-    const nextIndex = (currentIndex + 1) % materials.length;
-    setMaterial({ preset: materials[nextIndex] });
-    
-    toast({
-      title: "Material Changed",
-      description: `Switched to ${materials[nextIndex]}`,
-      duration: 1500,
-    });
+
+  const handleCanvasDoubleClick = (event: MouseEvent) => {
+    if ((window as any).__spawnCharacter) {
+      // Double click - spawn emojis
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+      const canvas = event.target as HTMLCanvasElement;
+      const rect = canvas.getBoundingClientRect();
+      
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      
+      const spawnPoint = new THREE.Vector3(
+        mouse.x * 3,
+        mouse.y * 3,
+        Math.random() * 2 - 1
+      );
+      
+      (window as any).__spawnCharacter(spawnPoint, true);
+    }
   };
   
   const handleKeyPress = (e: KeyboardEvent) => {
@@ -121,6 +143,18 @@ export const CanvasStage = () => {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [geometry.type, material.preset, codeTexture]);
+
+  useEffect(() => {
+    const canvas = document.querySelector('canvas');
+    if (canvas) {
+      canvas.addEventListener('click', handleCanvasClick);
+      canvas.addEventListener('dblclick', handleCanvasDoubleClick);
+      return () => {
+        canvas.removeEventListener('click', handleCanvasClick);
+        canvas.removeEventListener('dblclick', handleCanvasDoubleClick);
+      };
+    }
+  }, []);
   
   if (!codeTexture) {
     return (
@@ -136,6 +170,16 @@ export const CanvasStage = () => {
     <Canvas
       camera={{ position: [0, 0, 5], fov: camera.fov }}
       style={{ background: themeConfig.sceneBackground }}
+      gl={{
+        antialias: true,
+        alpha: true,
+        powerPreference: 'high-performance',
+        toneMapping: THREE.ACESFilmicToneMapping,
+        toneMappingExposure: 1.2,
+        outputColorSpace: THREE.SRGBColorSpace,
+      }}
+      shadows
+      dpr={[1, 2]}
     >
       <Suspense fallback={null}>
         <ambientLight intensity={lighting.envIntensity} />
@@ -157,11 +201,11 @@ export const CanvasStage = () => {
         />
         
         <GeometrySwitcher 
-          texture={codeTexture.getTexture()} 
-          onClick={handleMeshClick}
+          texture={codeTexture.getTexture()}
         />
         
         <Particles />
+        <InteractiveCharacters />
         
         <OrbitControls
           autoRotate={camera.autoRotate}

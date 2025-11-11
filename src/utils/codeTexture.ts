@@ -13,8 +13,8 @@ export class CodeTextureGenerator {
   private animationFrame: number | null = null;
   
   private config = {
-    width: 1024,
-    height: 1024,
+    width: 2048,
+    height: 2048,
     fontFamily: 'JetBrains Mono',
     fontSize: 14,
     lineHeight: 1.5,
@@ -38,6 +38,7 @@ export class CodeTextureGenerator {
     this.texture.anisotropy = 16;
     this.texture.minFilter = THREE.LinearMipMapLinearFilter;
     this.texture.magFilter = THREE.LinearFilter;
+    this.texture.generateMipmaps = true;
     
     this.setInputText(inputText);
     this.start();
