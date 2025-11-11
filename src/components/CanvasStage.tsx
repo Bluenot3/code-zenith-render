@@ -10,6 +10,7 @@ import { NebulaClouds } from './NebulaClouds';
 import { CosmicAsteroids } from './CosmicAsteroids';
 import { QuantumRift } from './QuantumRift';
 import { CrystalFormation } from './CrystalFormation';
+import { BackgroundFireworks } from './BackgroundFireworks';
 import { CodeTextureGenerator } from '@/utils/codeTexture';
 import { useStore } from '@/state/useStore';
 import { applyTheme } from '@/utils/themes';
@@ -214,6 +215,7 @@ export const CanvasStage = () => {
         <NebulaClouds />
         <CosmicAsteroids />
         <MeteorTrails />
+        <BackgroundFireworks />
         <QuantumRift />
         <CrystalFormation />
         <Particles />
