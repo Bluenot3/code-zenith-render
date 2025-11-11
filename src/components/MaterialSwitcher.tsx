@@ -198,14 +198,21 @@ export const MaterialSwitcher = ({
     case 'code':
     default:
       return (
-        <meshStandardMaterial
+        <meshPhysicalMaterial
           map={processedTexture}
           emissive={tintColor}
           emissiveMap={processedTexture}
-          emissiveIntensity={material.emissiveGain}
-          roughness={material.roughness}
-          metalness={material.metalness}
+          emissiveIntensity={material.emissiveGain * 2}
+          roughness={material.roughness * 0.6}
+          metalness={material.metalness * 1.2}
+          clearcoat={0.8}
+          clearcoatRoughness={0.1}
+          sheen={1.2}
+          sheenColor={tintColor}
+          reflectivity={1.5}
+          envMapIntensity={2.5}
           wireframe={wireframe}
+          toneMapped={false}
         />
       );
   }

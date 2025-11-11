@@ -19,7 +19,7 @@ export const MeteorTrails = () => {
   
   // Initialize meteors with variety
   useMemo(() => {
-    const meteorCount = 35;
+    const meteorCount = 60; // Dramatically increased
     const colorPalette = [
       new THREE.Color('#ff6600'), // Orange
       new THREE.Color('#ff0066'), // Hot Pink
@@ -96,15 +96,21 @@ export const MeteorTrails = () => {
       let headMesh = meshesRef.current.get(headKey) as THREE.Mesh;
       
       if (!headMesh) {
-        const geometry = new THREE.SphereGeometry(meteor.size, 16, 16);
-        const material = new THREE.MeshStandardMaterial({
+        const geometry = new THREE.SphereGeometry(meteor.size, 32, 32); // Higher quality
+        const material = new THREE.MeshPhysicalMaterial({
           color: meteor.color,
           emissive: meteor.color,
-          emissiveIntensity: meteor.glowIntensity,
+          emissiveIntensity: meteor.glowIntensity * 1.5,
           transparent: true,
-          opacity: 0.9,
-          metalness: 0.8,
-          roughness: 0.2,
+          opacity: 1,
+          metalness: 0.9,
+          roughness: 0.1,
+          clearcoat: 1,
+          clearcoatRoughness: 0,
+          sheen: 1.5,
+          sheenColor: meteor.color,
+          envMapIntensity: 2,
+          toneMapped: false,
         });
         headMesh = new THREE.Mesh(geometry, material);
         meshesRef.current.set(headKey, headMesh);
@@ -117,13 +123,14 @@ export const MeteorTrails = () => {
       let glowMesh = meshesRef.current.get(glowKey) as THREE.Mesh;
       
       if (!glowMesh) {
-        const glowGeometry = new THREE.SphereGeometry(meteor.size * 2.5, 16, 16);
+        const glowGeometry = new THREE.SphereGeometry(meteor.size * 3, 32, 32); // Larger, higher quality
         const glowMaterial = new THREE.MeshBasicMaterial({
           color: meteor.color,
           transparent: true,
-          opacity: 0.4,
+          opacity: 0.6,
           blending: THREE.AdditiveBlending,
           depthWrite: false,
+          toneMapped: false,
         });
         glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
         meshesRef.current.set(glowKey, glowMesh);

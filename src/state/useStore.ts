@@ -202,7 +202,7 @@ export const FACTORY_DEFAULTS: Omit<StoreState, 'setGeometry' | 'setMaterial' | 
     wireframe: false,
   },
   material: {
-    preset: 'crystal',
+    preset: 'code',
     roughness: 0.05,
     metalness: 0.1,
     transmission: 0,

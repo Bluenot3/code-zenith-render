@@ -7,11 +7,11 @@ export const NebulaClouds = () => {
   const cloudPointsRef = useRef<THREE.Points[]>([]);
   
   const clouds = useMemo(() => {
-    const cloudCount = 6;
+    const cloudCount = 10; // More clouds
     const cloudData = [];
     
     for (let cloudIndex = 0; cloudIndex < cloudCount; cloudIndex++) {
-      const particleCount = 800;
+      const particleCount = 1500; // Ultra-dense clouds
       const positions = new Float32Array(particleCount * 3);
       const colors = new Float32Array(particleCount * 3);
       const sizes = new Float32Array(particleCount);
@@ -21,7 +21,7 @@ export const NebulaClouds = () => {
       const centerY = (Math.random() - 0.5) * 40;
       const centerZ = (Math.random() - 0.5) * 40;
       
-      // Cloud color palette
+      // Enhanced cosmic color palette
       const colorPalettes = [
         [new THREE.Color('#ff6b9d'), new THREE.Color('#c06c84')],
         [new THREE.Color('#6b5b95'), new THREE.Color('#88d8b0')],
@@ -29,6 +29,10 @@ export const NebulaClouds = () => {
         [new THREE.Color('#4ecdc4'), new THREE.Color('#44a08d')],
         [new THREE.Color('#f38181'), new THREE.Color('#aa4465')],
         [new THREE.Color('#667eea'), new THREE.Color('#764ba2')],
+        [new THREE.Color('#00d4ff'), new THREE.Color('#090979')],
+        [new THREE.Color('#f093fb'), new THREE.Color('#f5576c')],
+        [new THREE.Color('#4facfe'), new THREE.Color('#00f2fe')],
+        [new THREE.Color('#fa709a'), new THREE.Color('#fee140')],
       ];
       
       const palette = colorPalettes[cloudIndex % colorPalettes.length];
@@ -155,13 +159,14 @@ export const NebulaClouds = () => {
             />
           </bufferGeometry>
           <pointsMaterial
-            size={0.5}
+            size={0.8}
             vertexColors
             transparent
-            opacity={0.6}
+            opacity={0.75}
             sizeAttenuation
             blending={THREE.AdditiveBlending}
             depthWrite={false}
+            toneMapped={false}
           />
         </points>
       ))}

@@ -16,7 +16,7 @@ export const CosmicAsteroids = () => {
   const asteroidsRef = useRef<Asteroid[]>([]);
   
   useMemo(() => {
-    const asteroidCount = 25;
+    const asteroidCount = 40; // Increased count
     const colorPalette = [
       new THREE.Color('#ff6b35'),
       new THREE.Color('#f7931e'),
@@ -24,51 +24,67 @@ export const CosmicAsteroids = () => {
       new THREE.Color('#ff1493'),
       new THREE.Color('#00ffff'),
       new THREE.Color('#9d4edd'),
+      new THREE.Color('#ff00ff'),
+      new THREE.Color('#00ff88'),
     ];
     
     for (let i = 0; i < asteroidCount; i++) {
-      // Create irregular asteroid shape
+      // Create highly detailed irregular asteroid shape
       const geometry = new THREE.DodecahedronGeometry(
-        Math.random() * 0.3 + 0.15,
-        0
+        Math.random() * 0.4 + 0.2, // Slightly larger
+        2 // Added subdivision for more detail
       );
       
-      // Deform vertices for irregular look
+      // Advanced deformation for ultra-realistic irregular shapes
       const positions = geometry.attributes.position;
       for (let j = 0; j < positions.count; j++) {
+        const x = positions.getX(j);
+        const y = positions.getY(j);
+        const z = positions.getZ(j);
+        
+        // Multi-octave noise-like deformation
+        const noise1 = Math.sin(x * 5 + y * 3) * Math.cos(z * 4);
+        const noise2 = Math.sin(x * 10) * Math.cos(y * 8);
+        
         positions.setXYZ(
           j,
-          positions.getX(j) * (0.7 + Math.random() * 0.6),
-          positions.getY(j) * (0.7 + Math.random() * 0.6),
-          positions.getZ(j) * (0.7 + Math.random() * 0.6)
+          x * (0.6 + Math.random() * 0.8 + noise1 * 0.15),
+          y * (0.6 + Math.random() * 0.8 + noise2 * 0.15),
+          z * (0.6 + Math.random() * 0.8 + noise1 * noise2 * 0.1)
         );
       }
       geometry.computeVertexNormals();
       
       const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
       
-      // Main asteroid body
-      const material = new THREE.MeshStandardMaterial({
+      // Ultra-high quality asteroid material
+      const material = new THREE.MeshPhysicalMaterial({
         color: color,
         emissive: color,
-        emissiveIntensity: 0.4,
-        metalness: 0.7,
-        roughness: 0.3,
+        emissiveIntensity: 0.6,
+        metalness: 0.8,
+        roughness: 0.25,
+        clearcoat: 0.5,
+        clearcoatRoughness: 0.3,
+        sheen: 0.8,
+        sheenColor: color,
+        envMapIntensity: 2,
       });
       const mesh = new THREE.Mesh(geometry, material);
       
-      // Glowing tip
+      // Enhanced multi-layer glow
       const glowGeometry = new THREE.SphereGeometry(
-        geometry.parameters.radius * 0.6,
-        16,
-        16
+        geometry.parameters.radius * 0.8,
+        32, // Higher quality sphere
+        32
       );
       const glowMaterial = new THREE.MeshBasicMaterial({
         color: color,
         transparent: true,
-        opacity: 0.8,
+        opacity: 0.9,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
+        toneMapped: false,
       });
       const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
       
