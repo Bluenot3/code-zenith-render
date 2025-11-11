@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useStore } from '@/state/useStore';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -6,10 +6,11 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Settings, X } from 'lucide-react';
+import { X } from 'lucide-react';
 
 export const CodeSettings = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [sparks, setSparks] = useState<Array<{ id: number; x: number; y: number }>>([]);
   const code = useStore((state) => state.code);
   const setCode = useStore((state) => state.setCode);
   const particles = useStore((state) => state.particles);
@@ -19,15 +20,48 @@ export const CodeSettings = () => {
   const material = useStore((state) => state.material);
   const setMaterial = useStore((state) => state.setMaterial);
   
+  const handleZClick = () => {
+    // Create sparks
+    const newSparks = Array.from({ length: 12 }, (_, i) => ({
+      id: Date.now() + i,
+      x: Math.random() * 60 - 30,
+      y: Math.random() * 60 - 30,
+    }));
+    setSparks(newSparks);
+    
+    // Clear sparks after animation
+    setTimeout(() => setSparks([]), 800);
+    
+    setIsOpen(true);
+  };
+  
   if (!isOpen) {
     return (
-      <Button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 z-50"
-        size="lg"
-      >
-        <Settings className="w-5 h-5" />
-      </Button>
+      <div className="fixed top-6 right-6 z-50">
+        <button
+          onClick={handleZClick}
+          className="relative group w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 border-2 border-primary/40 backdrop-blur-sm hover:border-primary/80 transition-all duration-300 hover:scale-110 shadow-[0_0_20px_hsl(var(--primary)/0.3)] hover:shadow-[0_0_40px_hsl(var(--primary)/0.6)]"
+        >
+          <span className="absolute inset-0 flex items-center justify-center text-4xl font-bold text-primary drop-shadow-[0_0_8px_hsl(var(--primary))] group-hover:drop-shadow-[0_0_16px_hsl(var(--primary))] transition-all duration-300 animate-pulse">
+            Z
+          </span>
+          
+          {/* Glow ring */}
+          <span className="absolute inset-0 rounded-full bg-primary/10 blur-xl group-hover:bg-primary/20 transition-all duration-300" />
+          
+          {/* Sparks */}
+          {sparks.map((spark) => (
+            <span
+              key={spark.id}
+              className="absolute top-1/2 left-1/2 w-1 h-1 bg-primary rounded-full animate-[spark_0.8s_ease-out_forwards]"
+              style={{
+                '--spark-x': `${spark.x}px`,
+                '--spark-y': `${spark.y}px`,
+              } as React.CSSProperties}
+            />
+          ))}
+        </button>
+      </div>
     );
   }
   
