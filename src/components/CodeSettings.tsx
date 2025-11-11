@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useStore } from '@/state/useStore';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { X } from 'lucide-react';
 
 export const CodeSettings = () => {
-  const [isOpen, setIsOpen] = useState(false); // Start closed with Z button
+  // Always start with panel CLOSED - only open when Z button is clicked
+  const [isOpen, setIsOpen] = useState(false);
   const [sparks, setSparks] = useState<Array<{ id: number; x: number; y: number }>>([]);
   const code = useStore((state) => state.code);
   const setCode = useStore((state) => state.setCode);
