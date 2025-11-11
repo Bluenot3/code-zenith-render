@@ -6,8 +6,10 @@ import { Particles } from './Particles';
 import { InteractiveCharacters } from './InteractiveCharacters';
 import { MeteorTrails } from './MeteorTrails';
 import { AmbientStars } from './AmbientStars';
-import { AuroraWaves } from './AuroraWaves';
 import { NebulaClouds } from './NebulaClouds';
+import { CosmicAsteroids } from './CosmicAsteroids';
+import { QuantumRift } from './QuantumRift';
+import { CrystalFormation } from './CrystalFormation';
 import { CodeTextureGenerator } from '@/utils/codeTexture';
 import { useStore } from '@/state/useStore';
 import { applyTheme } from '@/utils/themes';
@@ -210,8 +212,10 @@ export const CanvasStage = () => {
         
         <AmbientStars />
         <NebulaClouds />
-        <AuroraWaves />
+        <CosmicAsteroids />
         <MeteorTrails />
+        <QuantumRift />
+        <CrystalFormation />
         <Particles />
         <InteractiveCharacters />
         
