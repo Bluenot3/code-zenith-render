@@ -24,27 +24,24 @@ export const MaterialSwitcher = ({
   
   // Apply texture transformations
   const processedTexture = texture.clone();
-  processedTexture.repeat.set(textureRepeatX, textureRepeatY);
+  
+  // Always use RepeatWrapping for proper tiling
+  processedTexture.wrapS = THREE.RepeatWrapping;
+  processedTexture.wrapT = THREE.RepeatWrapping;
   
   // Apply coverage mode
   switch (coverageMode) {
     case 'wrap':
-      processedTexture.wrapS = THREE.RepeatWrapping;
-      processedTexture.wrapT = THREE.RepeatWrapping;
+      processedTexture.repeat.set(textureRepeatX, textureRepeatY);
       break;
     case 'fit':
-      processedTexture.wrapS = THREE.ClampToEdgeWrapping;
-      processedTexture.wrapT = THREE.ClampToEdgeWrapping;
+      processedTexture.repeat.set(textureRepeatX, textureRepeatY);
       break;
     case 'tile':
-      processedTexture.wrapS = THREE.RepeatWrapping;
-      processedTexture.wrapT = THREE.RepeatWrapping;
-      processedTexture.repeat.multiplyScalar(textureScale);
+      processedTexture.repeat.set(textureRepeatX * textureScale, textureRepeatY * textureScale);
       break;
     case 'stretch':
-      processedTexture.wrapS = THREE.ClampToEdgeWrapping;
-      processedTexture.wrapT = THREE.ClampToEdgeWrapping;
-      processedTexture.repeat.set(1, 1);
+      processedTexture.repeat.set(textureRepeatX, textureRepeatY);
       break;
   }
   
