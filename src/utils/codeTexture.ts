@@ -13,8 +13,8 @@ export class CodeTextureGenerator {
   private animationFrame: number | null = null;
   
   private config = {
-    width: 2048,
-    height: 2048,
+    width: 1024,
+    height: 1024,
     fontFamily: 'JetBrains Mono',
     fontSize: 20,
     lineHeight: 1.6,
@@ -210,8 +210,11 @@ export class CodeTextureGenerator {
   
   start() {
     const animate = () => {
-      this.render();
-      this.animationFrame = requestAnimationFrame(animate);
+      // Throttle to 30fps instead of 60fps for better performance
+      setTimeout(() => {
+        this.render();
+        this.animationFrame = requestAnimationFrame(animate);
+      }, 1000 / 30);
     };
     this.lastUpdate = Date.now();
     animate();

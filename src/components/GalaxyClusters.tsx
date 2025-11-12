@@ -7,11 +7,11 @@ export const GalaxyClusters = () => {
   const galaxyRefs = useRef<THREE.Points[]>([]);
   
   const galaxies = useMemo(() => {
-    const galaxyCount = 8;
+    const galaxyCount = 4; // Optimized galaxy count
     const galaxyData = [];
     
     for (let g = 0; g < galaxyCount; g++) {
-      const particleCount = 2000;
+      const particleCount = 1000; // Optimized particle count
       const positions = new Float32Array(particleCount * 3);
       const colors = new Float32Array(particleCount * 3);
       const sizes = new Float32Array(particleCount);
@@ -95,6 +95,9 @@ export const GalaxyClusters = () => {
   }, []);
   
   useFrame((state) => {
+    // Throttle to every 3rd frame
+    if (Math.floor(state.clock.elapsedTime * 60) % 3 !== 0) return;
+    
     galaxies.forEach((galaxy, index) => {
       const points = galaxyRefs.current[index];
       if (!points) return;

@@ -9,7 +9,7 @@ export const CrystalFormation = () => {
   useMemo(() => {
     if (crystalsRef.current.length > 0) return;
     
-    const crystalCount = 12;
+    const crystalCount = 8; // Optimized count
     const colors = [
       new THREE.Color('#ff00ff'),
       new THREE.Color('#00ffff'),
@@ -81,6 +81,9 @@ export const CrystalFormation = () => {
   
   useFrame((state) => {
     const time = state.clock.elapsedTime;
+    
+    // Throttle to every 2nd frame
+    if (Math.floor(time * 60) % 2 !== 0) return;
     
     crystalsRef.current.forEach((crystal, index) => {
       // Gentle floating rotation

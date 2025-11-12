@@ -7,11 +7,11 @@ export const NebulaClouds = () => {
   const cloudPointsRef = useRef<THREE.Points[]>([]);
   
   const clouds = useMemo(() => {
-    const cloudCount = 10; // More clouds
+    const cloudCount = 5; // Optimized cloud count
     const cloudData = [];
     
     for (let cloudIndex = 0; cloudIndex < cloudCount; cloudIndex++) {
-      const particleCount = 1500; // Ultra-dense clouds
+      const particleCount = 600; // Optimized particle density
       const positions = new Float32Array(particleCount * 3);
       const colors = new Float32Array(particleCount * 3);
       const sizes = new Float32Array(particleCount);
@@ -85,6 +85,9 @@ export const NebulaClouds = () => {
   
   useFrame((state) => {
     const time = state.clock.elapsedTime;
+    
+    // Throttle to every 3rd frame
+    if (Math.floor(time * 60) % 3 !== 0) return;
     
     clouds.forEach((cloud, index) => {
       const points = cloudPointsRef.current[index];

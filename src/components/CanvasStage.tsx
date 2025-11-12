@@ -206,7 +206,9 @@ export const CanvasStage = () => {
         outputColorSpace: THREE.SRGBColorSpace,
       }}
       shadows
-      dpr={[1, 2]}
+      dpr={isMobile ? [1, 1.5] : [1, 2]}
+      frameloop="demand"
+      performance={{ min: 0.5 }}
     >
       <Suspense fallback={null}>
         <ambientLight intensity={lighting.envIntensity} />
