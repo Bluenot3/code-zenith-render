@@ -229,10 +229,10 @@ export const FACTORY_DEFAULTS: Omit<StoreState, 'setGeometry' | 'setMaterial' | 
     syntaxColoring: true,
     seed: 42,
     proofOverlay: false,
-    generationStyle: 'standard',
+    generationStyle: 'dense',
     textureScale: 2,
-    textureRepeatX: 1,
-    textureRepeatY: 1,
+    textureRepeatX: 5,
+    textureRepeatY: 5,
     coverageMode: 'wrap',
   },
   theme: {
