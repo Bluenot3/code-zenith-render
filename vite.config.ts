@@ -22,7 +22,6 @@ export default defineConfig(({ mode }) => ({
           // Split Three.js core and React Three Fiber separately for better tree-shaking
           'three-core': ['three'],
           'three-fiber': ['@react-three/fiber'],
-          'three-helpers': ['@react-three/drei'],
           'three-effects': ['@react-three/postprocessing'],
           // Split UI components into separate chunks
           'ui-vendor': ['leva'],
@@ -35,5 +34,13 @@ export default defineConfig(({ mode }) => ({
     },
     // Increase chunk size warning limit for large 3D libraries
     chunkSizeWarningLimit: 1000,
+    // Optimize chunk size
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        pure_funcs: ['console.log', 'console.info'],
+      },
+    },
   },
 }));
