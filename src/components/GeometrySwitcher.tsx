@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, memo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Text3D, Center } from '@react-three/drei';
 import * as THREE from 'three';
@@ -10,7 +10,7 @@ interface GeometrySwitcherProps {
   texture: THREE.Texture;
 }
 
-export const GeometrySwitcher = ({ texture }: GeometrySwitcherProps) => {
+export const GeometrySwitcher = memo(({ texture }: GeometrySwitcherProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const isMobile = useIsMobile();
   const geometry = useStore((state) => state.geometry);
@@ -290,4 +290,4 @@ export const GeometrySwitcher = ({ texture }: GeometrySwitcherProps) => {
   }, [geometry, texture, animation, material]);
   
   return <>{geometryNode}</>;
-};
+});

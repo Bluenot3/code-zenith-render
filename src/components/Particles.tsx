@@ -1,9 +1,9 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, memo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useStore } from '@/state/useStore';
 
-export const Particles = () => {
+export const Particles = memo(() => {
   const pointsRef = useRef<THREE.Points>(null);
   const particles = useStore((state) => state.particles);
   const theme = useStore((state) => state.theme);
@@ -99,4 +99,4 @@ export const Particles = () => {
       />
     </points>
   );
-};
+});
