@@ -10,6 +10,8 @@ import { NebulaClouds } from './NebulaClouds';
 import { CosmicAsteroids } from './CosmicAsteroids';
 import { QuantumRift } from './QuantumRift';
 import { CrystalFormation } from './CrystalFormation';
+import { SpaceGradient } from './SpaceGradient';
+import { GalaxyClusters } from './GalaxyClusters';
 import { CodeTextureGenerator } from '@/utils/codeTexture';
 import { useStore } from '@/state/useStore';
 import { applyTheme } from '@/utils/themes';
@@ -205,6 +207,9 @@ export const CanvasStage = () => {
           intensity={lighting.rimIntensity} 
           color={themeConfig.particleColor} 
         />
+        
+        <SpaceGradient />
+        <GalaxyClusters />
         
         <GeometrySwitcher 
           texture={codeTexture.getTexture()}
