@@ -155,7 +155,7 @@ export const CanvasStage = () => {
         canvas.removeEventListener('dblclick', handleCanvasDoubleClick);
       };
     }
-  }, []);
+  }, [isZoomEnabled]);
   
   if (!codeTexture) {
     return (
