@@ -59,10 +59,6 @@ export default defineConfig(({ mode }) => ({
   // Optimize dependencies
   optimizeDeps: {
     include: ['react', 'react-dom'],
-    exclude: ['@react-three/postprocessing', 'leva'],
-    esbuildOptions: {
-      treeShaking: true,
-      target: 'esnext',
-    },
+    exclude: ['@react-three/postprocessing'],
   },
 }));
