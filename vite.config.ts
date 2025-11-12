@@ -19,16 +19,30 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: {
-          // Split Three.js and related 3D libraries into separate chunk
-          'three-vendor': ['three', '@react-three/fiber', '@react-three/drei', '@react-three/postprocessing'],
-          // Split UI components into separate chunk
+          // Split Three.js core and React Three Fiber separately for better tree-shaking
+          'three-core': ['three'],
+          'three-fiber': ['@react-three/fiber'],
+          'three-helpers': ['@react-three/drei'],
+          'three-effects': ['@react-three/postprocessing'],
+          // Split UI components into separate chunks
           'ui-vendor': ['leva'],
           // Split React and core libraries
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          // Split Zustand state management
+          'state-vendor': ['zustand'],
         },
       },
     },
     // Increase chunk size warning limit for large 3D libraries
     chunkSizeWarningLimit: 1000,
+    // Optimize minification
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info'],
+      },
+    },
   },
 }));
