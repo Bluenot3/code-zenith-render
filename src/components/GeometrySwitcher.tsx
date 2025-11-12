@@ -1,7 +1,7 @@
 import { useRef, useMemo, memo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Text3D, Center } from '@react-three/drei';
-import type * as THREE from 'three';
+import * as THREE from 'three';
 import { useStore, GeometryType } from '@/state/useStore';
 import { MaterialSwitcher } from './MaterialSwitcher';
 import { useIsMobile } from '@/hooks/use-mobile';
