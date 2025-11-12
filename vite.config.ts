@@ -24,8 +24,10 @@ export default defineConfig(({ mode }) => ({
         manualChunks: (id) => {
           // Aggressively split Three.js modules for better caching and parallel loading
           if (id.includes('three/examples')) return 'three-examples';
-          if (id.includes('three')) return 'three-core';
+          if (id.includes('three/src/core')) return 'three-core';
+          if (id.includes('three')) return 'three-base';
           if (id.includes('@react-three/fiber')) return 'three-fiber';
+          if (id.includes('@react-three/drei/core')) return 'drei-core';
           if (id.includes('@react-three/drei')) return 'three-helpers';
           if (id.includes('@react-three/postprocessing')) return 'three-effects';
           if (id.includes('leva')) return 'ui-vendor';
@@ -37,10 +39,15 @@ export default defineConfig(({ mode }) => ({
           }
         },
       },
+      treeshake: {
+        moduleSideEffects: false, // Enable aggressive tree-shaking
+        propertyReadSideEffects: false,
+        tryCatchDeoptimization: false,
+      },
     },
     // Increase chunk size warning limit for large 3D libraries
     chunkSizeWarningLimit: 1000,
-    // Target modern browsers for smaller bundle sizes
+    // Target modern browsers for smaller bundle sizes  
     target: 'esnext',
     // Optimize CSS code splitting
     cssCodeSplit: true,
@@ -51,7 +58,11 @@ export default defineConfig(({ mode }) => ({
   },
   // Optimize dependencies
   optimizeDeps: {
-    include: ['react', 'react-dom', 'three', '@react-three/fiber'],
-    exclude: ['@react-three/postprocessing'],
+    include: ['react', 'react-dom'],
+    exclude: ['@react-three/postprocessing', 'leva'],
+    esbuildOptions: {
+      treeShaking: true,
+      target: 'esnext',
+    },
   },
 }));
