@@ -96,6 +96,29 @@ export const QuantumRift = () => {
       // Swirl particles around the rift
       particlesRef.current.rotation.z += 0.005;
       particlesRef.current.rotation.x = Math.sin(time * 0.3) * 0.2;
+      
+      const positions = particlesRef.current.geometry.attributes.position.array as Float32Array;
+      const sizes = particlesRef.current.geometry.attributes.size.array as Float32Array;
+      
+      for (let i = 0; i < positions.length; i += 3) {
+        const x = positions[i];
+        const y = positions[i + 1];
+        const z = positions[i + 2];
+        
+        // Add spiral motion
+        const angle = Math.atan2(z, x);
+        const radius = Math.sqrt(x * x + z * z);
+        const newAngle = angle + 0.02;
+        
+        positions[i] = Math.cos(newAngle) * radius;
+        positions[i + 2] = Math.sin(newAngle) * radius;
+        
+        // Pulsing particle sizes
+        sizes[i / 3] = (0.05 + Math.sin(time * 2 + i) * 0.03);
+      }
+      
+      particlesRef.current.geometry.attributes.position.needsUpdate = true;
+      particlesRef.current.geometry.attributes.size.needsUpdate = true;
     }
   });
   
