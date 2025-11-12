@@ -4,6 +4,7 @@ import { Text3D, Center } from '@react-three/drei';
 import * as THREE from 'three';
 import { useStore, GeometryType } from '@/state/useStore';
 import { MaterialSwitcher } from './MaterialSwitcher';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface GeometrySwitcherProps {
   texture: THREE.Texture;
@@ -11,6 +12,7 @@ interface GeometrySwitcherProps {
 
 export const GeometrySwitcher = ({ texture }: GeometrySwitcherProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
+  const isMobile = useIsMobile();
   const geometry = useStore((state) => state.geometry);
   const animation = useStore((state) => state.animation);
   const material = useStore((state) => state.material);
@@ -69,6 +71,46 @@ export const GeometrySwitcher = ({ texture }: GeometrySwitcherProps) => {
     
     switch (geometry.type) {
       case 'text':
+        if (isMobile && geometry.text === 'ZEN') {
+          // Render letters vertically stacked on mobile
+          const letters = ['Z', 'E', 'N'];
+          const verticalSpacing = geometry.size * 1.2;
+          
+          return (
+            <group ref={meshRef as any}>
+              {letters.map((letter, index) => (
+                <Center key={`letter-${letter}-${index}`} position={[0, (1 - index) * verticalSpacing, 0]}>
+                  <Text3D
+                    font={getFontPath(geometry.fontFamily)}
+                    size={geometry.size}
+                    height={geometry.depth}
+                    curveSegments={geometry.curveSegments}
+                    bevelEnabled={geometry.bevel}
+                    bevelThickness={0.02}
+                    bevelSize={0.02}
+                    bevelOffset={0}
+                    bevelSegments={5}
+                    letterSpacing={0}
+                    castShadow
+                    receiveShadow
+                  >
+                    {letter}
+                    <MaterialSwitcher 
+                      texture={texture}
+                      material={material}
+                      wireframe={geometry.wireframe}
+                      textureScale={textureScale}
+                      textureRepeatX={textureRepeatX}
+                      textureRepeatY={textureRepeatY}
+                      coverageMode={coverageMode}
+                    />
+                  </Text3D>
+                </Center>
+              ))}
+            </group>
+          );
+        }
+        
         return (
           <Center key={`text-${geometry.fontFamily}-${geometry.text}-${geometry.size}-${getFontPath(geometry.fontFamily)}`}>
             <Text3D
