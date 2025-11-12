@@ -2,6 +2,16 @@ import { Suspense, useEffect, useState, useRef } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
 import { useIsMobile } from '@/hooks/use-mobile';
+
+const CameraManager = ({ isZoomEnabled, isMobile }: { isZoomEnabled: boolean; isMobile: boolean }) => {
+  const { camera } = useThree();
+  
+  useEffect(() => {
+    (window as any).__threeCamera = camera;
+  }, [camera]);
+  
+  return null;
+};
 import { GeometrySwitcher } from './GeometrySwitcher';
 import { Particles } from './Particles';
 import { InteractiveCharacters } from './InteractiveCharacters';
@@ -97,9 +107,23 @@ export const CanvasStage = () => {
   };
 
   const handleCanvasDoubleClick = (event: MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    
     // Toggle zoom mode
     setIsZoomEnabled(prev => {
       const newState = !prev;
+      
+      // Reset camera position when disabling zoom
+      if (!newState) {
+        const canvas = event.target as HTMLCanvasElement;
+        const camera = (window as any).__threeCamera;
+        if (camera) {
+          camera.position.set(0, 0, 5);
+          camera.lookAt(0, 0, 0);
+        }
+      }
+      
       toast({
         title: newState ? "Zoom Enabled" : "Zoom Disabled",
         description: newState ? "Scroll to zoom in/out" : "Scroll to navigate page",
@@ -218,6 +242,8 @@ export const CanvasStage = () => {
         <CrystalFormation />
         <Particles />
         <InteractiveCharacters />
+        
+        <CameraManager isZoomEnabled={isZoomEnabled} isMobile={isMobile} />
         
         <OrbitControls
           autoRotate={camera.autoRotate}
