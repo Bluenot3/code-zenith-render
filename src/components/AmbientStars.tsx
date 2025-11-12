@@ -6,7 +6,7 @@ export const AmbientStars = () => {
   const starsRef = useRef<THREE.Points>(null);
   
   const [positions, colors, sizes] = useMemo(() => {
-    const count = 1500; // Optimized star count for performance
+    const count = 3500; // Dramatically increased star count
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const sizes = new Float32Array(count);
@@ -64,25 +64,23 @@ export const AmbientStars = () => {
   useFrame((state) => {
     if (!starsRef.current) return;
     
-    // Throttle updates to every 3rd frame for performance
-    if (Math.floor(state.clock.elapsedTime * 60) % 3 !== 0) {
-      starsRef.current.rotation.y += 0.00005;
-      starsRef.current.rotation.x += 0.00002;
-      return;
-    }
-    
     const geo = starsRef.current.geometry;
     const sizes = geo.attributes.size.array as Float32Array;
+    const originalSizes = geo.attributes.size.array as Float32Array;
     
-    // Optimized twinkling with single calculation
+    // Advanced twinkling with multiple frequencies and phases
     for (let i = 0; i < sizes.length; i++) {
       const baseSize = i < sizes.length * 0.95 
         ? Math.random() * 0.4 + 0.1 
         : Math.random() * 1.2 + 0.8;
       
-      // Simplified single-frequency twinkling
-      const twinkle = Math.sin(state.clock.elapsedTime * 0.8 + i * 0.05);
-      sizes[i] = baseSize * (0.7 + Math.abs(twinkle) * 0.6);
+      // Multi-frequency twinkling for natural effect
+      const twinkle1 = Math.sin(state.clock.elapsedTime * 0.5 + i * 0.1);
+      const twinkle2 = Math.sin(state.clock.elapsedTime * 1.3 + i * 0.05) * 0.5;
+      const twinkle3 = Math.sin(state.clock.elapsedTime * 2.7 + i * 0.02) * 0.25;
+      
+      const combined = (twinkle1 + twinkle2 + twinkle3) / 1.75;
+      sizes[i] = baseSize * (0.7 + Math.abs(combined) * 0.6);
     }
     
     geo.attributes.size.needsUpdate = true;

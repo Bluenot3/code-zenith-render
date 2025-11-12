@@ -19,7 +19,7 @@ export const MeteorTrails = () => {
   
   // Initialize meteors with variety
   useMemo(() => {
-    const meteorCount = 20; // Optimized count
+    const meteorCount = 60; // Dramatically increased
     const colorPalette = [
       new THREE.Color('#ff6600'), // Orange
       new THREE.Color('#ff0066'), // Hot Pink
@@ -57,10 +57,6 @@ export const MeteorTrails = () => {
   
   useFrame(() => {
     if (!groupRef.current) return;
-    
-    // Throttle to every 2nd frame
-    const frameCount = Math.floor(performance.now() / 16);
-    if (frameCount % 2 !== 0) return;
     
     meteorsRef.current.forEach((meteor, meteorIndex) => {
       // Update position
@@ -100,7 +96,7 @@ export const MeteorTrails = () => {
       let headMesh = meshesRef.current.get(headKey) as THREE.Mesh;
       
       if (!headMesh) {
-        const geometry = new THREE.SphereGeometry(meteor.size, 16, 16); // Optimized quality
+        const geometry = new THREE.SphereGeometry(meteor.size, 32, 32); // Higher quality
         const material = new THREE.MeshPhysicalMaterial({
           color: meteor.color,
           emissive: meteor.color,
@@ -127,7 +123,7 @@ export const MeteorTrails = () => {
       let glowMesh = meshesRef.current.get(glowKey) as THREE.Mesh;
       
       if (!glowMesh) {
-        const glowGeometry = new THREE.SphereGeometry(meteor.size * 3, 16, 16); // Optimized quality
+        const glowGeometry = new THREE.SphereGeometry(meteor.size * 3, 32, 32); // Larger, higher quality
         const glowMaterial = new THREE.MeshBasicMaterial({
           color: meteor.color,
           transparent: true,

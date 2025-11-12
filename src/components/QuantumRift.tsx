@@ -29,7 +29,7 @@ export const QuantumRift = () => {
     groupRef.current.add(riftMesh);
     
     // Create quantum particles swirling around rift
-    const particleCount = 1000; // Optimized particle count
+    const particleCount = 3000;
     const positions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
     const sizes = new Float32Array(particleCount);
@@ -79,9 +79,6 @@ export const QuantumRift = () => {
   
   useFrame((state) => {
     const time = state.clock.elapsedTime;
-    
-    // Throttle to every 2nd frame
-    if (Math.floor(time * 60) % 2 !== 0) return;
     
     if (riftMeshRef.current) {
       // Rotate and pulse the rift

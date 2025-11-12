@@ -37,9 +37,6 @@ export const Particles = () => {
   useFrame((state) => {
     if (!pointsRef.current) return;
     
-    // Throttle updates to every 2nd frame
-    if (Math.floor(state.clock.elapsedTime * 60) % 2 !== 0) return;
-    
     const geo = pointsRef.current.geometry;
     const positions = geo.attributes.position.array as Float32Array;
     const sizes = geo.attributes.size.array as Float32Array;

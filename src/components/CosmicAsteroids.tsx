@@ -16,7 +16,7 @@ export const CosmicAsteroids = () => {
   const asteroidsRef = useRef<Asteroid[]>([]);
   
   useMemo(() => {
-    const asteroidCount = 15; // Optimized count
+    const asteroidCount = 40; // Increased count
     const colorPalette = [
       new THREE.Color('#ff6b35'),
       new THREE.Color('#f7931e'),
@@ -75,8 +75,8 @@ export const CosmicAsteroids = () => {
       // Enhanced multi-layer glow
       const glowGeometry = new THREE.SphereGeometry(
         geometry.parameters.radius * 0.8,
-        16, // Optimized quality
-        16
+        32, // Higher quality sphere
+        32
       );
       const glowMaterial = new THREE.MeshBasicMaterial({
         color: color,
@@ -141,10 +141,6 @@ export const CosmicAsteroids = () => {
   useFrame(() => {
     if (!groupRef.current) return;
     
-    // Throttle to every 2nd frame
-    const frameCount = Math.floor(performance.now() / 16);
-    if (frameCount % 2 !== 0) return;
-    
     asteroidsRef.current.forEach((asteroid) => {
       // Update position
       asteroid.mesh.position.add(asteroid.velocity);
@@ -157,7 +153,7 @@ export const CosmicAsteroids = () => {
       
       // Update trail
       asteroid.trailPositions.push(asteroid.mesh.position.clone());
-      const maxTrailLength = 15; // Reduced for performance
+      const maxTrailLength = 25;
       if (asteroid.trailPositions.length > maxTrailLength) {
         asteroid.trailPositions.shift();
       }
