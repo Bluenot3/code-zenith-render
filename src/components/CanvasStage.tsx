@@ -44,10 +44,12 @@ export const CanvasStage = () => {
   const setCode = useStore((state) => state.setCode);
   
   const [codeTexture, setCodeTexture] = useState<CodeTextureGenerator | null>(null);
+  const [isFullyLoaded, setIsFullyLoaded] = useState(false);
   const isPausedRef = useRef(false);
   const [isZoomEnabled, setIsZoomEnabled] = useState(false);
   const lastTapTimeRef = useRef(0);
   const tapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     const themeConfig = applyTheme(theme.preset);
@@ -70,6 +72,9 @@ export const CanvasStage = () => {
     });
     
     setCodeTexture(generator);
+    
+    // Mark as fully loaded after texture is ready
+    setTimeout(() => setIsFullyLoaded(true), 100);
     
     return () => {
       generator.dispose();
@@ -223,7 +228,7 @@ export const CanvasStage = () => {
     }
   }, [isZoomEnabled]);
   
-  if (!codeTexture) {
+  if (!codeTexture || !isFullyLoaded) {
     return (
       <div className="flex items-center justify-center w-full h-full bg-background">
         <p className="text-muted-foreground">Loading ZEN 3D...</p>
@@ -234,20 +239,22 @@ export const CanvasStage = () => {
   const themeConfig = applyTheme(theme.preset);
   
   return (
-    <Canvas
-      camera={{ position: [0, 0, 5], fov: camera.fov }}
-      style={{ background: themeConfig.sceneBackground }}
-      gl={{
-        antialias: true,
-        alpha: true,
-        powerPreference: 'high-performance',
-        toneMapping: THREE.ACESFilmicToneMapping,
-        toneMappingExposure: 1.2,
-        outputColorSpace: THREE.SRGBColorSpace,
-      }}
-      shadows
-      dpr={[1, 2]}
-    >
+    <div ref={containerRef} style={{ width: '100%', height: '100%', position: 'relative' }}>
+      <Canvas
+        camera={{ position: [0, 0, 5], fov: camera.fov }}
+        style={{ background: themeConfig.sceneBackground, width: '100%', height: '100%' }}
+        gl={{
+          antialias: true,
+          alpha: true,
+          powerPreference: 'high-performance',
+          toneMapping: THREE.ACESFilmicToneMapping,
+          toneMappingExposure: 1.2,
+          outputColorSpace: THREE.SRGBColorSpace,
+        }}
+        shadows
+        dpr={typeof window !== 'undefined' ? Math.min(window.devicePixelRatio, 2) : 1}
+        resize={{ scroll: false, debounce: { scroll: 0, resize: 100 } }}
+      >
       <Suspense fallback={null}>
         <ambientLight intensity={lighting.envIntensity} />
         <directionalLight 
@@ -303,5 +310,6 @@ export const CanvasStage = () => {
         <Environment preset="city" />
       </Suspense>
     </Canvas>
+    </div>
   );
 };
