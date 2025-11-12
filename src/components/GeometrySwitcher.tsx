@@ -29,7 +29,9 @@ export const GeometrySwitcher = ({ texture }: GeometrySwitcherProps) => {
     }
     
     if (animation.float) {
-      meshRef.current.position.y = Math.sin(state.clock.elapsedTime * animation.speed) * 0.3;
+      meshRef.current.position.y = 0.8 + Math.sin(state.clock.elapsedTime * animation.speed) * 0.3;
+    } else {
+      meshRef.current.position.y = 0.8;
     }
     
     if (animation.orbit) {
