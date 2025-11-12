@@ -34,13 +34,5 @@ export default defineConfig(({ mode }) => ({
     },
     // Increase chunk size warning limit for large 3D libraries
     chunkSizeWarningLimit: 1000,
-    // Optimize chunk size
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        pure_funcs: ['console.log', 'console.info'],
-      },
-    },
   },
 }));
