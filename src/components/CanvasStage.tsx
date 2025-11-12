@@ -45,6 +45,7 @@ export const CanvasStage = () => {
   
   const [codeTexture, setCodeTexture] = useState<CodeTextureGenerator | null>(null);
   const [isFullyLoaded, setIsFullyLoaded] = useState(false);
+  const [showBackgroundEffects, setShowBackgroundEffects] = useState(false);
   const isPausedRef = useRef(false);
   const [isZoomEnabled, setIsZoomEnabled] = useState(false);
   const lastTapTimeRef = useRef(0);
@@ -74,7 +75,16 @@ export const CanvasStage = () => {
     setCodeTexture(generator);
     
     // Mark as fully loaded after texture is ready
-    setTimeout(() => setIsFullyLoaded(true), 100);
+    setTimeout(() => {
+      setIsFullyLoaded(true);
+      
+      // Defer background effects to prevent main-thread blocking
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => setShowBackgroundEffects(true), { timeout: 100 });
+      } else {
+        setTimeout(() => setShowBackgroundEffects(true), 100);
+      }
+    }, 100);
     
     return () => {
       generator.dispose();
@@ -275,18 +285,24 @@ export const CanvasStage = () => {
         />
         
         <SpaceGradient />
-        <GalaxyClusters />
         
         <GeometrySwitcher 
           texture={codeTexture.getTexture()}
         />
         
-        <AmbientStars />
-        <NebulaClouds />
-        <CosmicAsteroids />
-        <MeteorTrails />
-        <QuantumRift />
-        <CrystalFormation />
+        {/* Defer decorative background effects for better performance */}
+        {showBackgroundEffects && (
+          <>
+            <GalaxyClusters />
+            <AmbientStars />
+            <NebulaClouds />
+            <CosmicAsteroids />
+            <MeteorTrails />
+            <QuantumRift />
+            <CrystalFormation />
+          </>
+        )}
+        
         <Particles />
         <InteractiveCharacters />
         
