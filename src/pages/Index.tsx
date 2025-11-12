@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react';
-import { CanvasStage } from '@/components/CanvasStage';
-import { CodeSettings } from '@/components/CodeSettings';
-import { AutoplayController } from '@/components/AutoplayController';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { useControls, button, folder, Leva } from 'leva';
 import { useStore } from '@/state/useStore';
 import { toast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
+
+// Lazy load heavy components to reduce initial JS execution time
+const CanvasStage = lazy(() => import('@/components/CanvasStage').then(m => ({ default: m.CanvasStage })));
+const CodeSettings = lazy(() => import('@/components/CodeSettings').then(m => ({ default: m.CodeSettings })));
+const AutoplayController = lazy(() => import('@/components/AutoplayController').then(m => ({ default: m.AutoplayController })));
 
 const Index = () => {
   const isMobile = useIsMobile();
@@ -354,9 +356,13 @@ const Index = () => {
   return (
     <div className="relative w-full h-screen overflow-hidden">
       <Leva hidden={levaHidden} />
-      <CanvasStage />
-      <CodeSettings onToggleLeva={() => setLevaHidden(!levaHidden)} levaHidden={levaHidden} />
-      <AutoplayController />
+      <Suspense fallback={<div className="absolute inset-0 bg-background flex items-center justify-center">
+        <div className="text-primary animate-pulse">Loading...</div>
+      </div>}>
+        <CanvasStage />
+        <CodeSettings onToggleLeva={() => setLevaHidden(!levaHidden)} levaHidden={levaHidden} />
+        <AutoplayController />
+      </Suspense>
       
       {/* Footer */}
       <div className="fixed bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 z-10 font-code text-xs">
