@@ -46,6 +46,8 @@ export const CanvasStage = () => {
   const [codeTexture, setCodeTexture] = useState<CodeTextureGenerator | null>(null);
   const isPausedRef = useRef(false);
   const [isZoomEnabled, setIsZoomEnabled] = useState(false);
+  const lastTapTimeRef = useRef(0);
+  const tapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   useEffect(() => {
     const themeConfig = applyTheme(theme.preset);
@@ -106,17 +108,12 @@ export const CanvasStage = () => {
     }
   };
 
-  const handleCanvasDoubleClick = (event: MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-    
-    // Toggle zoom mode
+  const toggleZoom = () => {
     setIsZoomEnabled(prev => {
       const newState = !prev;
       
       // Reset camera position when disabling zoom
       if (!newState) {
-        const canvas = event.target as HTMLCanvasElement;
         const camera = (window as any).__threeCamera;
         if (camera) {
           camera.position.set(0, 0, 5);
@@ -131,6 +128,43 @@ export const CanvasStage = () => {
       });
       return newState;
     });
+  };
+
+  const handleCanvasDoubleClick = (event: MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    toggleZoom();
+  };
+
+  const handleTouchEnd = (event: TouchEvent) => {
+    const currentTime = Date.now();
+    const tapInterval = currentTime - lastTapTimeRef.current;
+    
+    // Double tap detected (two taps within 300ms)
+    if (tapInterval < 300 && tapInterval > 0) {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleZoom();
+      lastTapTimeRef.current = 0; // Reset
+      if (tapTimeoutRef.current) {
+        clearTimeout(tapTimeoutRef.current);
+        tapTimeoutRef.current = null;
+      }
+    } else {
+      // First tap or too slow
+      lastTapTimeRef.current = currentTime;
+      
+      // Clear any existing timeout
+      if (tapTimeoutRef.current) {
+        clearTimeout(tapTimeoutRef.current);
+      }
+      
+      // Reset after 300ms if no second tap comes
+      tapTimeoutRef.current = setTimeout(() => {
+        lastTapTimeRef.current = 0;
+        tapTimeoutRef.current = null;
+      }, 300);
+    }
   };
   
   const handleKeyPress = (e: KeyboardEvent) => {
@@ -176,9 +210,15 @@ export const CanvasStage = () => {
     if (canvas) {
       canvas.addEventListener('click', handleCanvasClick);
       canvas.addEventListener('dblclick', handleCanvasDoubleClick);
+      canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+      
       return () => {
         canvas.removeEventListener('click', handleCanvasClick);
         canvas.removeEventListener('dblclick', handleCanvasDoubleClick);
+        canvas.removeEventListener('touchend', handleTouchEnd);
+        if (tapTimeoutRef.current) {
+          clearTimeout(tapTimeoutRef.current);
+        }
       };
     }
   }, [isZoomEnabled]);
