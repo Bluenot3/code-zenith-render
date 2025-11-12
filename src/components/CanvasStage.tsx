@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useState, useRef } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { GeometrySwitcher } from './GeometrySwitcher';
 import { Particles } from './Particles';
 import { InteractiveCharacters } from './InteractiveCharacters';
@@ -19,6 +20,7 @@ import { toast } from '@/hooks/use-toast';
 import * as THREE from 'three';
 
 export const CanvasStage = () => {
+  const isMobile = useIsMobile();
   const theme = useStore((state) => state.theme);
   const code = useStore((state) => state.code);
   const camera = useStore((state) => state.camera);
@@ -222,7 +224,14 @@ export const CanvasStage = () => {
           autoRotateSpeed={camera.rotateSpeed}
           enableDamping
           dampingFactor={camera.damping}
-          enableZoom={isZoomEnabled}
+          enableZoom={isMobile || isZoomEnabled}
+          enablePan={isMobile}
+          touches={{
+            ONE: isMobile ? 2 : 0,
+            TWO: 2,
+          }}
+          minDistance={isMobile ? 2 : 1}
+          maxDistance={isMobile ? 15 : 20}
         />
         
         <Environment preset="city" />

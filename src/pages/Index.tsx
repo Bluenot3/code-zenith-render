@@ -5,8 +5,10 @@ import { AutoplayController } from '@/components/AutoplayController';
 import { useControls, button, folder, Leva } from 'leva';
 import { useStore } from '@/state/useStore';
 import { toast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
+  const isMobile = useIsMobile();
   const store = useStore();
   const [levaHidden, setLevaHidden] = useState(true);
   
@@ -357,22 +359,22 @@ const Index = () => {
       <AutoplayController />
       
       {/* Footer */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-10 font-code text-xs">
-        <div className="bg-card/80 backdrop-blur-sm px-4 py-2 rounded border border-border space-x-4">
+      <div className="fixed bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 z-10 font-code text-xs">
+        <div className="bg-card/80 backdrop-blur-sm px-2 sm:px-4 py-1.5 sm:py-2 rounded border border-border flex flex-col sm:flex-row items-center gap-1 sm:gap-4">
           <a 
             href="https://zenarena.ai" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-primary hover:text-primary/80 transition-colors"
+            className="text-primary hover:text-primary/80 transition-colors text-[10px] sm:text-xs touch-manipulation"
           >
             ZEN Arena
           </a>
-          <span className="text-muted-foreground">|</span>
+          <span className="text-muted-foreground hidden sm:inline">|</span>
           <a 
             href="https://aipioneer.zen.ai" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-primary hover:text-primary/80 transition-colors"
+            className="text-primary hover:text-primary/80 transition-colors text-[10px] sm:text-xs touch-manipulation"
           >
             AI Pioneer Program
           </a>

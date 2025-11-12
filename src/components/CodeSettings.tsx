@@ -35,17 +35,18 @@ export const CodeSettings = ({ onToggleLeva, levaHidden }: CodeSettingsProps) =>
     <>
       <button
         onClick={handleZClick}
-        className="fixed top-6 right-6 z-50 w-16 h-16 rounded-full 
+        className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50 w-12 h-12 sm:w-16 sm:h-16 rounded-full 
                    bg-gradient-to-br from-primary/20 to-primary/10 
                    border-2 border-primary/40 backdrop-blur-sm 
                    hover:border-primary/80 transition-all duration-300 
-                   hover:scale-110 shadow-[0_0_20px_hsl(var(--primary)/0.3)] 
+                   hover:scale-110 active:scale-95 shadow-[0_0_20px_hsl(var(--primary)/0.3)] 
                    hover:shadow-[0_0_40px_hsl(var(--primary)/0.6)]
+                   touch-manipulation
                    group"
         aria-label={levaHidden ? "Open Settings" : "Close Settings"}
       >
         <span className="absolute inset-0 flex items-center justify-center 
-                         text-4xl font-bold text-primary 
+                         text-2xl sm:text-4xl font-bold text-primary 
                          drop-shadow-[0_0_8px_hsl(var(--primary))] 
                          group-hover:drop-shadow-[0_0_16px_hsl(var(--primary))] 
                          transition-all duration-300 animate-pulse">

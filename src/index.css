@@ -197,7 +197,13 @@
   
   canvas {
     display: block;
-    touch-action: none;
+    touch-action: pan-y pinch-zoom;
+  }
+  
+  @media (max-width: 768px) {
+    canvas {
+      touch-action: manipulation;
+    }
   }
 }
 
