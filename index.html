@@ -20,6 +20,10 @@ us.zenai.biz">
     <!-- Preload critical Google Font to reduce blocking time -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" as="style" />
     
+    <!-- Module preload hints for critical vendor chunks to reduce parse/compile time -->
+    <link rel="modulepreload" href="/src/main.tsx" />
+    <link rel="modulepreload" href="/src/pages/Index.tsx" />
+    
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/gD5911SmVJSaemqg0dgmkswpEDY2/social-images/social-1759366732446-Screenshot_1-10-2025_205834_lovable.dev.jpeg">
 
