@@ -33,6 +33,7 @@ export const CanvasStage = () => {
   
   const [codeTexture, setCodeTexture] = useState<CodeTextureGenerator | null>(null);
   const isPausedRef = useRef(false);
+  const [isZoomEnabled, setIsZoomEnabled] = useState(false);
   
   useEffect(() => {
     const themeConfig = applyTheme(theme.preset);
@@ -94,24 +95,16 @@ export const CanvasStage = () => {
   };
 
   const handleCanvasDoubleClick = (event: MouseEvent) => {
-    if ((window as any).__spawnCharacter) {
-      // Double click - spawn emojis
-      const raycaster = new THREE.Raycaster();
-      const mouse = new THREE.Vector2();
-      const canvas = event.target as HTMLCanvasElement;
-      const rect = canvas.getBoundingClientRect();
-      
-      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-      
-      const spawnPoint = new THREE.Vector3(
-        mouse.x * 3,
-        mouse.y * 3,
-        Math.random() * 2 - 1
-      );
-      
-      (window as any).__spawnCharacter(spawnPoint, true);
-    }
+    // Toggle zoom mode
+    setIsZoomEnabled(prev => {
+      const newState = !prev;
+      toast({
+        title: newState ? "Zoom Enabled" : "Zoom Disabled",
+        description: newState ? "Scroll to zoom in/out" : "Scroll to navigate page",
+        duration: 2000,
+      });
+      return newState;
+    });
   };
   
   const handleKeyPress = (e: KeyboardEvent) => {
@@ -229,6 +222,7 @@ export const CanvasStage = () => {
           autoRotateSpeed={camera.rotateSpeed}
           enableDamping
           dampingFactor={camera.damping}
+          enableZoom={isZoomEnabled}
         />
         
         <Environment preset="city" />
