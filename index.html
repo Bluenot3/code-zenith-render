@@ -2,7 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    
+    <!-- Mobile WebGL optimization -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
     <title>ZEN 3D Code Generator</title>
     <meta name="description" content="ZENAI.world
 us.zenai.biz">
@@ -41,5 +47,17 @@ us.zenai.biz">
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Mobile WebGL fallback check -->
+    <script>
+      // Ensure WebGL is supported on mobile
+      if (typeof window !== 'undefined') {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (!gl) {
+          console.error('WebGL not supported on this device');
+        }
+      }
+    </script>
   </body>
 </html>
