@@ -13,8 +13,8 @@ export class CodeTextureGenerator {
   private animationFrame: number | null = null;
   
   private config = {
-    width: 1024, // Reduced from 2048 for better performance
-    height: 1024, // Reduced from 2048 for better performance
+    width: 2048,
+    height: 2048,
     fontFamily: 'JetBrains Mono',
     fontSize: 20,
     lineHeight: 1.6,
@@ -35,10 +35,10 @@ export class CodeTextureGenerator {
     this.ctx = this.canvas.getContext('2d')!;
     
     this.texture = new THREE.CanvasTexture(this.canvas);
-    this.texture.anisotropy = 8; // Reduced from 16 for better performance
-    this.texture.minFilter = THREE.LinearFilter; // Simplified filtering for better performance
+    this.texture.anisotropy = 16;
+    this.texture.minFilter = THREE.LinearMipMapLinearFilter;
     this.texture.magFilter = THREE.LinearFilter;
-    this.texture.generateMipmaps = false; // Disabled for better performance
+    this.texture.generateMipmaps = true;
     this.texture.wrapS = THREE.RepeatWrapping;
     this.texture.wrapT = THREE.RepeatWrapping;
     
@@ -98,27 +98,23 @@ export class CodeTextureGenerator {
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
   
-  private keywordSet = new Set(['const', 'let', 'var', 'function', 'return', 'if', 'else', 'while', 'for', 'async', 'await', 'export', 'import', 'class', 'extends', 'new', 'this', 'super']);
-  private stringRegex = /^["'].*["']$/;
-  private commentRegex = /^\/\/.*/;
-  private numberRegex = /^\d+$/;
-  
   private highlightSyntax(text: string): { text: string; color: string }[] {
     if (!this.config.syntaxColoring) {
       return [{ text, color: this.config.inkColor }];
     }
     
     const tokens: { text: string; color: string }[] = [];
+    const keywords = ['const', 'let', 'var', 'function', 'return', 'if', 'else', 'while', 'for', 'async', 'await', 'export', 'import', 'class', 'extends', 'new', 'this', 'super'];
     const words = text.split(/(\s+|[{}()[\];,.])/);
     
     words.forEach(word => {
-      if (this.keywordSet.has(word)) {
+      if (keywords.includes(word)) {
         tokens.push({ text: word, color: '#FF80C0' }); // Bright keywords pink
-      } else if (this.stringRegex.test(word)) {
+      } else if (word.match(/^["'].*["']$/)) {
         tokens.push({ text: word, color: '#C0FFB0' }); // Bright strings green
-      } else if (this.commentRegex.test(word)) {
+      } else if (word.match(/^\/\/.*/)) {
         tokens.push({ text: word, color: '#A0C8FF' }); // Bright comments blue
-      } else if (this.numberRegex.test(word)) {
+      } else if (word.match(/^\d+$/)) {
         tokens.push({ text: word, color: '#FFBB80' }); // Bright numbers orange
       } else {
         tokens.push({ text: word, color: '#FFFFFF' }); // Pure white for maximum visibility
@@ -213,22 +209,12 @@ export class CodeTextureGenerator {
   }
   
   start() {
-    let lastFrameTime = 0;
-    const targetFPS = 30; // Throttle to 30fps for better performance
-    const frameInterval = 1000 / targetFPS;
-    
-    const animate = (currentTime: number) => {
-      const elapsed = currentTime - lastFrameTime;
-      
-      if (elapsed > frameInterval) {
-        this.render();
-        lastFrameTime = currentTime - (elapsed % frameInterval);
-      }
-      
+    const animate = () => {
+      this.render();
       this.animationFrame = requestAnimationFrame(animate);
     };
     this.lastUpdate = Date.now();
-    this.animationFrame = requestAnimationFrame(animate);
+    animate();
   }
   
   stop() {

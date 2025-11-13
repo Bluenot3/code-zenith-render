@@ -1,9 +1,9 @@
-import { Suspense, useEffect, useState, useRef, lazy, memo } from 'react';
+import { Suspense, useEffect, useState, useRef } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-const CameraManager = memo(({ isZoomEnabled, isMobile }: { isZoomEnabled: boolean; isMobile: boolean }) => {
+const CameraManager = ({ isZoomEnabled, isMobile }: { isZoomEnabled: boolean; isMobile: boolean }) => {
   const { camera } = useThree();
   
   useEffect(() => {
@@ -11,22 +11,18 @@ const CameraManager = memo(({ isZoomEnabled, isMobile }: { isZoomEnabled: boolea
   }, [camera]);
   
   return null;
-});
-
-// Lazy load heavy background components for better initial load
-const GalaxyClusters = lazy(() => import('./GalaxyClusters').then(m => ({ default: m.GalaxyClusters })));
-const AmbientStars = lazy(() => import('./AmbientStars').then(m => ({ default: m.AmbientStars })));
-const NebulaClouds = lazy(() => import('./NebulaClouds').then(m => ({ default: m.NebulaClouds })));
-const CosmicAsteroids = lazy(() => import('./CosmicAsteroids').then(m => ({ default: m.CosmicAsteroids })));
-const MeteorTrails = lazy(() => import('./MeteorTrails').then(m => ({ default: m.MeteorTrails })));
-const QuantumRift = lazy(() => import('./QuantumRift').then(m => ({ default: m.QuantumRift })));
-const CrystalFormation = lazy(() => import('./CrystalFormation').then(m => ({ default: m.CrystalFormation })));
-
-// Keep critical components as regular imports for immediate rendering
+};
 import { GeometrySwitcher } from './GeometrySwitcher';
 import { Particles } from './Particles';
 import { InteractiveCharacters } from './InteractiveCharacters';
+import { MeteorTrails } from './MeteorTrails';
+import { AmbientStars } from './AmbientStars';
+import { NebulaClouds } from './NebulaClouds';
+import { CosmicAsteroids } from './CosmicAsteroids';
+import { QuantumRift } from './QuantumRift';
+import { CrystalFormation } from './CrystalFormation';
 import { SpaceGradient } from './SpaceGradient';
+import { GalaxyClusters } from './GalaxyClusters';
 import { CodeTextureGenerator } from '@/utils/codeTexture';
 import { useStore } from '@/state/useStore';
 import { applyTheme } from '@/utils/themes';
@@ -78,15 +74,17 @@ export const CanvasStage = () => {
     
     setCodeTexture(generator);
     
-    // Mark as fully loaded immediately for faster initial paint
-    setIsFullyLoaded(true);
-    
-    // Defer background effects to prevent main-thread blocking - reduced delay
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(() => setShowBackgroundEffects(true), { timeout: 50 });
-    } else {
-      setTimeout(() => setShowBackgroundEffects(true), 50);
-    }
+    // Mark as fully loaded after texture is ready
+    setTimeout(() => {
+      setIsFullyLoaded(true);
+      
+      // Defer background effects to prevent main-thread blocking
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => setShowBackgroundEffects(true), { timeout: 100 });
+      } else {
+        setTimeout(() => setShowBackgroundEffects(true), 100);
+      }
+    }, 100);
     
     return () => {
       generator.dispose();
@@ -257,7 +255,7 @@ export const CanvasStage = () => {
         style={{ background: themeConfig.sceneBackground, width: '100%', height: '100%' }}
         gl={{
           antialias: true,
-          alpha: false, // Disable alpha for better performance
+          alpha: true,
           powerPreference: 'high-performance',
           toneMapping: THREE.ACESFilmicToneMapping,
           toneMappingExposure: 1.2,
@@ -266,8 +264,6 @@ export const CanvasStage = () => {
         shadows
         dpr={typeof window !== 'undefined' ? Math.min(window.devicePixelRatio, 2) : 1}
         resize={{ scroll: false, debounce: { scroll: 0, resize: 100 } }}
-        performance={{ min: 0.5 }} // Adaptive performance mode
-        frameloop="always"
       >
       <Suspense fallback={null}>
         <ambientLight intensity={lighting.envIntensity} />
@@ -296,7 +292,7 @@ export const CanvasStage = () => {
         
         {/* Defer decorative background effects for better performance */}
         {showBackgroundEffects && (
-          <Suspense fallback={null}>
+          <>
             <GalaxyClusters />
             <AmbientStars />
             <NebulaClouds />
@@ -304,7 +300,7 @@ export const CanvasStage = () => {
             <MeteorTrails />
             <QuantumRift />
             <CrystalFormation />
-          </Suspense>
+          </>
         )}
         
         <Particles />
