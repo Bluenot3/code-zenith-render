@@ -31,13 +31,9 @@ export default defineConfig(({ mode }) => ({
         drop_debugger: true,
         pure_funcs: ['console.log', 'console.info', 'console.debug'],
         passes: 3,
-        unsafe: true,
-        unsafe_math: true,
-        unsafe_methods: true,
       },
       mangle: {
         safari10: true,
-        toplevel: true,
       },
       format: {
         comments: false,
@@ -96,9 +92,8 @@ export default defineConfig(({ mode }) => ({
         compact: true,
       },
       treeshake: {
-        moduleSideEffects: false,
+        moduleSideEffects: 'no-external',
         propertyReadSideEffects: false,
-        tryCatchDeoptimization: false,
       },
     },
     chunkSizeWarningLimit: 1000,
