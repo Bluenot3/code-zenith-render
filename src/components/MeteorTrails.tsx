@@ -1,6 +1,7 @@
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Meteor {
   position: THREE.Vector3;
@@ -13,13 +14,14 @@ interface Meteor {
 }
 
 export const MeteorTrails = () => {
+  const isMobile = useIsMobile();
   const meteorsRef = useRef<Meteor[]>([]);
   const meshesRef = useRef<Map<string, THREE.Mesh | THREE.Line>>(new Map());
   const groupRef = useRef<THREE.Group>(null);
   
   // Initialize meteors with variety
   useMemo(() => {
-    const meteorCount = 80; // Even more meteors for dramatic effect
+    const meteorCount = isMobile ? 40 : 80; // Adaptive count
     const colorPalette = [
       new THREE.Color('#ff6600'), // Orange
       new THREE.Color('#ff0066'), // Hot Pink
@@ -53,7 +55,7 @@ export const MeteorTrails = () => {
         glowIntensity: Math.random() * 2 + 3,
       };
     });
-  }, []);
+  }, [isMobile]);
   
   useFrame(() => {
     if (!groupRef.current) return;

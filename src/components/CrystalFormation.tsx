@@ -1,15 +1,17 @@
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export const CrystalFormation = () => {
+  const isMobile = useIsMobile();
   const groupRef = useRef<THREE.Group>(null);
   const crystalsRef = useRef<THREE.Mesh[]>([]);
   
   useMemo(() => {
     if (crystalsRef.current.length > 0) return;
     
-    const crystalCount = 18; // More crystals for richer formation
+    const crystalCount = isMobile ? 10 : 18; // Adaptive count
     const colors = [
       new THREE.Color('#ff00ff'),
       new THREE.Color('#00ffff'),
@@ -77,7 +79,7 @@ export const CrystalFormation = () => {
       const glow = new THREE.Mesh(glowGeometry, glowMaterial);
       crystal.add(glow);
     }
-  }, []);
+  }, [isMobile]);
   
   useFrame((state) => {
     const time = state.clock.elapsedTime;

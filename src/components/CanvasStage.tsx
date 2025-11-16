@@ -1,15 +1,16 @@
 import { Suspense, useEffect, useState, useRef, lazy } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
-
-import { MeteorTrails } from './MeteorTrails';
-import { AmbientStars } from './AmbientStars';
-import { NebulaClouds } from './NebulaClouds';
-import { CosmicAsteroids } from './CosmicAsteroids';
-import { QuantumRift } from './QuantumRift';
-import { CrystalFormation } from './CrystalFormation';
-import { GalaxyClusters } from './GalaxyClusters';
 import { useIsMobile } from '@/hooks/use-mobile';
+
+// Dynamic imports for progressive loading
+const GalaxyClusters = lazy(() => import('./GalaxyClusters').then(m => ({ default: m.GalaxyClusters })));
+const AmbientStars = lazy(() => import('./AmbientStars').then(m => ({ default: m.AmbientStars })));
+const NebulaClouds = lazy(() => import('./NebulaClouds').then(m => ({ default: m.NebulaClouds })));
+const CosmicAsteroids = lazy(() => import('./CosmicAsteroids').then(m => ({ default: m.CosmicAsteroids })));
+const MeteorTrails = lazy(() => import('./MeteorTrails').then(m => ({ default: m.MeteorTrails })));
+const QuantumRift = lazy(() => import('./QuantumRift').then(m => ({ default: m.QuantumRift })));
+const CrystalFormation = lazy(() => import('./CrystalFormation').then(m => ({ default: m.CrystalFormation })));
 
 const CameraManager = ({ isZoomEnabled, isMobile }: { isZoomEnabled: boolean; isMobile: boolean }) => {
   const { camera } = useThree();
@@ -46,6 +47,7 @@ export const CanvasStage = () => {
   
   const [codeTexture, setCodeTexture] = useState<CodeTextureGenerator | null>(null);
   const [isFullyLoaded, setIsFullyLoaded] = useState(false);
+  const [loadStage, setLoadStage] = useState(0); // Progressive loading stages
   const isPausedRef = useRef(false);
   const [isZoomEnabled, setIsZoomEnabled] = useState(false);
   const lastTapTimeRef = useRef(0);
@@ -74,10 +76,23 @@ export const CanvasStage = () => {
     
     setCodeTexture(generator);
     
-    // Mark as fully loaded after texture is ready
-    setTimeout(() => {
-      setIsFullyLoaded(true);
-    }, 100);
+    // Progressive loading strategy
+    setIsFullyLoaded(true);
+    
+    // Stage 1: Immediate (core scene is already rendered)
+    setLoadStage(1);
+    
+    // Stage 2: Quick decorative effects after first paint
+    requestAnimationFrame(() => {
+      setLoadStage(2);
+      
+      // Stage 3: Heavy background effects when browser is idle
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => setLoadStage(3), { timeout: 2000 });
+      } else {
+        setTimeout(() => setLoadStage(3), 500);
+      }
+    });
     
     return () => {
       generator.dispose();
@@ -283,17 +298,26 @@ export const CanvasStage = () => {
           texture={codeTexture.getTexture()}
         />
         
-        {/* High-quality background effects */}
-        <GalaxyClusters />
-        <AmbientStars />
-        <NebulaClouds />
-        <CosmicAsteroids />
-        <MeteorTrails />
-        <QuantumRift />
-        <CrystalFormation />
+        {/* Stage 2: Quick decorative effects - load after first paint */}
+        {loadStage >= 2 && (
+          <>
+            <Particles />
+            <InteractiveCharacters />
+          </>
+        )}
         
-        <Particles />
-        <InteractiveCharacters />
+        {/* Stage 3: Heavy background effects - load when idle */}
+        {loadStage >= 3 && (
+          <Suspense fallback={null}>
+            <GalaxyClusters />
+            <AmbientStars />
+            <NebulaClouds />
+            <CosmicAsteroids />
+            <MeteorTrails />
+            <QuantumRift />
+            <CrystalFormation />
+          </Suspense>
+        )}
         
         <CameraManager isZoomEnabled={isZoomEnabled} isMobile={isMobile} />
         

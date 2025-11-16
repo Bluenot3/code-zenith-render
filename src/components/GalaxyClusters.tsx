@@ -1,17 +1,19 @@
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export const GalaxyClusters = () => {
+  const isMobile = useIsMobile();
   const groupRef = useRef<THREE.Group>(null);
   const galaxyRefs = useRef<THREE.Points[]>([]);
   
   const galaxies = useMemo(() => {
-    const galaxyCount = 8;
+    const galaxyCount = isMobile ? 4 : 8; // Adaptive galaxy count
     const galaxyData = [];
     
     for (let g = 0; g < galaxyCount; g++) {
-      const particleCount = 2000;
+      const particleCount = isMobile ? 1000 : 2000; // Adaptive particles per galaxy
       const positions = new Float32Array(particleCount * 3);
       const colors = new Float32Array(particleCount * 3);
       const sizes = new Float32Array(particleCount);
@@ -92,7 +94,7 @@ export const GalaxyClusters = () => {
     }
     
     return galaxyData;
-  }, []);
+  }, [isMobile]);
   
   useFrame((state) => {
     galaxies.forEach((galaxy, index) => {

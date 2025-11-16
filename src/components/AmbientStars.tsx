@@ -1,12 +1,14 @@
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export const AmbientStars = () => {
+  const isMobile = useIsMobile();
   const starsRef = useRef<THREE.Points>(null);
   
   const [positions, colors, sizes] = useMemo(() => {
-    const count = 3500; // Dramatically increased star count
+    const count = isMobile ? 1500 : 3500; // Adaptive star count
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const sizes = new Float32Array(count);
@@ -59,7 +61,7 @@ export const AmbientStars = () => {
     }
     
     return [positions, colors, sizes];
-  }, []);
+  }, [isMobile]);
   
   useFrame((state) => {
     if (!starsRef.current) return;

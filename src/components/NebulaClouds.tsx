@@ -1,17 +1,19 @@
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export const NebulaClouds = () => {
+  const isMobile = useIsMobile();
   const groupRef = useRef<THREE.Group>(null);
   const cloudPointsRef = useRef<THREE.Points[]>([]);
   
   const clouds = useMemo(() => {
-    const cloudCount = 10; // More clouds
+    const cloudCount = isMobile ? 5 : 10; // Adaptive cloud count
     const cloudData = [];
     
     for (let cloudIndex = 0; cloudIndex < cloudCount; cloudIndex++) {
-      const particleCount = 1500; // Ultra-dense clouds
+      const particleCount = isMobile ? 750 : 1500; // Adaptive particles per cloud
       const positions = new Float32Array(particleCount * 3);
       const colors = new Float32Array(particleCount * 3);
       const sizes = new Float32Array(particleCount);
@@ -81,7 +83,7 @@ export const NebulaClouds = () => {
     }
     
     return cloudData;
-  }, []);
+  }, [isMobile]);
   
   useFrame((state) => {
     const time = state.clock.elapsedTime;
