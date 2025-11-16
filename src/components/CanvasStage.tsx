@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState, useRef, lazy } from 'react';
+import { Suspense, useEffect, useState, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -13,19 +13,18 @@ import { GeometrySwitcher } from './GeometrySwitcher';
 import { Particles } from './Particles';
 import { InteractiveCharacters } from './InteractiveCharacters';
 import { SpaceGradient } from './SpaceGradient';
+import { GalaxyClusters } from './GalaxyClusters';
+import { AmbientStars } from './AmbientStars';
+import { NebulaClouds } from './NebulaClouds';
+import { CosmicAsteroids } from './CosmicAsteroids';
+import { MeteorTrails } from './MeteorTrails';
+import { QuantumRift } from './QuantumRift';
+import { CrystalFormation } from './CrystalFormation';
+import { Sparkles, SpawnFlash, ShockwaveRing } from './SpawnEffects';
 import { CodeTextureGenerator } from '@/utils/codeTexture';
 import { useStore } from '@/state/useStore';
 import { applyTheme } from '@/utils/themes';
 import * as THREE from 'three';
-
-// Dynamic imports for progressive loading
-const GalaxyClusters = lazy(() => import('./GalaxyClusters').then(m => ({ default: m.GalaxyClusters })));
-const AmbientStars = lazy(() => import('./AmbientStars').then(m => ({ default: m.AmbientStars })));
-const NebulaClouds = lazy(() => import('./NebulaClouds').then(m => ({ default: m.NebulaClouds })));
-const CosmicAsteroids = lazy(() => import('./CosmicAsteroids').then(m => ({ default: m.CosmicAsteroids })));
-const MeteorTrails = lazy(() => import('./MeteorTrails').then(m => ({ default: m.MeteorTrails })));
-const QuantumRift = lazy(() => import('./QuantumRift').then(m => ({ default: m.QuantumRift })));
-const CrystalFormation = lazy(() => import('./CrystalFormation').then(m => ({ default: m.CrystalFormation })));
 
 export const CanvasStage = () => {
   const isMobile = useIsMobile();
@@ -43,8 +42,8 @@ export const CanvasStage = () => {
   
   const [codeTexture, setCodeTexture] = useState<CodeTextureGenerator | null>(null);
   const [isFullyLoaded, setIsFullyLoaded] = useState(false);
-  const [loadStage, setLoadStage] = useState(0); // Progressive loading stages
   const isPausedRef = useRef(false);
+  const [showSpawnEffect, setShowSpawnEffect] = useState(true);
   const [isZoomEnabled, setIsZoomEnabled] = useState(false);
   const lastTapTimeRef = useRef(0);
   const tapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -71,24 +70,11 @@ export const CanvasStage = () => {
     });
     
     setCodeTexture(generator);
-    
-    // Progressive loading strategy
     setIsFullyLoaded(true);
     
-    // Stage 1: Immediate (core scene is already rendered)
-    setLoadStage(1);
-    
-    // Stage 2: Quick decorative effects after first paint
-    requestAnimationFrame(() => {
-      setLoadStage(2);
-      
-      // Stage 3: Heavy background effects when browser is idle
-      if ('requestIdleCallback' in window) {
-        requestIdleCallback(() => setLoadStage(3), { timeout: 2000 });
-      } else {
-        setTimeout(() => setLoadStage(3), 500);
-      }
-    });
+    // Show spawn effects on load
+    setShowSpawnEffect(true);
+    setTimeout(() => setShowSpawnEffect(false), 3000);
     
     return () => {
       generator.dispose();
@@ -203,29 +189,35 @@ export const CanvasStage = () => {
         
         <SpaceGradient />
         
+        {/* Ultra High Quality Background Effects - Always Active */}
+        <GalaxyClusters />
+        <AmbientStars />
+        <NebulaClouds />
+        <CosmicAsteroids />
+        <MeteorTrails />
+        <QuantumRift />
+        <CrystalFormation />
+        
         <GeometrySwitcher 
           texture={codeTexture.getTexture()}
         />
         
-        {/* Stage 2: Quick decorative effects - load after first paint */}
-        {loadStage >= 2 && (
-          <>
-            <Particles />
-            <InteractiveCharacters />
-          </>
-        )}
+        <Particles />
+        <InteractiveCharacters />
         
-        {/* Stage 3: Heavy background effects - load when idle */}
-        {loadStage >= 3 && (
-          <Suspense fallback={null}>
-            <GalaxyClusters />
-            <AmbientStars />
-            <NebulaClouds />
-            <CosmicAsteroids />
-            <MeteorTrails />
-            <QuantumRift />
-            <CrystalFormation />
-          </Suspense>
+        {/* Spawn Effects with Sparks */}
+        {showSpawnEffect && (
+          <>
+            <Sparkles position={new THREE.Vector3(0, 0, 0)} count={50} />
+            <SpawnFlash 
+              position={new THREE.Vector3(0, 0, 0)} 
+              onComplete={() => {}} 
+            />
+            <ShockwaveRing 
+              position={new THREE.Vector3(0, 0, 0)} 
+              onComplete={() => {}} 
+            />
+          </>
         )}
         
         <CameraManager isZoomEnabled={isZoomEnabled} isMobile={isMobile} />
