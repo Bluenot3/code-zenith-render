@@ -1,47 +1,49 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, memo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-export const CrystalFormation = () => {
+const CrystalFormationComponent = () => {
   const isMobile = useIsMobile();
   const groupRef = useRef<THREE.Group>(null);
   const crystalsRef = useRef<THREE.Mesh[]>([]);
+  const frameCount = useRef(0);
+  
+  // Shared materials for performance
+  const sharedMaterials = useMemo(() => {
+    const colors = ['#ff00ff', '#00ffff', '#ffff00', '#00ff88', '#ff0088', '#8800ff'];
+    return colors.map(color => ({
+      crystal: new THREE.MeshPhysicalMaterial({
+        color,
+        emissive: color,
+        emissiveIntensity: 1.5,
+        transparent: true,
+        opacity: 0.85,
+        metalness: 0.9,
+        roughness: 0.1,
+        clearcoat: 1,
+        clearcoatRoughness: 0.1,
+      }),
+      glow: new THREE.MeshBasicMaterial({
+        color,
+        transparent: true,
+        opacity: 0.6,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      })
+    }));
+  }, []);
   
   useMemo(() => {
     if (crystalsRef.current.length > 0) return;
     
-    const crystalCount = isMobile ? 10 : 18; // Adaptive count
-    const colors = [
-      new THREE.Color('#ff00ff'),
-      new THREE.Color('#00ffff'),
-      new THREE.Color('#ffff00'),
-      new THREE.Color('#00ff88'),
-      new THREE.Color('#ff0088'),
-      new THREE.Color('#8800ff'),
-    ];
-    
+    const crystalCount = isMobile ? 8 : 14; // Reduced count
     for (let i = 0; i < crystalCount; i++) {
-      // Create elongated crystal shape with higher detail
-      const geometry = new THREE.ConeGeometry(0.35, 2.8, 8);
-      const color = colors[Math.floor(Math.random() * colors.length)];
+      const materialIndex = Math.floor(Math.random() * sharedMaterials.length);
       
-      const material = new THREE.MeshPhysicalMaterial({
-        color: color,
-        emissive: color,
-        emissiveIntensity: 2.0,
-        transparent: true,
-        opacity: 0.9,
-        metalness: 0.95,
-        roughness: 0.05,
-        clearcoat: 1,
-        clearcoatRoughness: 0.05,
-        transmission: 0.4,
-        thickness: 0.6,
-        side: THREE.DoubleSide,
-      });
-      
-      const crystal = new THREE.Mesh(geometry, material);
+      // Create optimized crystal shape
+      const geometry = new THREE.ConeGeometry(0.3, 2.5, 6); // Reduced segments
+      const crystal = new THREE.Mesh(geometry, sharedMaterials[materialIndex].crystal);
       
       // Position in a loose cluster
       const angle = (i / crystalCount) * Math.PI * 2;
@@ -67,22 +69,19 @@ export const CrystalFormation = () => {
         groupRef.current.add(crystal);
       }
       
-      // Add enhanced inner glow
-      const glowGeometry = new THREE.ConeGeometry(0.28, 2.6, 8);
-      const glowMaterial = new THREE.MeshBasicMaterial({
-        color: color,
-        transparent: true,
-        opacity: 0.75,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-      });
-      const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+      // Add optimized inner glow
+      const glowGeometry = new THREE.ConeGeometry(0.25, 2.4, 6);
+      const glow = new THREE.Mesh(glowGeometry, sharedMaterials[materialIndex].glow);
       crystal.add(glow);
     }
-  }, [isMobile]);
+  }, [isMobile, sharedMaterials]);
   
   useFrame((state) => {
     const time = state.clock.elapsedTime;
+    frameCount.current++;
+    
+    // Update every other frame
+    if (frameCount.current % 2 !== 0) return;
     
     crystalsRef.current.forEach((crystal, index) => {
       // Enhanced floating rotation with more dynamic movement
@@ -112,3 +111,5 @@ export const CrystalFormation = () => {
   
   return <group ref={groupRef} renderOrder={-1} />;
 };
+
+export const CrystalFormation = memo(CrystalFormationComponent);

@@ -1,17 +1,19 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, memo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-export const AmbientStars = () => {
+const AmbientStarsComponent = () => {
   const isMobile = useIsMobile();
   const starsRef = useRef<THREE.Points>(null);
+  const frameCount = useRef(0);
   
-  const [positions, colors, sizes] = useMemo(() => {
-    const count = isMobile ? 1500 : 3500; // Adaptive star count
+  const [positions, colors, sizes, baseSizes] = useMemo(() => {
+    const count = isMobile ? 1000 : 2500; // Reduced count
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const sizes = new Float32Array(count);
+    const baseSizes = new Float32Array(count); // Store base sizes
     
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
@@ -55,37 +57,38 @@ export const AmbientStars = () => {
       colors[i3 + 2] = b;
       
       // Variable sizes with some very large bright stars
-      sizes[i] = Math.random() < 0.95 
+      const baseSize = Math.random() < 0.95 
         ? Math.random() * 0.4 + 0.1 
-        : Math.random() * 1.2 + 0.8; // Bright prominent stars
+        : Math.random() * 1.2 + 0.8;
+      sizes[i] = baseSize;
+      baseSizes[i] = baseSize; // Store base size
     }
     
-    return [positions, colors, sizes];
+    return [positions, colors, sizes, baseSizes];
   }, [isMobile]);
   
   useFrame((state) => {
     if (!starsRef.current) return;
     
-    const geo = starsRef.current.geometry;
-    const sizes = geo.attributes.size.array as Float32Array;
-    const originalSizes = geo.attributes.size.array as Float32Array;
+    frameCount.current++;
     
-    // Advanced twinkling with multiple frequencies and phases
-    for (let i = 0; i < sizes.length; i++) {
-      const baseSize = i < sizes.length * 0.95 
-        ? Math.random() * 0.4 + 0.1 
-        : Math.random() * 1.2 + 0.8;
+    // Only update twinkling every 3 frames
+    if (frameCount.current % 3 === 0) {
+      const geo = starsRef.current.geometry;
+      const sizes = geo.attributes.size.array as Float32Array;
+      const time = state.clock.elapsedTime;
       
-      // Multi-frequency twinkling for natural effect
-      const twinkle1 = Math.sin(state.clock.elapsedTime * 0.5 + i * 0.1);
-      const twinkle2 = Math.sin(state.clock.elapsedTime * 1.3 + i * 0.05) * 0.5;
-      const twinkle3 = Math.sin(state.clock.elapsedTime * 2.7 + i * 0.02) * 0.25;
+      // Optimized twinkling - update subset of stars
+      for (let i = 0; i < sizes.length; i += 3) { // Skip every 3rd star
+        // Simplified twinkling
+        const twinkle = Math.sin(time * 0.8 + i * 0.05);
+        sizes[i] = baseSizes[i] * (0.8 + Math.abs(twinkle) * 0.4);
+        if (i + 1 < sizes.length) sizes[i + 1] = baseSizes[i + 1] * (0.8 + Math.abs(Math.sin(time * 0.9 + i)) * 0.4);
+        if (i + 2 < sizes.length) sizes[i + 2] = baseSizes[i + 2] * (0.8 + Math.abs(Math.sin(time * 0.7 + i)) * 0.4);
+      }
       
-      const combined = (twinkle1 + twinkle2 + twinkle3) / 1.75;
-      sizes[i] = baseSize * (0.7 + Math.abs(combined) * 0.6);
+      geo.attributes.size.needsUpdate = true;
     }
-    
-    geo.attributes.size.needsUpdate = true;
     
     // Very slow rotation for parallax effect
     starsRef.current.rotation.y += 0.00005;
@@ -127,3 +130,5 @@ export const AmbientStars = () => {
     </points>
   );
 };
+
+export const AmbientStars = memo(AmbientStarsComponent);

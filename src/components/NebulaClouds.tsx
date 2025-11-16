@@ -1,19 +1,20 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, memo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-export const NebulaClouds = () => {
+const NebulaCloudsComponent = () => {
   const isMobile = useIsMobile();
   const groupRef = useRef<THREE.Group>(null);
   const cloudPointsRef = useRef<THREE.Points[]>([]);
+  const frameCount = useRef(0);
   
   const clouds = useMemo(() => {
-    const cloudCount = isMobile ? 5 : 10; // Adaptive cloud count
+    const cloudCount = isMobile ? 4 : 7; // Reduced count
     const cloudData = [];
     
     for (let cloudIndex = 0; cloudIndex < cloudCount; cloudIndex++) {
-      const particleCount = isMobile ? 750 : 1500; // Adaptive particles per cloud
+      const particleCount = isMobile ? 500 : 1000; // Reduced particles
       const positions = new Float32Array(particleCount * 3);
       const colors = new Float32Array(particleCount * 3);
       const sizes = new Float32Array(particleCount);
@@ -87,6 +88,10 @@ export const NebulaClouds = () => {
   
   useFrame((state) => {
     const time = state.clock.elapsedTime;
+    frameCount.current++;
+    
+    // Only update every other frame for better performance
+    if (frameCount.current % 2 !== 0) return;
     
     clouds.forEach((cloud, index) => {
       const points = cloudPointsRef.current[index];
@@ -175,3 +180,5 @@ export const NebulaClouds = () => {
     </group>
   );
 };
+
+export const NebulaClouds = memo(NebulaCloudsComponent);
