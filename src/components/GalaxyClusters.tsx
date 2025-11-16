@@ -1,9 +1,9 @@
-import { useRef, useMemo, memo } from 'react';
+import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-const GalaxyClustersComponent = () => {
+export const GalaxyClusters = () => {
   const isMobile = useIsMobile();
   const groupRef = useRef<THREE.Group>(null);
   const galaxyRefs = useRef<THREE.Points[]>([]);
@@ -161,5 +161,3 @@ const GalaxyClustersComponent = () => {
     </group>
   );
 };
-
-export const GalaxyClusters = memo(GalaxyClustersComponent);

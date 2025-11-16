@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, memo } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -7,7 +7,7 @@ interface SpawnFlashProps {
   onComplete: () => void;
 }
 
-const SpawnFlashComponent = ({ position, onComplete }: SpawnFlashProps) => {
+export const SpawnFlash = ({ position, onComplete }: SpawnFlashProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const [scale, setScale] = useState(0.1);
   const [opacity, setOpacity] = useState(1);
@@ -65,14 +65,12 @@ const SpawnFlashComponent = ({ position, onComplete }: SpawnFlashProps) => {
   );
 };
 
-export const SpawnFlash = memo(SpawnFlashComponent);
-
 interface ShockwaveRingProps {
   position: THREE.Vector3;
   onComplete: () => void;
 }
 
-const ShockwaveRingComponent = ({ position, onComplete }: ShockwaveRingProps) => {
+export const ShockwaveRing = ({ position, onComplete }: ShockwaveRingProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const ring2Ref = useRef<THREE.Mesh>(null);
   const ring3Ref = useRef<THREE.Mesh>(null);
@@ -140,8 +138,6 @@ const ShockwaveRingComponent = ({ position, onComplete }: ShockwaveRingProps) =>
   );
 };
 
-export const ShockwaveRing = memo(ShockwaveRingComponent);
-
 interface SparkleParticle {
   id: number;
   position: THREE.Vector3;
@@ -154,7 +150,7 @@ interface SparklesProps {
   count: number;
 }
 
-const SparklesComponent = ({ position, count }: SparklesProps) => {
+export const Sparkles = ({ position, count }: SparklesProps) => {
   const [particles, setParticles] = useState<SparkleParticle[]>([]);
   const nextId = useRef(0);
   const timeRef = useRef(0);
@@ -242,5 +238,3 @@ const SparklesComponent = ({ position, count }: SparklesProps) => {
     </group>
   );
 };
-
-export const Sparkles = memo(SparklesComponent);

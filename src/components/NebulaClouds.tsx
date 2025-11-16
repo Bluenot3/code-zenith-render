@@ -1,9 +1,9 @@
-import { useRef, useMemo, memo } from 'react';
+import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-const NebulaCloudsComponent = () => {
+export const NebulaClouds = () => {
   const isMobile = useIsMobile();
   const groupRef = useRef<THREE.Group>(null);
   const cloudPointsRef = useRef<THREE.Points[]>([]);
@@ -180,5 +180,3 @@ const NebulaCloudsComponent = () => {
     </group>
   );
 };
-
-export const NebulaClouds = memo(NebulaCloudsComponent);

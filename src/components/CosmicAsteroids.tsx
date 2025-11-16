@@ -1,4 +1,4 @@
-import { useRef, useMemo, memo } from 'react';
+import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -12,7 +12,7 @@ interface Asteroid {
   trailPositions: THREE.Vector3[];
 }
 
-const CosmicAsteroidsComponent = () => {
+export const CosmicAsteroids = () => {
   const isMobile = useIsMobile();
   const groupRef = useRef<THREE.Group>(null);
   const asteroidsRef = useRef<Asteroid[]>([]);
@@ -214,5 +214,3 @@ const CosmicAsteroidsComponent = () => {
   
   return <group ref={groupRef} renderOrder={-1} />;
 };
-
-export const CosmicAsteroids = memo(CosmicAsteroidsComponent);
