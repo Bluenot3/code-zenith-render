@@ -9,7 +9,7 @@ export const CrystalFormation = () => {
   useMemo(() => {
     if (crystalsRef.current.length > 0) return;
     
-    const crystalCount = 12;
+    const crystalCount = 18; // More crystals for richer formation
     const colors = [
       new THREE.Color('#ff00ff'),
       new THREE.Color('#00ffff'),
@@ -20,22 +20,22 @@ export const CrystalFormation = () => {
     ];
     
     for (let i = 0; i < crystalCount; i++) {
-      // Create elongated crystal shape
-      const geometry = new THREE.ConeGeometry(0.3, 2.5, 6);
+      // Create elongated crystal shape with higher detail
+      const geometry = new THREE.ConeGeometry(0.35, 2.8, 8);
       const color = colors[Math.floor(Math.random() * colors.length)];
       
       const material = new THREE.MeshPhysicalMaterial({
         color: color,
         emissive: color,
-        emissiveIntensity: 1.5,
+        emissiveIntensity: 2.0,
         transparent: true,
-        opacity: 0.85,
-        metalness: 0.9,
-        roughness: 0.1,
+        opacity: 0.9,
+        metalness: 0.95,
+        roughness: 0.05,
         clearcoat: 1,
-        clearcoatRoughness: 0.1,
-        transmission: 0.3,
-        thickness: 0.5,
+        clearcoatRoughness: 0.05,
+        transmission: 0.4,
+        thickness: 0.6,
         side: THREE.DoubleSide,
       });
       
@@ -65,12 +65,12 @@ export const CrystalFormation = () => {
         groupRef.current.add(crystal);
       }
       
-      // Add inner glow
-      const glowGeometry = new THREE.ConeGeometry(0.25, 2.3, 6);
+      // Add enhanced inner glow
+      const glowGeometry = new THREE.ConeGeometry(0.28, 2.6, 8);
       const glowMaterial = new THREE.MeshBasicMaterial({
         color: color,
         transparent: true,
-        opacity: 0.6,
+        opacity: 0.75,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
       });
@@ -83,26 +83,28 @@ export const CrystalFormation = () => {
     const time = state.clock.elapsedTime;
     
     crystalsRef.current.forEach((crystal, index) => {
-      // Gentle floating rotation
-      crystal.rotation.y += 0.005 + index * 0.001;
-      crystal.rotation.x = Math.sin(time * 0.5 + index) * 0.1;
+      // Enhanced floating rotation with more dynamic movement
+      crystal.rotation.y += 0.007 + index * 0.0015;
+      crystal.rotation.x = Math.sin(time * 0.6 + index) * 0.15;
+      crystal.rotation.z = Math.cos(time * 0.4 + index) * 0.08;
       
-      // Subtle floating motion
-      crystal.position.y += Math.sin(time * 0.8 + index) * 0.002;
+      // More dramatic floating motion
+      crystal.position.y += Math.sin(time * 1.2 + index) * 0.004;
       
-      // Pulsing emissive intensity
+      // More intense pulsing emissive intensity
       if (crystal.material instanceof THREE.MeshPhysicalMaterial) {
-        crystal.material.emissiveIntensity = 1.2 + Math.sin(time * 2 + index) * 0.3;
+        crystal.material.emissiveIntensity = 1.8 + Math.sin(time * 2.5 + index) * 0.5;
       }
       
-      // Pulsing scale
-      const scale = 1 + Math.sin(time * 1.5 + index) * 0.05;
+      // Enhanced pulsing scale
+      const scale = 1 + Math.sin(time * 2 + index) * 0.08;
       crystal.scale.set(scale, scale, scale);
     });
     
-    // Rotate entire formation slowly
+    // Rotate entire formation with more presence
     if (groupRef.current) {
-      groupRef.current.rotation.y += 0.002;
+      groupRef.current.rotation.y += 0.003;
+      groupRef.current.rotation.x = Math.sin(time * 0.2) * 0.05;
     }
   });
   

@@ -2,14 +2,13 @@ import { Suspense, useEffect, useState, useRef, lazy } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
 
-// Lazy load background effects for better initial load
-const MeteorTrailsLazy = lazy(() => import('./MeteorTrails').then(m => ({ default: m.MeteorTrails })));
-const AmbientStarsLazy = lazy(() => import('./AmbientStars').then(m => ({ default: m.AmbientStars })));
-const NebulaCloudLazy = lazy(() => import('./NebulaClouds').then(m => ({ default: m.NebulaClouds })));
-const CosmicAsteroidsLazy = lazy(() => import('./CosmicAsteroids').then(m => ({ default: m.CosmicAsteroids })));
-const QuantumRiftLazy = lazy(() => import('./QuantumRift').then(m => ({ default: m.QuantumRift })));
-const CrystalFormationLazy = lazy(() => import('./CrystalFormation').then(m => ({ default: m.CrystalFormation })));
-const GalaxyClustersLazy = lazy(() => import('./GalaxyClusters').then(m => ({ default: m.GalaxyClusters })));
+import { MeteorTrails } from './MeteorTrails';
+import { AmbientStars } from './AmbientStars';
+import { NebulaClouds } from './NebulaClouds';
+import { CosmicAsteroids } from './CosmicAsteroids';
+import { QuantumRift } from './QuantumRift';
+import { CrystalFormation } from './CrystalFormation';
+import { GalaxyClusters } from './GalaxyClusters';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const CameraManager = ({ isZoomEnabled, isMobile }: { isZoomEnabled: boolean; isMobile: boolean }) => {
@@ -47,7 +46,6 @@ export const CanvasStage = () => {
   
   const [codeTexture, setCodeTexture] = useState<CodeTextureGenerator | null>(null);
   const [isFullyLoaded, setIsFullyLoaded] = useState(false);
-  const [showBackgroundEffects, setShowBackgroundEffects] = useState(false);
   const isPausedRef = useRef(false);
   const [isZoomEnabled, setIsZoomEnabled] = useState(false);
   const lastTapTimeRef = useRef(0);
@@ -79,13 +77,6 @@ export const CanvasStage = () => {
     // Mark as fully loaded after texture is ready
     setTimeout(() => {
       setIsFullyLoaded(true);
-      
-      // Defer background effects to prevent main-thread blocking
-      if ('requestIdleCallback' in window) {
-        requestIdleCallback(() => setShowBackgroundEffects(true), { timeout: 100 });
-      } else {
-        setTimeout(() => setShowBackgroundEffects(true), 100);
-      }
     }, 100);
     
     return () => {
@@ -292,18 +283,14 @@ export const CanvasStage = () => {
           texture={codeTexture.getTexture()}
         />
         
-        {/* Defer decorative background effects for better performance */}
-        {showBackgroundEffects && (
-          <Suspense fallback={null}>
-            <GalaxyClustersLazy />
-            <AmbientStarsLazy />
-            <NebulaCloudLazy />
-            <CosmicAsteroidsLazy />
-            <MeteorTrailsLazy />
-            <QuantumRiftLazy />
-            <CrystalFormationLazy />
-          </Suspense>
-        )}
+        {/* High-quality background effects */}
+        <GalaxyClusters />
+        <AmbientStars />
+        <NebulaClouds />
+        <CosmicAsteroids />
+        <MeteorTrails />
+        <QuantumRift />
+        <CrystalFormation />
         
         <Particles />
         <InteractiveCharacters />
