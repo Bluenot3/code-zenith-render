@@ -1,4 +1,4 @@
-import { useRef, useMemo, memo } from 'react';
+import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -13,7 +13,7 @@ interface Meteor {
   glowIntensity: number;
 }
 
-const MeteorTrailsComponent = () => {
+export const MeteorTrails = () => {
   const isMobile = useIsMobile();
   const meteorsRef = useRef<Meteor[]>([]);
   const meshesRef = useRef<Map<string, THREE.Mesh | THREE.Line>>(new Map());
@@ -182,5 +182,3 @@ const MeteorTrailsComponent = () => {
   
   return <group ref={groupRef} renderOrder={-2} />;
 };
-
-export const MeteorTrails = memo(MeteorTrailsComponent);

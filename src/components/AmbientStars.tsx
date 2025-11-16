@@ -1,9 +1,9 @@
-import { useRef, useMemo, memo } from 'react';
+import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-const AmbientStarsComponent = () => {
+export const AmbientStars = () => {
   const isMobile = useIsMobile();
   const starsRef = useRef<THREE.Points>(null);
   const frameCount = useRef(0);
@@ -130,5 +130,3 @@ const AmbientStarsComponent = () => {
     </points>
   );
 };
-
-export const AmbientStars = memo(AmbientStarsComponent);

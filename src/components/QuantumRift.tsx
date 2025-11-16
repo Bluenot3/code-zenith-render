@@ -1,9 +1,9 @@
-import { useRef, memo } from 'react';
+import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-const QuantumRiftComponent = () => {
+export const QuantumRift = () => {
   const isMobile = useIsMobile();
   const groupRef = useRef<THREE.Group>(null);
   const riftMeshRef = useRef<THREE.Mesh>(null);
@@ -111,5 +111,3 @@ const QuantumRiftComponent = () => {
   
   return <group ref={groupRef} renderOrder={-1} />;
 };
-
-export const QuantumRift = memo(QuantumRiftComponent);
