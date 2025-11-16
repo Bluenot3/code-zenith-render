@@ -6,8 +6,7 @@ import { particleVertexShader, particleFragmentShader } from '@/utils/sharedReso
 
 export const GalaxyClusters = () => {
   const isMobile = useIsMobile();
-  const instancedMeshRef = useRef<THREE.InstancedMesh>(null);
-  const materialRef = useRef<THREE.ShaderMaterial>(null);
+  const pointsRef = useRef<THREE.Points>(null);
   
   const { geometry, material, instanceCount, matrices } = useMemo(() => {
     const galaxyCount = isMobile ? 6 : 12; // More galaxies but optimized
@@ -94,12 +93,13 @@ export const GalaxyClusters = () => {
   }, [isMobile]);
   
   useFrame((state) => {
-    if (materialRef.current) {
-      materialRef.current.uniforms.time.value = state.clock.elapsedTime * 0.1;
+    if (pointsRef.current) {
+      const mat = pointsRef.current.material as THREE.ShaderMaterial;
+      mat.uniforms.time.value = state.clock.elapsedTime * 0.1;
     }
   });
   
   return (
-    <points geometry={geometry} material={material} ref={materialRef as any} />
+    <points ref={pointsRef} geometry={geometry} material={material} />
   );
 };

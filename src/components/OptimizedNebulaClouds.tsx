@@ -6,7 +6,7 @@ import { particleVertexShader, particleFragmentShader } from '@/utils/sharedReso
 
 export const NebulaClouds = () => {
   const isMobile = useIsMobile();
-  const meshRef = useRef<THREE.Points>(null);
+  const pointsRef = useRef<THREE.Points>(null);
   
   const { geometry, material } = useMemo(() => {
     const cloudCount = isMobile ? 8 : 15; // More clouds, optimized rendering

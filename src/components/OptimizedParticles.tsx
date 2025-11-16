@@ -5,7 +5,7 @@ import { useStore } from '@/state/useStore';
 import { particleVertexShader, particleFragmentShader } from '@/utils/sharedResources';
 
 export const Particles = () => {
-  const meshRef = useRef<THREE.Points>(null);
+  const pointsRef = useRef<THREE.Points>(null);
   const particles = useStore((state) => state.particles);
   const theme = useStore((state) => state.theme);
   
@@ -75,13 +75,13 @@ export const Particles = () => {
   }, [particles.density, theme.background, particles.twinkle]);
   
   useFrame((state) => {
-    if (!meshRef.current) return;
-    const mat = meshRef.current.material as THREE.ShaderMaterial;
+    if (!pointsRef.current) return;
+    const mat = pointsRef.current.material as THREE.ShaderMaterial;
     mat.uniforms.time.value = state.clock.elapsedTime * particles.driftSpeed;
     mat.uniforms.twinkle.value = particles.twinkle ? 1.0 : 0.0;
   });
   
   if (!particles.enabled) return null;
   
-  return <points ref={meshRef} geometry={geometry} material={material} frustumCulled />;
+  return <points ref={pointsRef} geometry={geometry} material={material} frustumCulled />;
 };
