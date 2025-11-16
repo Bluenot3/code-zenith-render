@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, memo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -7,7 +7,7 @@ interface SpawnFlashProps {
   onComplete: () => void;
 }
 
-export const SpawnFlash = ({ position, onComplete }: SpawnFlashProps) => {
+const SpawnFlashComponent = ({ position, onComplete }: SpawnFlashProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const [scale, setScale] = useState(0.1);
   const [opacity, setOpacity] = useState(1);
@@ -47,7 +47,7 @@ export const SpawnFlash = ({ position, onComplete }: SpawnFlashProps) => {
         />
       </mesh>
       <mesh ref={innerRef} position={position}>
-        <sphereGeometry args={[scale * 0.7, 32, 32]} />
+        <sphereGeometry args={[scale * 0.7, 24, 24]} />
         <meshBasicMaterial
           color={`hsl(${(hue + 180) % 360}, 100%, 70%)`}
           transparent
@@ -65,12 +65,14 @@ export const SpawnFlash = ({ position, onComplete }: SpawnFlashProps) => {
   );
 };
 
+export const SpawnFlash = memo(SpawnFlashComponent);
+
 interface ShockwaveRingProps {
   position: THREE.Vector3;
   onComplete: () => void;
 }
 
-export const ShockwaveRing = ({ position, onComplete }: ShockwaveRingProps) => {
+const ShockwaveRingComponent = ({ position, onComplete }: ShockwaveRingProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const ring2Ref = useRef<THREE.Mesh>(null);
   const ring3Ref = useRef<THREE.Mesh>(null);
@@ -105,7 +107,7 @@ export const ShockwaveRing = ({ position, onComplete }: ShockwaveRingProps) => {
   return (
     <group>
       <mesh ref={meshRef} position={position} rotation={[Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[scale, scale + 0.2, 64]} />
+        <ringGeometry args={[scale, scale + 0.2, 48]} />
         <meshBasicMaterial
           color="#00FFD5"
           transparent
@@ -115,7 +117,7 @@ export const ShockwaveRing = ({ position, onComplete }: ShockwaveRingProps) => {
         />
       </mesh>
       <mesh ref={ring2Ref} position={[position.x, position.y + waveHeight, position.z]} rotation={[Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[scale * 0.7, scale * 0.7 + 0.15, 48]} />
+        <ringGeometry args={[scale * 0.7, scale * 0.7 + 0.15, 32]} />
         <meshBasicMaterial
           color="#FF00FF"
           transparent
@@ -138,6 +140,8 @@ export const ShockwaveRing = ({ position, onComplete }: ShockwaveRingProps) => {
   );
 };
 
+export const ShockwaveRing = memo(ShockwaveRingComponent);
+
 interface SparkleParticle {
   id: number;
   position: THREE.Vector3;
@@ -150,14 +154,17 @@ interface SparklesProps {
   count: number;
 }
 
-export const Sparkles = ({ position, count }: SparklesProps) => {
+const SparklesComponent = ({ position, count }: SparklesProps) => {
   const [particles, setParticles] = useState<SparkleParticle[]>([]);
   const nextId = useRef(0);
   const timeRef = useRef(0);
+  
+  // Reduced count for performance
+  const optimizedCount = Math.min(count, 400);
 
   useEffect(() => {
     const newParticles: SparkleParticle[] = [];
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < optimizedCount; i++) {
       const angle = (Math.PI * 2 * i) / count;
       const phi = Math.random() * Math.PI;
       const speed = 0.3 + Math.random() * 0.5;
@@ -175,7 +182,7 @@ export const Sparkles = ({ position, count }: SparklesProps) => {
       });
     }
     setParticles(newParticles);
-  }, [position, count]);
+  }, [position, optimizedCount]);
 
   useFrame((state, delta) => {
     timeRef.current += delta;
@@ -215,7 +222,7 @@ export const Sparkles = ({ position, count }: SparklesProps) => {
         return (
           <group key={particle.id}>
             <mesh position={particle.position}>
-              <sphereGeometry args={[size, 8, 8]} />
+              <sphereGeometry args={[size, 6, 6]} />
               <meshBasicMaterial
                 color={`hsl(${hue}, 100%, 70%)`}
                 transparent
@@ -235,3 +242,5 @@ export const Sparkles = ({ position, count }: SparklesProps) => {
     </group>
   );
 };
+
+export const Sparkles = memo(SparklesComponent);

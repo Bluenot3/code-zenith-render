@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, memo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -13,27 +13,57 @@ interface Meteor {
   glowIntensity: number;
 }
 
-export const MeteorTrails = () => {
+const MeteorTrailsComponent = () => {
   const isMobile = useIsMobile();
   const meteorsRef = useRef<Meteor[]>([]);
   const meshesRef = useRef<Map<string, THREE.Mesh | THREE.Line>>(new Map());
   const groupRef = useRef<THREE.Group>(null);
+  const frameCount = useRef(0);
+  
+  // Shared materials for better performance
+  const sharedMaterials = useMemo(() => {
+    const colorPalette = [
+      '#ff6600', '#ff0066', '#00ffff', '#ffff00', 
+      '#00ff88', '#8800ff', '#ff3300', '#ffffff'
+    ];
+    
+    return colorPalette.map(color => ({
+      head: new THREE.MeshPhysicalMaterial({
+        color,
+        emissive: color,
+        emissiveIntensity: 4.5,
+        transparent: true,
+        opacity: 1,
+        metalness: 0.9,
+        roughness: 0.1,
+        clearcoat: 1,
+        clearcoatRoughness: 0,
+        toneMapped: false,
+      }),
+      glow: new THREE.MeshBasicMaterial({
+        color,
+        transparent: true,
+        opacity: 0.5,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        toneMapped: false,
+      }),
+      trail: new THREE.LineBasicMaterial({
+        color,
+        transparent: true,
+        opacity: 0.4,
+        linewidth: 1,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      })
+    }));
+  }, []);
   
   // Initialize meteors with variety
   useMemo(() => {
-    const meteorCount = isMobile ? 40 : 80; // Adaptive count
-    const colorPalette = [
-      new THREE.Color('#ff6600'), // Orange
-      new THREE.Color('#ff0066'), // Hot Pink
-      new THREE.Color('#00ffff'), // Cyan
-      new THREE.Color('#ffff00'), // Yellow
-      new THREE.Color('#00ff88'), // Teal
-      new THREE.Color('#8800ff'), // Purple
-      new THREE.Color('#ff3300'), // Red-Orange
-      new THREE.Color('#ffffff'), // White
-    ];
-    
+    const meteorCount = isMobile ? 30 : 60; // Reduced count
     meteorsRef.current = Array.from({ length: meteorCount }, () => {
+      const materialIndex = Math.floor(Math.random() * sharedMaterials.length);
       const startX = (Math.random() - 0.5) * 60;
       const startY = (Math.random() - 0.5) * 60;
       const startZ = (Math.random() - 0.5) * 60;
@@ -49,16 +79,20 @@ export const MeteorTrails = () => {
           (Math.random() - 0.5) * speed
         ),
         trail: [],
-        color: colorPalette[Math.floor(Math.random() * colorPalette.length)].clone(),
+        color: new THREE.Color(sharedMaterials[materialIndex].head.color),
         size,
         speed,
         glowIntensity: Math.random() * 2 + 3,
       };
     });
-  }, [isMobile]);
+  }, [isMobile, sharedMaterials]);
   
   useFrame(() => {
     if (!groupRef.current) return;
+    
+    // Update every frame but reduce geometry quality updates
+    frameCount.current++;
+    const updateGeometry = frameCount.current % 2 === 0; // Update geometry every other frame
     
     meteorsRef.current.forEach((meteor, meteorIndex) => {
       // Update position
@@ -98,23 +132,9 @@ export const MeteorTrails = () => {
       let headMesh = meshesRef.current.get(headKey) as THREE.Mesh;
       
       if (!headMesh) {
-        const geometry = new THREE.SphereGeometry(meteor.size, 32, 32); // Higher quality
-        const material = new THREE.MeshPhysicalMaterial({
-          color: meteor.color,
-          emissive: meteor.color,
-          emissiveIntensity: meteor.glowIntensity * 1.5,
-          transparent: true,
-          opacity: 1,
-          metalness: 0.9,
-          roughness: 0.1,
-          clearcoat: 1,
-          clearcoatRoughness: 0,
-          sheen: 1.5,
-          sheenColor: meteor.color,
-          envMapIntensity: 2,
-          toneMapped: false,
-        });
-        headMesh = new THREE.Mesh(geometry, material);
+        const geometry = new THREE.SphereGeometry(meteor.size, 16, 16); // Reduced quality
+        const materialIndex = Math.floor(Math.random() * sharedMaterials.length);
+        headMesh = new THREE.Mesh(geometry, sharedMaterials[materialIndex].head);
         meshesRef.current.set(headKey, headMesh);
         groupRef.current.add(headMesh);
       }
@@ -125,37 +145,23 @@ export const MeteorTrails = () => {
       let glowMesh = meshesRef.current.get(glowKey) as THREE.Mesh;
       
       if (!glowMesh) {
-        const glowGeometry = new THREE.SphereGeometry(meteor.size * 3, 32, 32); // Larger, higher quality
-        const glowMaterial = new THREE.MeshBasicMaterial({
-          color: meteor.color,
-          transparent: true,
-          opacity: 0.6,
-          blending: THREE.AdditiveBlending,
-          depthWrite: false,
-          toneMapped: false,
-        });
-        glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
+        const glowGeometry = new THREE.SphereGeometry(meteor.size * 2.5, 12, 12); // Reduced quality
+        const materialIndex = Math.floor(Math.random() * sharedMaterials.length);
+        glowMesh = new THREE.Mesh(glowGeometry, sharedMaterials[materialIndex].glow);
         meshesRef.current.set(glowKey, glowMesh);
         groupRef.current.add(glowMesh);
       }
       glowMesh.position.copy(meteor.position);
       
-      // Update or create trail
-      if (meteor.trail.length > 3) {
+      // Update or create trail (only if needed)
+      if (updateGeometry && meteor.trail.length > 3) {
         const trailKey = `trail-${meteorIndex}`;
         let trailLine = meshesRef.current.get(trailKey) as THREE.Line;
         
         if (!trailLine) {
           const trailGeometry = new THREE.BufferGeometry();
-          const trailMaterial = new THREE.LineBasicMaterial({
-            color: meteor.color,
-            transparent: true,
-            opacity: 0.6,
-            linewidth: 2,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false,
-          });
-          trailLine = new THREE.Line(trailGeometry, trailMaterial);
+          const materialIndex = Math.floor(Math.random() * sharedMaterials.length);
+          trailLine = new THREE.Line(trailGeometry, sharedMaterials[materialIndex].trail);
           meshesRef.current.set(trailKey, trailLine);
           groupRef.current.add(trailLine);
         }
@@ -176,3 +182,5 @@ export const MeteorTrails = () => {
   
   return <group ref={groupRef} renderOrder={-2} />;
 };
+
+export const MeteorTrails = memo(MeteorTrailsComponent);

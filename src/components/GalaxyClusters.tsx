@@ -1,19 +1,20 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, memo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-export const GalaxyClusters = () => {
+const GalaxyClustersComponent = () => {
   const isMobile = useIsMobile();
   const groupRef = useRef<THREE.Group>(null);
   const galaxyRefs = useRef<THREE.Points[]>([]);
+  const frameCount = useRef(0);
   
   const galaxies = useMemo(() => {
-    const galaxyCount = isMobile ? 4 : 8; // Adaptive galaxy count
+    const galaxyCount = isMobile ? 3 : 6; // Reduced count
     const galaxyData = [];
     
     for (let g = 0; g < galaxyCount; g++) {
-      const particleCount = isMobile ? 1000 : 2000; // Adaptive particles per galaxy
+      const particleCount = isMobile ? 600 : 1200; // Reduced particles
       const positions = new Float32Array(particleCount * 3);
       const colors = new Float32Array(particleCount * 3);
       const sizes = new Float32Array(particleCount);
@@ -97,6 +98,12 @@ export const GalaxyClusters = () => {
   }, [isMobile]);
   
   useFrame((state) => {
+    const time = state.clock.elapsedTime;
+    frameCount.current++;
+    
+    // Update every other frame
+    if (frameCount.current % 2 !== 0) return;
+    
     galaxies.forEach((galaxy, index) => {
       const points = galaxyRefs.current[index];
       if (!points) return;
@@ -105,7 +112,7 @@ export const GalaxyClusters = () => {
       points.rotateOnAxis(galaxy.rotationAxis, galaxy.rotationSpeed);
       
       // Subtle pulsing
-      const pulse = 1 + Math.sin(state.clock.elapsedTime * 0.5 + index) * 0.05;
+      const pulse = 1 + Math.sin(time * 0.5 + index) * 0.05;
       points.scale.setScalar(pulse);
     });
   });
@@ -154,3 +161,5 @@ export const GalaxyClusters = () => {
     </group>
   );
 };
+
+export const GalaxyClusters = memo(GalaxyClustersComponent);

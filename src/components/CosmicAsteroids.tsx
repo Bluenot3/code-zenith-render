@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, memo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -12,95 +12,86 @@ interface Asteroid {
   trailPositions: THREE.Vector3[];
 }
 
-export const CosmicAsteroids = () => {
+const CosmicAsteroidsComponent = () => {
   const isMobile = useIsMobile();
   const groupRef = useRef<THREE.Group>(null);
   const asteroidsRef = useRef<Asteroid[]>([]);
+  const frameCount = useRef(0);
+  
+  // Shared materials for performance
+  const sharedMaterials = useMemo(() => {
+    const colors = ['#ff6b35', '#f7931e', '#ffd700', '#ff1493', '#00ffff', '#9d4edd', '#ff00ff', '#00ff88'];
+    return colors.map(color => ({
+      asteroid: new THREE.MeshPhysicalMaterial({
+        color,
+        emissive: color,
+        emissiveIntensity: 0.5,
+        metalness: 0.8,
+        roughness: 0.3,
+        clearcoat: 0.4,
+        clearcoatRoughness: 0.3,
+      }),
+      glow: new THREE.MeshBasicMaterial({
+        color,
+        transparent: true,
+        opacity: 0.6,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        toneMapped: false,
+      }),
+      trail: new THREE.MeshBasicMaterial({
+        color,
+        transparent: true,
+        opacity: 0.25,
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      })
+    }));
+  }, []);
   
   useMemo(() => {
-    const asteroidCount = isMobile ? 25 : 50; // Adaptive count
-    const colorPalette = [
-      new THREE.Color('#ff6b35'),
-      new THREE.Color('#f7931e'),
-      new THREE.Color('#ffd700'),
-      new THREE.Color('#ff1493'),
-      new THREE.Color('#00ffff'),
-      new THREE.Color('#9d4edd'),
-      new THREE.Color('#ff00ff'),
-      new THREE.Color('#00ff88'),
-    ];
-    
+    const asteroidCount = isMobile ? 20 : 35; // Reduced count
     for (let i = 0; i < asteroidCount; i++) {
-      // Create highly detailed irregular asteroid shape
+      const materialIndex = Math.floor(Math.random() * sharedMaterials.length);
+      
+      // Create optimized irregular asteroid shape
       const geometry = new THREE.DodecahedronGeometry(
-        Math.random() * 0.4 + 0.2, // Slightly larger
-        2 // Added subdivision for more detail
+        Math.random() * 0.35 + 0.2,
+        1 // Reduced subdivision
       );
       
-      // Advanced deformation for ultra-realistic irregular shapes
+      // Simplified deformation
       const positions = geometry.attributes.position;
       for (let j = 0; j < positions.count; j++) {
         const x = positions.getX(j);
         const y = positions.getY(j);
         const z = positions.getZ(j);
         
-        // Multi-octave noise-like deformation
-        const noise1 = Math.sin(x * 5 + y * 3) * Math.cos(z * 4);
-        const noise2 = Math.sin(x * 10) * Math.cos(y * 8);
+        const noise = Math.sin(x * 4) * Math.cos(y * 4);
         
         positions.setXYZ(
           j,
-          x * (0.6 + Math.random() * 0.8 + noise1 * 0.15),
-          y * (0.6 + Math.random() * 0.8 + noise2 * 0.15),
-          z * (0.6 + Math.random() * 0.8 + noise1 * noise2 * 0.1)
+          x * (0.7 + Math.random() * 0.6),
+          y * (0.7 + Math.random() * 0.6),
+          z * (0.7 + Math.random() * 0.6 + noise * 0.1)
         );
       }
       geometry.computeVertexNormals();
       
-      const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+      const mesh = new THREE.Mesh(geometry, sharedMaterials[materialIndex].asteroid);
       
-      // Ultra-high quality asteroid material
-      const material = new THREE.MeshPhysicalMaterial({
-        color: color,
-        emissive: color,
-        emissiveIntensity: 0.6,
-        metalness: 0.8,
-        roughness: 0.25,
-        clearcoat: 0.5,
-        clearcoatRoughness: 0.3,
-        sheen: 0.8,
-        sheenColor: color,
-        envMapIntensity: 2,
-      });
-      const mesh = new THREE.Mesh(geometry, material);
-      
-      // Enhanced multi-layer glow
+      // Optimized glow
       const glowGeometry = new THREE.SphereGeometry(
-        geometry.parameters.radius * 0.8,
-        32, // Higher quality sphere
-        32
+        geometry.parameters.radius * 0.7,
+        16, // Reduced quality
+        16
       );
-      const glowMaterial = new THREE.MeshBasicMaterial({
-        color: color,
-        transparent: true,
-        opacity: 0.9,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-        toneMapped: false,
-      });
-      const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
+      const glowMesh = new THREE.Mesh(glowGeometry, sharedMaterials[materialIndex].glow);
       
       // Mesh trail
       const trailGeometry = new THREE.BufferGeometry();
-      const trailMaterial = new THREE.MeshBasicMaterial({
-        color: color,
-        transparent: true,
-        opacity: 0.3,
-        side: THREE.DoubleSide,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-      });
-      const trailMesh = new THREE.Mesh(trailGeometry, trailMaterial);
+      const trailMesh = new THREE.Mesh(trailGeometry, sharedMaterials[materialIndex].trail);
       
       // Position
       const startX = (Math.random() - 0.5) * 50;
@@ -143,6 +134,9 @@ export const CosmicAsteroids = () => {
   useFrame(() => {
     if (!groupRef.current) return;
     
+    frameCount.current++;
+    const updateTrails = frameCount.current % 3 === 0; // Update trails every 3 frames
+    
     asteroidsRef.current.forEach((asteroid) => {
       // Update position
       asteroid.mesh.position.add(asteroid.velocity);
@@ -153,43 +147,45 @@ export const CosmicAsteroids = () => {
       asteroid.mesh.rotation.y += asteroid.rotation.y;
       asteroid.mesh.rotation.z += asteroid.rotation.z;
       
-      // Update trail
-      asteroid.trailPositions.push(asteroid.mesh.position.clone());
-      const maxTrailLength = 25;
-      if (asteroid.trailPositions.length > maxTrailLength) {
-        asteroid.trailPositions.shift();
-      }
-      
-      // Create mesh trail geometry
-      if (asteroid.trailPositions.length > 2) {
-        const vertices: number[] = [];
-        const width = 0.08;
-        
-        for (let i = 0; i < asteroid.trailPositions.length - 1; i++) {
-          const p1 = asteroid.trailPositions[i];
-          const p2 = asteroid.trailPositions[i + 1];
-          const dir = new THREE.Vector3().subVectors(p2, p1).normalize();
-          const perp = new THREE.Vector3(-dir.y, dir.x, 0).normalize();
-          
-          const fade = i / asteroid.trailPositions.length;
-          const w = width * fade;
-          
-          // Create quad
-          vertices.push(
-            p1.x - perp.x * w, p1.y - perp.y * w, p1.z - perp.z * w,
-            p1.x + perp.x * w, p1.y + perp.y * w, p1.z + perp.z * w,
-            p2.x + perp.x * w, p2.y + perp.y * w, p2.z + perp.z * w,
-            
-            p1.x - perp.x * w, p1.y - perp.y * w, p1.z - perp.z * w,
-            p2.x + perp.x * w, p2.y + perp.y * w, p2.z + perp.z * w,
-            p2.x - perp.x * w, p2.y - perp.y * w, p2.z - perp.z * w
-          );
+      // Update trail (less frequently)
+      if (updateTrails) {
+        asteroid.trailPositions.push(asteroid.mesh.position.clone());
+        const maxTrailLength = 12; // Reduced
+        if (asteroid.trailPositions.length > maxTrailLength) {
+          asteroid.trailPositions.shift();
         }
         
-        asteroid.trailMesh.geometry.setAttribute(
-          'position',
-          new THREE.Float32BufferAttribute(vertices, 3)
-        );
+        // Simplified mesh trail geometry
+        if (asteroid.trailPositions.length > 2) {
+          const vertices: number[] = [];
+          const width = 0.06;
+          
+          for (let i = 0; i < asteroid.trailPositions.length - 1; i++) {
+            const p1 = asteroid.trailPositions[i];
+            const p2 = asteroid.trailPositions[i + 1];
+            const dir = new THREE.Vector3().subVectors(p2, p1).normalize();
+            const perp = new THREE.Vector3(-dir.y, dir.x, 0).normalize();
+            
+            const fade = i / asteroid.trailPositions.length;
+            const w = width * fade;
+            
+            // Create quad
+            vertices.push(
+              p1.x - perp.x * w, p1.y - perp.y * w, p1.z - perp.z * w,
+              p1.x + perp.x * w, p1.y + perp.y * w, p1.z + perp.z * w,
+              p2.x + perp.x * w, p2.y + perp.y * w, p2.z + perp.z * w,
+              
+              p1.x - perp.x * w, p1.y - perp.y * w, p1.z - perp.z * w,
+              p2.x + perp.x * w, p2.y + perp.y * w, p2.z + perp.z * w,
+              p2.x - perp.x * w, p2.y - perp.y * w, p2.z - perp.z * w
+            );
+          }
+          
+          asteroid.trailMesh.geometry.setAttribute(
+            'position',
+            new THREE.Float32BufferAttribute(vertices, 3)
+          );
+        }
       }
       
       // Reset if out of bounds
@@ -218,3 +214,5 @@ export const CosmicAsteroids = () => {
   
   return <group ref={groupRef} renderOrder={-1} />;
 };
+
+export const CosmicAsteroids = memo(CosmicAsteroidsComponent);
