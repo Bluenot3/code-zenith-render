@@ -59,36 +59,56 @@ export const CosmicAsteroids = () => {
       
       const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
       
-      // Ultra-high quality asteroid material
+      // Ultra-high quality asteroid material with advanced effects
       const material = new THREE.MeshPhysicalMaterial({
         color: color,
         emissive: color,
-        emissiveIntensity: 0.6,
-        metalness: 0.8,
-        roughness: 0.25,
-        clearcoat: 0.5,
-        clearcoatRoughness: 0.3,
-        sheen: 0.8,
+        emissiveIntensity: 1.2,
+        metalness: 0.9,
+        roughness: 0.15,
+        clearcoat: 1,
+        clearcoatRoughness: 0.2,
+        sheen: 1.5,
         sheenColor: color,
-        envMapIntensity: 2,
+        iridescence: 0.5,
+        iridescenceIOR: 2,
+        iridescenceThicknessRange: [100, 400],
+        envMapIntensity: 3,
+        transmission: 0.1,
+        thickness: 0.5,
       });
       const mesh = new THREE.Mesh(geometry, material);
       
-      // Enhanced multi-layer glow
-      const glowGeometry = new THREE.SphereGeometry(
-        geometry.parameters.radius * 0.8,
-        32, // Higher quality sphere
-        32
+      // Multi-layer volumetric glow
+      const glowGeometry = new THREE.DodecahedronGeometry(
+        geometry.parameters.radius * 1.5,
+        1
       );
       const glowMaterial = new THREE.MeshBasicMaterial({
         color: color,
         transparent: true,
-        opacity: 0.9,
+        opacity: 0.4,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
         toneMapped: false,
       });
       const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
+      
+      // Add outer glow sphere
+      const outerGlowGeometry = new THREE.SphereGeometry(
+        geometry.parameters.radius * 2,
+        16,
+        16
+      );
+      const outerGlowMaterial = new THREE.MeshBasicMaterial({
+        color: color,
+        transparent: true,
+        opacity: 0.2,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+      const outerGlow = new THREE.Mesh(outerGlowGeometry, outerGlowMaterial);
+      mesh.add(outerGlow);
       
       // Mesh trail
       const trailGeometry = new THREE.BufferGeometry();
