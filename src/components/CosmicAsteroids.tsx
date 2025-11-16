@@ -110,8 +110,14 @@ export const CosmicAsteroids = () => {
       const outerGlow = new THREE.Mesh(outerGlowGeometry, outerGlowMaterial);
       mesh.add(outerGlow);
       
-      // Mesh trail
+      // Mesh trail with pre-allocated buffer
+      const maxTrailPoints = 25;
+      const maxVertices = maxTrailPoints * 6 * 3; // 6 vertices per quad segment
       const trailGeometry = new THREE.BufferGeometry();
+      const trailPositionsArray = new Float32Array(maxVertices);
+      trailGeometry.setAttribute('position', new THREE.BufferAttribute(trailPositionsArray, 3));
+      trailGeometry.setDrawRange(0, 0);
+      
       const trailMaterial = new THREE.MeshBasicMaterial({
         color: color,
         transparent: true,
@@ -180,10 +186,11 @@ export const CosmicAsteroids = () => {
         asteroid.trailPositions.shift();
       }
       
-      // Create mesh trail geometry
+      // Update mesh trail geometry without resizing
       if (asteroid.trailPositions.length > 2) {
-        const vertices: number[] = [];
         const width = 0.08;
+        const positionAttribute = asteroid.trailMesh.geometry.attributes.position;
+        let vertexIndex = 0;
         
         for (let i = 0; i < asteroid.trailPositions.length - 1; i++) {
           const p1 = asteroid.trailPositions[i];
@@ -194,22 +201,18 @@ export const CosmicAsteroids = () => {
           const fade = i / asteroid.trailPositions.length;
           const w = width * fade;
           
-          // Create quad
-          vertices.push(
-            p1.x - perp.x * w, p1.y - perp.y * w, p1.z - perp.z * w,
-            p1.x + perp.x * w, p1.y + perp.y * w, p1.z + perp.z * w,
-            p2.x + perp.x * w, p2.y + perp.y * w, p2.z + perp.z * w,
-            
-            p1.x - perp.x * w, p1.y - perp.y * w, p1.z - perp.z * w,
-            p2.x + perp.x * w, p2.y + perp.y * w, p2.z + perp.z * w,
-            p2.x - perp.x * w, p2.y - perp.y * w, p2.z - perp.z * w
-          );
+          // Create quad - 6 vertices
+          positionAttribute.setXYZ(vertexIndex++, p1.x - perp.x * w, p1.y - perp.y * w, p1.z - perp.z * w);
+          positionAttribute.setXYZ(vertexIndex++, p1.x + perp.x * w, p1.y + perp.y * w, p1.z + perp.z * w);
+          positionAttribute.setXYZ(vertexIndex++, p2.x + perp.x * w, p2.y + perp.y * w, p2.z + perp.z * w);
+          
+          positionAttribute.setXYZ(vertexIndex++, p1.x - perp.x * w, p1.y - perp.y * w, p1.z - perp.z * w);
+          positionAttribute.setXYZ(vertexIndex++, p2.x + perp.x * w, p2.y + perp.y * w, p2.z + perp.z * w);
+          positionAttribute.setXYZ(vertexIndex++, p2.x - perp.x * w, p2.y - perp.y * w, p2.z - perp.z * w);
         }
         
-        asteroid.trailMesh.geometry.setAttribute(
-          'position',
-          new THREE.Float32BufferAttribute(vertices, 3)
-        );
+        positionAttribute.needsUpdate = true;
+        asteroid.trailMesh.geometry.setDrawRange(0, vertexIndex);
       }
       
       // Reset if out of bounds
