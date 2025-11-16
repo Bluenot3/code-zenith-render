@@ -22,6 +22,11 @@ export default defineConfig(({ mode }) => ({
     include: ['three', '@react-three/fiber', '@react-three/drei'],
     exclude: ['@react-three/postprocessing'],
   },
+  experimental: {
+    renderBuiltUrl(filename) {
+      return { runtime: `window.__prependAssetPath(${JSON.stringify(filename)})` }
+    }
+  },
   build: {
     target: 'esnext',
     minify: 'terser',
@@ -85,6 +90,10 @@ export default defineConfig(({ mode }) => ({
           // Radix UI primitives
           if (id.includes('@radix-ui')) {
             return 'radix-ui';
+          }
+          // Canvas handlers and utilities
+          if (id.includes('src/components/CanvasStage/')) {
+            return 'canvas-utils';
           }
         },
         chunkFileNames: 'assets/[name]-[hash].js',

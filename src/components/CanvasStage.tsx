@@ -1,7 +1,22 @@
 import { Suspense, useEffect, useState, useRef, lazy } from 'react';
-import { Canvas, useThree } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { CameraManager } from './CanvasStage/CameraManager';
+import { 
+  createZoomToggler, 
+  createDoubleClickHandler, 
+  createTouchEndHandler,
+  createKeyPressHandler 
+} from './CanvasStage/handlers';
+import { GeometrySwitcher } from './GeometrySwitcher';
+import { Particles } from './Particles';
+import { InteractiveCharacters } from './InteractiveCharacters';
+import { SpaceGradient } from './SpaceGradient';
+import { CodeTextureGenerator } from '@/utils/codeTexture';
+import { useStore } from '@/state/useStore';
+import { applyTheme } from '@/utils/themes';
+import * as THREE from 'three';
 
 // Dynamic imports for progressive loading
 const GalaxyClusters = lazy(() => import('./GalaxyClusters').then(m => ({ default: m.GalaxyClusters })));
@@ -11,25 +26,6 @@ const CosmicAsteroids = lazy(() => import('./CosmicAsteroids').then(m => ({ defa
 const MeteorTrails = lazy(() => import('./MeteorTrails').then(m => ({ default: m.MeteorTrails })));
 const QuantumRift = lazy(() => import('./QuantumRift').then(m => ({ default: m.QuantumRift })));
 const CrystalFormation = lazy(() => import('./CrystalFormation').then(m => ({ default: m.CrystalFormation })));
-
-const CameraManager = ({ isZoomEnabled, isMobile }: { isZoomEnabled: boolean; isMobile: boolean }) => {
-  const { camera } = useThree();
-  
-  useEffect(() => {
-    (window as any).__threeCamera = camera;
-  }, [camera]);
-  
-  return null;
-};
-import { GeometrySwitcher } from './GeometrySwitcher';
-import { Particles } from './Particles';
-import { InteractiveCharacters } from './InteractiveCharacters';
-import { SpaceGradient } from './SpaceGradient';
-import { CodeTextureGenerator } from '@/utils/codeTexture';
-import { useStore } from '@/state/useStore';
-import { applyTheme } from '@/utils/themes';
-import { toast } from '@/hooks/use-toast';
-import * as THREE from 'three';
 
 export const CanvasStage = () => {
   const isMobile = useIsMobile();
@@ -109,9 +105,9 @@ export const CanvasStage = () => {
     });
   }, [theme.preset, codeTexture]);
   
+  
   const handleCanvasClick = (event: MouseEvent) => {
     if ((window as any).__spawnCharacter && event.detail === 1) {
-      // Single click - spawn special characters
       const raycaster = new THREE.Raycaster();
       const mouse = new THREE.Vector2();
       const canvas = event.target as HTMLCanvasElement;
@@ -120,7 +116,6 @@ export const CanvasStage = () => {
       mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
       
-      // Spawn at a point in 3D space near the click
       const spawnPoint = new THREE.Vector3(
         mouse.x * 3,
         mouse.y * 3,
@@ -131,97 +126,11 @@ export const CanvasStage = () => {
     }
   };
 
-  const toggleZoom = () => {
-    setIsZoomEnabled(prev => {
-      const newState = !prev;
-      
-      // Reset camera position when disabling zoom
-      if (!newState) {
-        const camera = (window as any).__threeCamera;
-        if (camera) {
-          camera.position.set(0, 0, 5);
-          camera.lookAt(0, 0, 0);
-        }
-      }
-      
-      toast({
-        title: newState ? "Zoom Enabled" : "Zoom Disabled",
-        description: newState ? "Scroll to zoom in/out" : "Scroll to navigate page",
-        duration: 2000,
-      });
-      return newState;
-    });
-  };
-
-  const handleCanvasDoubleClick = (event: MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-    toggleZoom();
-  };
-
-  const handleTouchEnd = (event: TouchEvent) => {
-    const currentTime = Date.now();
-    const tapInterval = currentTime - lastTapTimeRef.current;
-    
-    // Double tap detected (two taps within 300ms)
-    if (tapInterval < 300 && tapInterval > 0) {
-      event.preventDefault();
-      event.stopPropagation();
-      toggleZoom();
-      lastTapTimeRef.current = 0; // Reset
-      if (tapTimeoutRef.current) {
-        clearTimeout(tapTimeoutRef.current);
-        tapTimeoutRef.current = null;
-      }
-    } else {
-      // First tap or too slow
-      lastTapTimeRef.current = currentTime;
-      
-      // Clear any existing timeout
-      if (tapTimeoutRef.current) {
-        clearTimeout(tapTimeoutRef.current);
-      }
-      
-      // Reset after 300ms if no second tap comes
-      tapTimeoutRef.current = setTimeout(() => {
-        lastTapTimeRef.current = 0;
-        tapTimeoutRef.current = null;
-      }, 300);
-    }
-  };
+  const toggleZoom = createZoomToggler(setIsZoomEnabled);
+  const handleCanvasDoubleClick = createDoubleClickHandler(toggleZoom);
+  const handleTouchEnd = createTouchEndHandler(toggleZoom, lastTapTimeRef, tapTimeoutRef);
+  const handleKeyPress = createKeyPressHandler(geometry, setGeometry, codeTexture, isPausedRef);
   
-  const handleKeyPress = (e: KeyboardEvent) => {
-    if (e.shiftKey && e.key.toLowerCase() === 'g') {
-      // Cycle geometry (Shift+Click simulation via Shift+G)
-      const geometries: typeof geometry.type[] = ['text', 'cube', 'sphere', 'torus', 'cylinder', 'plane', 'pyramid', 'torusKnot', 'icosahedron', 'dodecahedron'];
-      const currentIndex = geometries.indexOf(geometry.type);
-      const nextIndex = (currentIndex + 1) % geometries.length;
-      setGeometry({ type: geometries[nextIndex] });
-      
-      toast({
-        title: "Geometry Changed",
-        description: `Switched to ${geometries[nextIndex]}`,
-        duration: 1500,
-      });
-    } else if (e.altKey && e.key.toLowerCase() === 'p') {
-      // Pause/resume code stream (Alt+Click simulation via Alt+P)
-      isPausedRef.current = !isPausedRef.current;
-      
-      if (codeTexture) {
-        if (isPausedRef.current) {
-          codeTexture.stop();
-        } else {
-          codeTexture.start();
-        }
-      }
-      
-      toast({
-        title: isPausedRef.current ? "Code Paused" : "Code Resumed",
-        description: `Animation ${isPausedRef.current ? 'stopped' : 'playing'}`,
-        duration: 1500,
-      });
-    }
-  };
   
   useEffect(() => {
     window.addEventListener('keydown', handleKeyPress);
