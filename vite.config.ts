@@ -22,11 +22,6 @@ export default defineConfig(({ mode }) => ({
     include: ['three', '@react-three/fiber', '@react-three/drei'],
     exclude: ['@react-three/postprocessing'],
   },
-  experimental: {
-    renderBuiltUrl(filename) {
-      return { runtime: `window.__prependAssetPath(${JSON.stringify(filename)})` }
-    }
-  },
   build: {
     target: 'esnext',
     minify: 'terser',
