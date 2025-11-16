@@ -29,11 +29,18 @@ export default defineConfig(({ mode }) => ({
       compress: {
         drop_console: mode === 'production',
         drop_debugger: true,
-        pure_funcs: ['console.log'],
-        passes: 2,
+        pure_funcs: ['console.log', 'console.info', 'console.debug'],
+        passes: 3,
+        unsafe: true,
+        unsafe_math: true,
+        unsafe_methods: true,
       },
       mangle: {
         safari10: true,
+        toplevel: true,
+      },
+      format: {
+        comments: false,
       },
     },
     rollupOptions: {
@@ -84,20 +91,27 @@ export default defineConfig(({ mode }) => ({
             return 'radix-ui';
           }
         },
-        chunkFileNames: (chunkInfo) => {
-          const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/').pop() : 'chunk';
-          return `assets/${facadeModuleId}-[hash].js`;
-        },
+        chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash][extname]',
+        compact: true,
+      },
+      treeshake: {
+        moduleSideEffects: false,
+        propertyReadSideEffects: false,
+        tryCatchDeoptimization: false,
       },
     },
     chunkSizeWarningLimit: 1000,
     reportCompressedSize: false,
     cssCodeSplit: true,
     assetsInlineLimit: 4096,
+    sourcemap: false,
   },
   esbuild: {
     legalComments: 'none',
     treeShaking: true,
+    minifyIdentifiers: true,
+    minifySyntax: true,
+    minifyWhitespace: true,
   },
 }));
