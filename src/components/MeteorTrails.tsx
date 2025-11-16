@@ -98,42 +98,25 @@ export const MeteorTrails = () => {
       let headMesh = meshesRef.current.get(headKey) as THREE.Mesh;
       
       if (!headMesh) {
-        const geometry = new THREE.SphereGeometry(meteor.size, 32, 32);
+        const geometry = new THREE.SphereGeometry(meteor.size, 32, 32); // Higher quality
         const material = new THREE.MeshPhysicalMaterial({
           color: meteor.color,
           emissive: meteor.color,
-          emissiveIntensity: meteor.glowIntensity * 2.5,
+          emissiveIntensity: meteor.glowIntensity * 1.5,
           transparent: true,
           opacity: 1,
-          metalness: 1,
-          roughness: 0,
+          metalness: 0.9,
+          roughness: 0.1,
           clearcoat: 1,
           clearcoatRoughness: 0,
-          sheen: 2,
+          sheen: 1.5,
           sheenColor: meteor.color,
-          iridescence: 0.8,
-          iridescenceIOR: 2.5,
-          iridescenceThicknessRange: [100, 800],
-          envMapIntensity: 3,
-          transmission: 0.2,
-          thickness: 1,
+          envMapIntensity: 2,
           toneMapped: false,
         });
         headMesh = new THREE.Mesh(geometry, material);
         meshesRef.current.set(headKey, headMesh);
         groupRef.current.add(headMesh);
-        
-        // Add ultra-bright core
-        const coreGeometry = new THREE.SphereGeometry(meteor.size * 0.5, 16, 16);
-        const coreMaterial = new THREE.MeshBasicMaterial({
-          color: new THREE.Color('#ffffff'),
-          transparent: true,
-          opacity: 1,
-          blending: THREE.AdditiveBlending,
-          toneMapped: false,
-        });
-        const core = new THREE.Mesh(coreGeometry, coreMaterial);
-        headMesh.add(core);
       }
       headMesh.position.copy(meteor.position);
       
@@ -142,11 +125,11 @@ export const MeteorTrails = () => {
       let glowMesh = meshesRef.current.get(glowKey) as THREE.Mesh;
       
       if (!glowMesh) {
-        const glowGeometry = new THREE.SphereGeometry(meteor.size * 4, 32, 32);
+        const glowGeometry = new THREE.SphereGeometry(meteor.size * 3, 32, 32); // Larger, higher quality
         const glowMaterial = new THREE.MeshBasicMaterial({
           color: meteor.color,
           transparent: true,
-          opacity: 0.5,
+          opacity: 0.6,
           blending: THREE.AdditiveBlending,
           depthWrite: false,
           toneMapped: false,
@@ -154,42 +137,8 @@ export const MeteorTrails = () => {
         glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
         meshesRef.current.set(glowKey, glowMesh);
         groupRef.current.add(glowMesh);
-        
-        // Add outer energy corona
-        const coronaGeometry = new THREE.SphereGeometry(meteor.size * 5.5, 24, 24);
-        const coronaMaterial = new THREE.MeshBasicMaterial({
-          color: meteor.color,
-          transparent: true,
-          opacity: 0.25,
-          blending: THREE.AdditiveBlending,
-          depthWrite: false,
-          side: THREE.BackSide,
-        });
-        const corona = new THREE.Mesh(coronaGeometry, coronaMaterial);
-        glowMesh.add(corona);
-        
-        // Add rotating energy field wireframe
-        const energyFieldGeometry = new THREE.IcosahedronGeometry(meteor.size * 4.5, 1);
-        const energyFieldMaterial = new THREE.MeshBasicMaterial({
-          color: meteor.color,
-          transparent: true,
-          opacity: 0.3,
-          blending: THREE.AdditiveBlending,
-          depthWrite: false,
-          wireframe: true,
-        });
-        const energyField = new THREE.Mesh(energyFieldGeometry, energyFieldMaterial);
-        glowMesh.add(energyField);
       }
       glowMesh.position.copy(meteor.position);
-      
-      // Rotate energy field if it exists
-      if (glowMesh.children.length > 0) {
-        glowMesh.children.forEach((child, idx) => {
-          child.rotation.y += 0.02 * (idx + 1);
-          child.rotation.x += 0.015 * (idx + 1);
-        });
-      }
       
       // Update or create trail
       if (meteor.trail.length > 3) {
@@ -197,12 +146,7 @@ export const MeteorTrails = () => {
         let trailLine = meshesRef.current.get(trailKey) as THREE.Line;
         
         if (!trailLine) {
-          const maxTrailPoints = 100;
           const trailGeometry = new THREE.BufferGeometry();
-          const positions = new Float32Array(maxTrailPoints * 3);
-          trailGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-          trailGeometry.setDrawRange(0, 0);
-          
           const trailMaterial = new THREE.LineBasicMaterial({
             color: meteor.color,
             transparent: true,
@@ -216,13 +160,16 @@ export const MeteorTrails = () => {
           groupRef.current.add(trailLine);
         }
         
-        // Update trail geometry without resizing
-        const positionAttribute = trailLine.geometry.attributes.position;
+        // Update trail geometry
+        const positions = new Float32Array(meteor.trail.length * 3);
         meteor.trail.forEach((point, i) => {
-          positionAttribute.setXYZ(i, point.x, point.y, point.z);
+          positions[i * 3] = point.x;
+          positions[i * 3 + 1] = point.y;
+          positions[i * 3 + 2] = point.z;
         });
-        positionAttribute.needsUpdate = true;
-        trailLine.geometry.setDrawRange(0, meteor.trail.length);
+        
+        trailLine.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        trailLine.geometry.attributes.position.needsUpdate = true;
       }
     });
   });

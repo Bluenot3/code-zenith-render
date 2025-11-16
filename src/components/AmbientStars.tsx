@@ -8,7 +8,7 @@ export const AmbientStars = () => {
   const starsRef = useRef<THREE.Points>(null);
   
   const [positions, colors, sizes] = useMemo(() => {
-    const count = isMobile ? 2500 : 6000; // More stars for ultra-dense field
+    const count = isMobile ? 1500 : 3500; // Adaptive star count
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const sizes = new Float32Array(count);
@@ -16,9 +16,9 @@ export const AmbientStars = () => {
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
       
-      // Multi-layered ultra-deep field distribution
+      // Multi-layered sphere distribution for depth
       const layer = Math.random();
-      const radius = 50 + Math.pow(layer, 3) * 150; // Deeper space with cubic falloff
+      const radius = 50 + Math.pow(layer, 2) * 100; // Non-linear distribution for depth
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.random() * Math.PI;
       
@@ -26,53 +26,38 @@ export const AmbientStars = () => {
       positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
       positions[i3 + 2] = radius * Math.cos(phi);
       
-      // Ultra-rich spectral color palette for realistic stars
+      // Rich color palette - blues, whites, hints of pink/yellow for realism
       const starType = Math.random();
       let r, g, b;
-      if (starType < 0.3) {
-        // O/B type - Blue supergiants
-        r = 0.7 + Math.random() * 0.2;
-        g = 0.85 + Math.random() * 0.1;
+      if (starType < 0.5) {
+        // Blue-white stars (hot)
+        r = 0.9 + Math.random() * 0.1;
+        g = 0.95 + Math.random() * 0.05;
         b = 1.0;
-      } else if (starType < 0.5) {
-        // A type - White-blue
-        r = 0.95 + Math.random() * 0.05;
-        g = 0.97 + Math.random() * 0.03;
-        b = 1.0;
-      } else if (starType < 0.7) {
-        // F/G type - Yellow-white
+      } else if (starType < 0.8) {
+        // Pure white stars
+        const brightness = 0.95 + Math.random() * 0.05;
+        r = g = b = brightness;
+      } else if (starType < 0.95) {
+        // Yellow-white stars (cooler)
         r = 1.0;
         g = 0.95 + Math.random() * 0.05;
-        b = 0.8 + Math.random() * 0.15;
-      } else if (starType < 0.85) {
-        // K type - Orange
-        r = 1.0;
-        g = 0.75 + Math.random() * 0.2;
-        b = 0.5 + Math.random() * 0.3;
-      } else if (starType < 0.95) {
-        // M type - Red dwarfs
-        r = 1.0;
-        g = 0.5 + Math.random() * 0.2;
-        b = 0.3 + Math.random() * 0.2;
+        b = 0.85 + Math.random() * 0.1;
       } else {
-        // Exotic colors - Purple/cyan nebula illumination
-        r = 0.6 + Math.random() * 0.4;
-        g = 0.3 + Math.random() * 0.4;
-        b = 0.9 + Math.random() * 0.1;
+        // Red-orange stars (coolest)
+        r = 1.0;
+        g = 0.7 + Math.random() * 0.2;
+        b = 0.6 + Math.random() * 0.2;
       }
       
       colors[i3] = r;
       colors[i3 + 1] = g;
       colors[i3 + 2] = b;
       
-      // Ultra-varied sizes with multiple giant stars
-      if (Math.random() < 0.92) {
-        sizes[i] = Math.random() * 0.5 + 0.1; // Normal stars
-      } else if (Math.random() < 0.7) {
-        sizes[i] = Math.random() * 1.5 + 1.0; // Giant stars
-      } else {
-        sizes[i] = Math.random() * 3 + 2; // Supergiant stars
-      }
+      // Variable sizes with some very large bright stars
+      sizes[i] = Math.random() < 0.95 
+        ? Math.random() * 0.4 + 0.1 
+        : Math.random() * 1.2 + 0.8; // Bright prominent stars
     }
     
     return [positions, colors, sizes];

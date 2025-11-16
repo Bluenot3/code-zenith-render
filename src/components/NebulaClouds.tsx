@@ -23,18 +23,18 @@ export const NebulaClouds = () => {
       const centerY = (Math.random() - 0.5) * 40;
       const centerZ = (Math.random() - 0.5) * 40;
       
-      // Enhanced cosmic color palette with more vibrant colors
+      // Enhanced cosmic color palette
       const colorPalettes = [
-        [new THREE.Color('#ff006e'), new THREE.Color('#8338ec'), new THREE.Color('#3a86ff')],
-        [new THREE.Color('#06ffa5'), new THREE.Color('#00d9ff'), new THREE.Color('#4361ee')],
-        [new THREE.Color('#ffbe0b'), new THREE.Color('#fb5607'), new THREE.Color('#ff006e')],
-        [new THREE.Color('#7209b7'), new THREE.Color('#f72585'), new THREE.Color('#4cc9f0')],
-        [new THREE.Color('#06ffa5'), new THREE.Color('#fffb00'), new THREE.Color('#ff006e')],
-        [new THREE.Color('#4895ef'), new THREE.Color('#4361ee'), new THREE.Color('#3f37c9')],
-        [new THREE.Color('#ff99c8'), new THREE.Color('#fcf6bd'), new THREE.Color('#d0f4de')],
-        [new THREE.Color('#f72585'), new THREE.Color('#b5179e'), new THREE.Color('#7209b7')],
-        [new THREE.Color('#00f5ff'), new THREE.Color('#00bbf9'), new THREE.Color('#0077b6')],
-        [new THREE.Color('#ffba08'), new THREE.Color('#faa307'), new THREE.Color('#f48c06')],
+        [new THREE.Color('#ff6b9d'), new THREE.Color('#c06c84')],
+        [new THREE.Color('#6b5b95'), new THREE.Color('#88d8b0')],
+        [new THREE.Color('#feb236'), new THREE.Color('#ff6f91')],
+        [new THREE.Color('#4ecdc4'), new THREE.Color('#44a08d')],
+        [new THREE.Color('#f38181'), new THREE.Color('#aa4465')],
+        [new THREE.Color('#667eea'), new THREE.Color('#764ba2')],
+        [new THREE.Color('#00d4ff'), new THREE.Color('#090979')],
+        [new THREE.Color('#f093fb'), new THREE.Color('#f5576c')],
+        [new THREE.Color('#4facfe'), new THREE.Color('#00f2fe')],
+        [new THREE.Color('#fa709a'), new THREE.Color('#fee140')],
       ];
       
       const palette = colorPalettes[cloudIndex % colorPalettes.length];
@@ -42,47 +42,29 @@ export const NebulaClouds = () => {
       for (let i = 0; i < particleCount; i++) {
         const i3 = i * 3;
         
-        // Create ultra-volumetric cloud with fractal-like distribution
+        // Create volumetric cloud shape using gaussian distribution
         const spreadX = (Math.random() - 0.5) * 2;
         const spreadY = (Math.random() - 0.5) * 2;
         const spreadZ = (Math.random() - 0.5) * 2;
         
-        // Multi-scale clustering for ultra-realistic nebula
-        const largeScale = Math.exp(-Math.random() * 2);
-        const mediumScale = Math.exp(-Math.random() * 4);
-        
         const radius = Math.sqrt(spreadX * spreadX + spreadY * spreadY + spreadZ * spreadZ);
-        const density = Math.exp(-radius * radius / 3) * largeScale * mediumScale;
+        const density = Math.exp(-radius * radius / 2);
         
-        const scale = 12; // Larger clouds
-        positions[i3] = centerX + spreadX * scale * largeScale;
-        positions[i3 + 1] = centerY + spreadY * scale * largeScale;
-        positions[i3 + 2] = centerZ + spreadZ * scale * largeScale;
+        const scale = 8;
+        positions[i3] = centerX + spreadX * scale;
+        positions[i3 + 1] = centerY + spreadY * scale;
+        positions[i3 + 2] = centerZ + spreadZ * scale;
         
-        // Tri-color gradient for ultra-vibrant nebula
-        const palette = colorPalettes[cloudIndex % colorPalettes.length];
-        const colorMix1 = Math.random();
-        const colorMix2 = Math.random();
-        
-        let color;
-        if (colorMix1 < 0.33) {
-          color = palette[0].clone().lerp(palette[1], colorMix2);
-        } else if (colorMix1 < 0.66) {
-          color = palette[1].clone().lerp(palette[2], colorMix2);
-        } else {
-          color = palette[2].clone().lerp(palette[0], colorMix2);
-        }
-        
-        // Add brightness variation
-        const brightness = 0.6 + Math.random() * 0.8;
-        color.multiplyScalar(brightness);
+        // Color gradient within cloud
+        const colorMix = Math.random();
+        const color = palette[0].clone().lerp(palette[1], colorMix);
         
         colors[i3] = color.r;
         colors[i3 + 1] = color.g;
         colors[i3 + 2] = color.b;
         
-        // Enhanced size variation based on density and depth
-        sizes[i] = density * (Math.random() * 1.2 + 0.5);
+        // Size based on density
+        sizes[i] = density * (Math.random() * 0.6 + 0.3);
       }
       
       cloudData.push({
