@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -80,92 +80,54 @@ interface SparklesProps {
 }
 
 export const Sparkles = ({ position, count }: SparklesProps) => {
-  const meshRef = useRef<THREE.Points>(null);
-  
-  const { geometry, material } = useMemo(() => {
-    const positions = new Float32Array(count * 3);
-    const velocities = new Float32Array(count * 3);
-    const colors = new Float32Array(count * 3);
-    const sizes = new Float32Array(count);
-    const lifetimes = new Float32Array(count);
-    
+  const [particles, setParticles] = useState<SparkleParticle[]>([]);
+  const nextId = useRef(0);
+
+  useEffect(() => {
+    const newParticles: SparkleParticle[] = [];
     for (let i = 0; i < count; i++) {
-      const i3 = i * 3;
-      const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;
-      const speed = 0.3 + Math.random() * 0.5;
-      const upwardBias = 0.3 + Math.random() * 0.4;
-      
-      positions[i3] = position.x;
-      positions[i3 + 1] = position.y;
-      positions[i3 + 2] = position.z;
-      
-      velocities[i3] = Math.cos(angle) * speed;
-      velocities[i3 + 1] = upwardBias;
-      velocities[i3 + 2] = Math.sin(angle) * speed;
-      
-      const color = new THREE.Color().setHSL(0.5 + Math.random() * 0.1, 1, 0.6);
-      colors[i3] = color.r;
-      colors[i3 + 1] = color.g;
-      colors[i3 + 2] = color.b;
-      
-      sizes[i] = 0.05 + Math.random() * 0.08;
-      lifetimes[i] = 1;
+      const angle = (Math.PI * 2 * i) / count;
+      const speed = 0.2 + Math.random() * 0.3;
+      newParticles.push({
+        id: nextId.current++,
+        position: position.clone(),
+        velocity: new THREE.Vector3(
+          Math.cos(angle) * speed,
+          Math.random() * speed,
+          Math.sin(angle) * speed
+        ),
+        life: 1
+      });
     }
-    
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
-    geometry.setAttribute('customColor', new THREE.BufferAttribute(colors, 3));
-    geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-    geometry.setAttribute('lifetime', new THREE.BufferAttribute(lifetimes, 1));
-    
-    const material = new THREE.ShaderMaterial({
-      uniforms: {
-        time: { value: 0 }
-      },
-      vertexShader: `
-        attribute vec3 velocity;
-        attribute vec3 customColor;
-        attribute float size;
-        attribute float lifetime;
-        uniform float time;
-        varying vec3 vColor;
-        varying float vLifetime;
-        
-        void main() {
-          vColor = customColor;
-          vLifetime = max(0.0, lifetime - time * 2.0);
-          vec3 pos = position + velocity * time * 60.0 - vec3(0, time * time * 9.8 * 0.5, 0);
-          vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-          gl_PointSize = size * vLifetime * (300.0 / -mvPosition.z);
-          gl_Position = projectionMatrix * mvPosition;
-        }
-      `,
-      fragmentShader: `
-        varying vec3 vColor;
-        varying float vLifetime;
-        
-        void main() {
-          float dist = length(gl_PointCoord - vec2(0.5));
-          if (dist > 0.5 || vLifetime <= 0.0) discard;
-          float alpha = (1.0 - dist * 2.0) * vLifetime;
-          gl_FragColor = vec4(vColor, alpha);
-        }
-      `,
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    });
-    
-    return { geometry, material };
+    setParticles(newParticles);
   }, [position, count]);
 
   useFrame((_, delta) => {
-    if (meshRef.current) {
-      const mat = meshRef.current.material as THREE.ShaderMaterial;
-      mat.uniforms.time.value += delta;
-    }
+    setParticles(prev => 
+      prev
+        .map(p => ({
+          ...p,
+          position: p.position.clone().add(p.velocity.clone().multiplyScalar(delta * 60)),
+          velocity: p.velocity.clone().multiplyScalar(0.95),
+          life: p.life - delta * 2
+        }))
+        .filter(p => p.life > 0)
+    );
   });
 
-  return <points ref={meshRef} geometry={geometry} material={material} />;
+  return (
+    <group>
+      {particles.map(particle => (
+        <mesh key={particle.id} position={particle.position}>
+          <sphereGeometry args={[0.02, 4, 4]} />
+          <meshBasicMaterial
+            color="#FFFFFF"
+            transparent
+            opacity={particle.life}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      ))}
+    </group>
+  );
 };
