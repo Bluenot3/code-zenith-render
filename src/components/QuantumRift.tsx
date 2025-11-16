@@ -1,16 +1,20 @@
 import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export const QuantumRift = () => {
+  const isMobile = useIsMobile();
   const groupRef = useRef<THREE.Group>(null);
   const riftMeshRef = useRef<THREE.Mesh>(null);
   const particlesRef = useRef<THREE.Points>(null);
   
   // Create quantum rift effect
   if (riftMeshRef.current === null && groupRef.current) {
-    // Create swirling vortex geometry with higher detail
-    const riftGeometry = new THREE.TorusGeometry(3, 0.5, 64, 200);
+    // Create swirling vortex geometry with adaptive detail
+    const segments = isMobile ? 32 : 64;
+    const radialSegments = isMobile ? 100 : 200;
+    const riftGeometry = new THREE.TorusGeometry(3, 0.5, segments, radialSegments);
     const riftMaterial = new THREE.MeshStandardMaterial({
       color: new THREE.Color('#00ffff'),
       emissive: new THREE.Color('#0088ff'),
@@ -28,8 +32,8 @@ export const QuantumRift = () => {
     riftMeshRef.current = riftMesh;
     groupRef.current.add(riftMesh);
     
-    // Create quantum particles swirling around rift with more particles
-    const particleCount = 5000;
+    // Create quantum particles with adaptive count
+    const particleCount = isMobile ? 2000 : 5000;
     const positions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
     const sizes = new Float32Array(particleCount);

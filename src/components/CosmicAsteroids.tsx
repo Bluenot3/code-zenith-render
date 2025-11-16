@@ -1,6 +1,7 @@
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Asteroid {
   mesh: THREE.Mesh;
@@ -12,11 +13,12 @@ interface Asteroid {
 }
 
 export const CosmicAsteroids = () => {
+  const isMobile = useIsMobile();
   const groupRef = useRef<THREE.Group>(null);
   const asteroidsRef = useRef<Asteroid[]>([]);
   
   useMemo(() => {
-    const asteroidCount = 50; // More asteroids
+    const asteroidCount = isMobile ? 25 : 50; // Adaptive count
     const colorPalette = [
       new THREE.Color('#ff6b35'),
       new THREE.Color('#f7931e'),
@@ -136,7 +138,7 @@ export const CosmicAsteroids = () => {
         groupRef.current.add(trailMesh);
       }
     }
-  }, []);
+  }, [isMobile]);
   
   useFrame(() => {
     if (!groupRef.current) return;
