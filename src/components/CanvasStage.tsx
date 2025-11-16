@@ -10,15 +10,15 @@ import {
   createKeyPressHandler 
 } from './CanvasStage/handlers';
 import { GeometrySwitcher } from './GeometrySwitcher';
-import { Particles } from './Particles';
+import { Particles } from './OptimizedParticles';
 import { InteractiveCharacters } from './InteractiveCharacters';
 import { SpaceGradient } from './SpaceGradient';
-import { GalaxyClusters } from './GalaxyClusters';
-import { AmbientStars } from './AmbientStars';
-import { NebulaClouds } from './NebulaClouds';
+import { GalaxyClusters } from './OptimizedGalaxyClusters';
+import { AmbientStars } from './OptimizedAmbientStars';
+import { NebulaClouds } from './OptimizedNebulaClouds';
 import { CosmicAsteroids } from './CosmicAsteroids';
 import { MeteorTrails } from './MeteorTrails';
-import { QuantumRift } from './QuantumRift';
+import { QuantumRift } from './OptimizedQuantumRift';
 import { CrystalFormation } from './CrystalFormation';
 import { Sparkles, SpawnFlash, ShockwaveRing } from './SpawnEffects';
 import { CodeTextureGenerator } from '@/utils/codeTexture';
@@ -157,13 +157,15 @@ export const CanvasStage = () => {
         camera={{ position: [0, 0, 5], fov: camera.fov }}
         style={{ background: themeConfig.sceneBackground, width: '100%', height: '100%' }}
         gl={{
-          antialias: true,
+          antialias: !isMobile,
           alpha: true,
           powerPreference: 'high-performance',
           toneMapping: THREE.ACESFilmicToneMapping,
           toneMappingExposure: 1.2,
           outputColorSpace: THREE.SRGBColorSpace,
+          preserveDrawingBuffer: false,
         }}
+        performance={{ min: 0.5 }}
         shadows
         dpr={typeof window !== 'undefined' ? Math.min(window.devicePixelRatio, 2) : 1}
         resize={{ scroll: false, debounce: { scroll: 0, resize: 100 } }}
@@ -205,11 +207,17 @@ export const CanvasStage = () => {
         <Particles />
         <InteractiveCharacters />
         
-        {/* Spawn Effects with Sparks */}
+        {/* Spawn Effects with Sparks - Dramatic entry */}
         {showSpawnEffect && (
           <>
-            <Sparkles position={new THREE.Vector3(0, 0, 0)} count={50} />
+            <Sparkles position={new THREE.Vector3(0, 0, 0)} count={100} />
+            <Sparkles position={new THREE.Vector3(3, 0, 0)} count={60} />
+            <Sparkles position={new THREE.Vector3(-3, 0, 0)} count={60} />
             <SpawnFlash 
+              position={new THREE.Vector3(0, 0, 0)} 
+              onComplete={() => {}} 
+            />
+            <ShockwaveRing 
               position={new THREE.Vector3(0, 0, 0)} 
               onComplete={() => {}} 
             />
