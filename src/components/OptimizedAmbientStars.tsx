@@ -6,7 +6,7 @@ import { particleVertexShader, particleFragmentShader } from '@/utils/sharedReso
 
 export const AmbientStars = () => {
   const isMobile = useIsMobile();
-  const meshRef = useRef<THREE.Points>(null);
+  const pointsRef = useRef<THREE.Points>(null);
   
   const { geometry, material } = useMemo(() => {
     const starCount = isMobile ? 3000 : 6000; // More stars, single draw call
@@ -81,11 +81,11 @@ export const AmbientStars = () => {
   }, [isMobile]);
   
   useFrame((state) => {
-    if (meshRef.current) {
-      const mat = meshRef.current.material as THREE.ShaderMaterial;
+    if (pointsRef.current) {
+      const mat = pointsRef.current.material as THREE.ShaderMaterial;
       mat.uniforms.time.value = state.clock.elapsedTime;
     }
   });
   
-  return <points ref={meshRef} geometry={geometry} material={material} frustumCulled />;
+  return <points ref={pointsRef} geometry={geometry} material={material} frustumCulled />;
 };

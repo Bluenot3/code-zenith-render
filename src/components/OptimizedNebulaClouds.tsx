@@ -105,11 +105,11 @@ export const NebulaClouds = () => {
   }, [isMobile]);
   
   useFrame((state) => {
-    if (meshRef.current) {
-      const mat = meshRef.current.material as THREE.ShaderMaterial;
+    if (pointsRef.current) {
+      const mat = pointsRef.current.material as THREE.ShaderMaterial;
       mat.uniforms.time.value = state.clock.elapsedTime;
     }
   });
   
-  return <points ref={meshRef} geometry={geometry} material={material} frustumCulled />;
+  return <points ref={pointsRef} geometry={geometry} material={material} frustumCulled />;
 };
