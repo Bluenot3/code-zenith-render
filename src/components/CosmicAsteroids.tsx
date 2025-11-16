@@ -16,7 +16,7 @@ export const CosmicAsteroids = () => {
   const asteroidsRef = useRef<Asteroid[]>([]);
   
   useMemo(() => {
-    const asteroidCount = 40; // Increased count
+    const asteroidCount = 50; // More asteroids
     const colorPalette = [
       new THREE.Color('#ff6b35'),
       new THREE.Color('#f7931e'),

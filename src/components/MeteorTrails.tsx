@@ -19,7 +19,7 @@ export const MeteorTrails = () => {
   
   // Initialize meteors with variety
   useMemo(() => {
-    const meteorCount = 60; // Dramatically increased
+    const meteorCount = 80; // Even more meteors for dramatic effect
     const colorPalette = [
       new THREE.Color('#ff6600'), // Orange
       new THREE.Color('#ff0066'), // Hot Pink
@@ -36,8 +36,8 @@ export const MeteorTrails = () => {
       const startY = (Math.random() - 0.5) * 60;
       const startZ = (Math.random() - 0.5) * 60;
       
-      const speed = Math.random() * 0.2 + 0.1;
-      const size = Math.random() * 0.1 + 0.08;
+      const speed = Math.random() * 0.25 + 0.12;
+      const size = Math.random() * 0.15 + 0.1;
       
       return {
         position: new THREE.Vector3(startX, startY, startZ),
@@ -50,7 +50,7 @@ export const MeteorTrails = () => {
         color: colorPalette[Math.floor(Math.random() * colorPalette.length)].clone(),
         size,
         speed,
-        glowIntensity: Math.random() * 1.5 + 2.5,
+        glowIntensity: Math.random() * 2 + 3,
       };
     });
   }, []);

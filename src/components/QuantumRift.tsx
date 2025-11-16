@@ -7,18 +7,18 @@ export const QuantumRift = () => {
   const riftMeshRef = useRef<THREE.Mesh>(null);
   const particlesRef = useRef<THREE.Points>(null);
   
-  // Create the quantum rift effect
+  // Create quantum rift effect
   if (riftMeshRef.current === null && groupRef.current) {
-    // Create swirling vortex geometry
-    const riftGeometry = new THREE.TorusGeometry(3, 0.4, 32, 100);
+    // Create swirling vortex geometry with higher detail
+    const riftGeometry = new THREE.TorusGeometry(3, 0.5, 64, 200);
     const riftMaterial = new THREE.MeshStandardMaterial({
       color: new THREE.Color('#00ffff'),
       emissive: new THREE.Color('#0088ff'),
-      emissiveIntensity: 2.5,
+      emissiveIntensity: 3.5,
       transparent: true,
-      opacity: 0.7,
+      opacity: 0.8,
       metalness: 1,
-      roughness: 0.1,
+      roughness: 0.05,
       side: THREE.DoubleSide,
     });
     
@@ -28,8 +28,8 @@ export const QuantumRift = () => {
     riftMeshRef.current = riftMesh;
     groupRef.current.add(riftMesh);
     
-    // Create quantum particles swirling around rift
-    const particleCount = 3000;
+    // Create quantum particles swirling around rift with more particles
+    const particleCount = 5000;
     const positions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
     const sizes = new Float32Array(particleCount);
@@ -40,8 +40,8 @@ export const QuantumRift = () => {
     
     for (let i = 0; i < particleCount; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const radius = Math.random() * 4;
-      const height = (Math.random() - 0.5) * 2;
+      const radius = Math.random() * 4.5;
+      const height = (Math.random() - 0.5) * 2.5;
       
       positions[i * 3] = Math.cos(angle) * radius;
       positions[i * 3 + 1] = height;
@@ -53,7 +53,7 @@ export const QuantumRift = () => {
       colors[i * 3 + 1] = selectedColor.g;
       colors[i * 3 + 2] = selectedColor.b;
       
-      sizes[i] = Math.random() * 0.08 + 0.02;
+      sizes[i] = Math.random() * 0.12 + 0.03;
     }
     
     const particleGeometry = new THREE.BufferGeometry();
@@ -62,10 +62,10 @@ export const QuantumRift = () => {
     particleGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
     
     const particleMaterial = new THREE.PointsMaterial({
-      size: 0.08,
+      size: 0.1,
       vertexColors: true,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.9,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
       sizeAttenuation: true,
@@ -81,21 +81,22 @@ export const QuantumRift = () => {
     const time = state.clock.elapsedTime;
     
     if (riftMeshRef.current) {
-      // Rotate and pulse the rift
-      riftMeshRef.current.rotation.z += 0.01;
-      const scale = 1 + Math.sin(time * 2) * 0.1;
+      // Rotate and pulse the rift with smoother animation
+      riftMeshRef.current.rotation.z += 0.015;
+      const scale = 1 + Math.sin(time * 2) * 0.15;
       riftMeshRef.current.scale.set(scale, scale, scale);
       
-      // Pulsing emissive intensity
+      // Pulsing emissive intensity with more dramatic effect
       if (riftMeshRef.current.material instanceof THREE.MeshStandardMaterial) {
-        riftMeshRef.current.material.emissiveIntensity = 2 + Math.sin(time * 3) * 0.5;
+        riftMeshRef.current.material.emissiveIntensity = 3 + Math.sin(time * 3) * 0.8;
       }
     }
     
     if (particlesRef.current) {
-      // Swirl particles around the rift
-      particlesRef.current.rotation.z += 0.005;
-      particlesRef.current.rotation.x = Math.sin(time * 0.3) * 0.2;
+      // Swirl particles around the rift with more fluid motion
+      particlesRef.current.rotation.z += 0.008;
+      particlesRef.current.rotation.x = Math.sin(time * 0.3) * 0.3;
+      particlesRef.current.rotation.y += 0.003;
     }
   });
   
