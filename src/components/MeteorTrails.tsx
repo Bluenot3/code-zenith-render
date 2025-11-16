@@ -197,7 +197,12 @@ export const MeteorTrails = () => {
         let trailLine = meshesRef.current.get(trailKey) as THREE.Line;
         
         if (!trailLine) {
+          const maxTrailPoints = 100;
           const trailGeometry = new THREE.BufferGeometry();
+          const positions = new Float32Array(maxTrailPoints * 3);
+          trailGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+          trailGeometry.setDrawRange(0, 0);
+          
           const trailMaterial = new THREE.LineBasicMaterial({
             color: meteor.color,
             transparent: true,
@@ -211,16 +216,13 @@ export const MeteorTrails = () => {
           groupRef.current.add(trailLine);
         }
         
-        // Update trail geometry
-        const positions = new Float32Array(meteor.trail.length * 3);
+        // Update trail geometry without resizing
+        const positionAttribute = trailLine.geometry.attributes.position;
         meteor.trail.forEach((point, i) => {
-          positions[i * 3] = point.x;
-          positions[i * 3 + 1] = point.y;
-          positions[i * 3 + 2] = point.z;
+          positionAttribute.setXYZ(i, point.x, point.y, point.z);
         });
-        
-        trailLine.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        trailLine.geometry.attributes.position.needsUpdate = true;
+        positionAttribute.needsUpdate = true;
+        trailLine.geometry.setDrawRange(0, meteor.trail.length);
       }
     });
   });
