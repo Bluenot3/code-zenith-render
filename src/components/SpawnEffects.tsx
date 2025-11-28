@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SpawnFlashProps {
   position: THREE.Vector3;
@@ -8,13 +9,18 @@ interface SpawnFlashProps {
 }
 
 export const SpawnFlash = ({ position, onComplete }: SpawnFlashProps) => {
+  const isMobile = useIsMobile();
   const meshRef = useRef<THREE.Mesh>(null);
   const [scale, setScale] = useState(0.1);
   const [opacity, setOpacity] = useState(1);
   const [hue, setHue] = useState(180);
   const innerRef = useRef<THREE.Mesh>(null);
+  const frameCount = useRef(0);
 
   useFrame((_, delta) => {
+    frameCount.current++;
+    if (isMobile && frameCount.current % 2 !== 0) return; // Skip frames on mobile
+    
     const newScale = scale + delta * 12;
     setScale(newScale);
     setOpacity(Math.max(0, opacity - delta * 3));
@@ -37,7 +43,7 @@ export const SpawnFlash = ({ position, onComplete }: SpawnFlashProps) => {
   return (
     <group>
       <mesh ref={meshRef} position={position}>
-        <icosahedronGeometry args={[scale, 2]} />
+        <icosahedronGeometry args={[scale, isMobile ? 0 : 1]} />
         <meshBasicMaterial
           color={`hsl(${hue}, 100%, 60%)`}
           transparent
@@ -46,21 +52,25 @@ export const SpawnFlash = ({ position, onComplete }: SpawnFlashProps) => {
           wireframe
         />
       </mesh>
-      <mesh ref={innerRef} position={position}>
-        <sphereGeometry args={[scale * 0.7, 24, 24]} />
-        <meshBasicMaterial
-          color={`hsl(${(hue + 180) % 360}, 100%, 70%)`}
-          transparent
-          opacity={opacity * 0.6}
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
-      <pointLight 
-        position={position} 
-        color={`hsl(${hue}, 100%, 60%)`}
-        intensity={opacity * 20} 
-        distance={scale * 5} 
-      />
+      {!isMobile && (
+        <>
+          <mesh ref={innerRef} position={position}>
+            <sphereGeometry args={[scale * 0.7, 16, 16]} />
+            <meshBasicMaterial
+              color={`hsl(${(hue + 180) % 360}, 100%, 70%)`}
+              transparent
+              opacity={opacity * 0.6}
+              blending={THREE.AdditiveBlending}
+            />
+          </mesh>
+          <pointLight 
+            position={position} 
+            color={`hsl(${hue}, 100%, 60%)`}
+            intensity={opacity * 20} 
+            distance={scale * 5} 
+          />
+        </>
+      )}
     </group>
   );
 };
@@ -71,14 +81,19 @@ interface ShockwaveRingProps {
 }
 
 export const ShockwaveRing = ({ position, onComplete }: ShockwaveRingProps) => {
+  const isMobile = useIsMobile();
   const meshRef = useRef<THREE.Mesh>(null);
   const ring2Ref = useRef<THREE.Mesh>(null);
   const ring3Ref = useRef<THREE.Mesh>(null);
   const [scale, setScale] = useState(0.5);
   const [opacity, setOpacity] = useState(0.8);
   const [distortion, setDistortion] = useState(0);
+  const frameCount = useRef(0);
 
   useFrame((state, delta) => {
+    frameCount.current++;
+    if (isMobile && frameCount.current % 2 !== 0) return; // Skip frames on mobile
+    
     const newScale = scale + delta * 8;
     setScale(newScale);
     setOpacity(Math.max(0, opacity - delta * 1.5));
@@ -87,11 +102,11 @@ export const ShockwaveRing = ({ position, onComplete }: ShockwaveRingProps) => {
     if (meshRef.current) {
       meshRef.current.rotation.z += delta * 2;
     }
-    if (ring2Ref.current) {
+    if (ring2Ref.current && !isMobile) {
       ring2Ref.current.rotation.z -= delta * 3;
       ring2Ref.current.scale.setScalar(1 + Math.sin(state.clock.elapsedTime * 10) * 0.1);
     }
-    if (ring3Ref.current) {
+    if (ring3Ref.current && !isMobile) {
       ring3Ref.current.rotation.z += delta * 4;
     }
     
@@ -105,7 +120,7 @@ export const ShockwaveRing = ({ position, onComplete }: ShockwaveRingProps) => {
   return (
     <group>
       <mesh ref={meshRef} position={position} rotation={[Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[scale, scale + 0.2, 48]} />
+        <ringGeometry args={[scale, scale + 0.2, isMobile ? 24 : 48]} />
         <meshBasicMaterial
           color="#00FFD5"
           transparent
@@ -114,26 +129,30 @@ export const ShockwaveRing = ({ position, onComplete }: ShockwaveRingProps) => {
           blending={THREE.AdditiveBlending}
         />
       </mesh>
-      <mesh ref={ring2Ref} position={[position.x, position.y + waveHeight, position.z]} rotation={[Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[scale * 0.7, scale * 0.7 + 0.15, 32]} />
-        <meshBasicMaterial
-          color="#FF00FF"
-          transparent
-          opacity={opacity * 0.7}
-          side={THREE.DoubleSide}
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
-      <mesh ref={ring3Ref} position={[position.x, position.y - waveHeight, position.z]} rotation={[Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[scale * 1.3, scale * 1.3 + 0.1, 32]} />
-        <meshBasicMaterial
-          color="#FFFF00"
-          transparent
-          opacity={opacity * 0.4}
-          side={THREE.DoubleSide}
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
+      {!isMobile && (
+        <>
+          <mesh ref={ring2Ref} position={[position.x, position.y + waveHeight, position.z]} rotation={[Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[scale * 0.7, scale * 0.7 + 0.15, 32]} />
+            <meshBasicMaterial
+              color="#FF00FF"
+              transparent
+              opacity={opacity * 0.7}
+              side={THREE.DoubleSide}
+              blending={THREE.AdditiveBlending}
+            />
+          </mesh>
+          <mesh ref={ring3Ref} position={[position.x, position.y - waveHeight, position.z]} rotation={[Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[scale * 1.3, scale * 1.3 + 0.1, 32]} />
+            <meshBasicMaterial
+              color="#FFFF00"
+              transparent
+              opacity={opacity * 0.4}
+              side={THREE.DoubleSide}
+              blending={THREE.AdditiveBlending}
+            />
+          </mesh>
+        </>
+      )}
     </group>
   );
 };
@@ -151,12 +170,14 @@ interface SparklesProps {
 }
 
 export const Sparkles = ({ position, count }: SparklesProps) => {
+  const isMobile = useIsMobile();
   const [particles, setParticles] = useState<SparkleParticle[]>([]);
   const nextId = useRef(0);
   const timeRef = useRef(0);
+  const frameCount = useRef(0);
   
-  // Reduced count for performance
-  const optimizedCount = Math.min(count, 400);
+  // More aggressive mobile reduction
+  const optimizedCount = isMobile ? Math.floor(count * 0.3) : Math.min(count, 400);
 
   useEffect(() => {
     const newParticles: SparkleParticle[] = [];
@@ -181,6 +202,9 @@ export const Sparkles = ({ position, count }: SparklesProps) => {
   }, [position, optimizedCount]);
 
   useFrame((state, delta) => {
+    frameCount.current++;
+    if (isMobile && frameCount.current % 3 !== 0) return; // Update every 3rd frame on mobile
+    
     timeRef.current += delta;
     
     setParticles(prev => 
@@ -218,7 +242,7 @@ export const Sparkles = ({ position, count }: SparklesProps) => {
         return (
           <group key={particle.id}>
             <mesh position={particle.position}>
-              <sphereGeometry args={[size, 6, 6]} />
+              <sphereGeometry args={[size, 4, 4]} />
               <meshBasicMaterial
                 color={`hsl(${hue}, 100%, 70%)`}
                 transparent
@@ -226,12 +250,14 @@ export const Sparkles = ({ position, count }: SparklesProps) => {
                 blending={THREE.AdditiveBlending}
               />
             </mesh>
-            <pointLight
-              position={particle.position}
-              color={`hsl(${hue}, 100%, 60%)`}
-              intensity={particle.life * 2}
-              distance={0.5}
-            />
+            {!isMobile && (
+              <pointLight
+                position={particle.position}
+                color={`hsl(${hue}, 100%, 60%)`}
+                intensity={particle.life * 2}
+                distance={0.5}
+              />
+            )}
           </group>
         );
       })}
