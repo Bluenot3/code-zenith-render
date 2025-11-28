@@ -2,14 +2,18 @@ import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useStore } from '@/state/useStore';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export const Particles = () => {
+  const isMobile = useIsMobile();
   const pointsRef = useRef<THREE.Points>(null);
   const particles = useStore((state) => state.particles);
   const theme = useStore((state) => state.theme);
   
   const [positions, colors, sizes] = useMemo(() => {
-    const count = particles.density;
+    // Much more aggressive mobile reduction
+    const actualDensity = isMobile ? Math.floor(particles.density * 0.15) : particles.density;
+    const count = actualDensity;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const sizes = new Float32Array(count);
@@ -32,7 +36,7 @@ export const Particles = () => {
     }
     
     return [positions, colors, sizes];
-  }, [particles.density, theme.background]);
+  }, [particles.density, theme.background, isMobile]);
   
   useFrame((state) => {
     if (!pointsRef.current) return;

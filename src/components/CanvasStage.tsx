@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState, useRef } from 'react';
+import { Suspense, useEffect, useState, useRef, lazy } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -13,18 +13,22 @@ import { GeometrySwitcher } from './GeometrySwitcher';
 import { Particles } from './Particles';
 import { InteractiveCharacters } from './InteractiveCharacters';
 import { SpaceGradient } from './SpaceGradient';
-import { GalaxyClusters } from './GalaxyClusters';
 import { AmbientStars } from './AmbientStars';
-import { NebulaClouds } from './NebulaClouds';
-import { CosmicAsteroids } from './CosmicAsteroids';
-import { MeteorTrails } from './MeteorTrails';
-import { QuantumRift } from './QuantumRift';
-import { CrystalFormation } from './CrystalFormation';
-import { Sparkles, SpawnFlash, ShockwaveRing } from './SpawnEffects';
 import { CodeTextureGenerator } from '@/utils/codeTexture';
 import { useStore } from '@/state/useStore';
 import { applyTheme } from '@/utils/themes';
 import * as THREE from 'three';
+
+// Lazy load heavy effects - only load on desktop
+const GalaxyClusters = lazy(() => import('./GalaxyClusters').then(m => ({ default: m.GalaxyClusters })));
+const NebulaClouds = lazy(() => import('./NebulaClouds').then(m => ({ default: m.NebulaClouds })));
+const CosmicAsteroids = lazy(() => import('./CosmicAsteroids').then(m => ({ default: m.CosmicAsteroids })));
+const MeteorTrails = lazy(() => import('./MeteorTrails').then(m => ({ default: m.MeteorTrails })));
+const QuantumRift = lazy(() => import('./QuantumRift').then(m => ({ default: m.QuantumRift })));
+const CrystalFormation = lazy(() => import('./CrystalFormation').then(m => ({ default: m.CrystalFormation })));
+const Sparkles = lazy(() => import('./SpawnEffects').then(m => ({ default: m.Sparkles })));
+const SpawnFlash = lazy(() => import('./SpawnEffects').then(m => ({ default: m.SpawnFlash })));
+const ShockwaveRing = lazy(() => import('./SpawnEffects').then(m => ({ default: m.ShockwaveRing })));
 
 export const CanvasStage = () => {
   const isMobile = useIsMobile();
@@ -42,6 +46,7 @@ export const CanvasStage = () => {
   
   const [codeTexture, setCodeTexture] = useState<CodeTextureGenerator | null>(null);
   const [isFullyLoaded, setIsFullyLoaded] = useState(false);
+  const [hasWebGLError, setHasWebGLError] = useState(false);
   const isPausedRef = useRef(false);
   const [showSpawnEffect, setShowSpawnEffect] = useState(true);
   const [isZoomEnabled, setIsZoomEnabled] = useState(false);
@@ -141,10 +146,25 @@ export const CanvasStage = () => {
     }
   }, [isZoomEnabled]);
   
+  // Fallback for WebGL errors or when not loaded
+  if (hasWebGLError) {
+    return (
+      <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-background via-background/95 to-primary/10">
+        <div className="text-center space-y-2">
+          <div className="text-primary text-2xl">✨</div>
+          <p className="text-muted-foreground text-sm">3D View Unavailable</p>
+        </div>
+      </div>
+    );
+  }
+  
   if (!codeTexture || !isFullyLoaded) {
     return (
-      <div className="flex items-center justify-center w-full h-full bg-background">
-        <p className="text-muted-foreground">Loading ZEN 3D...</p>
+      <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-background via-background/95 to-primary/10">
+        <div className="text-center space-y-2">
+          <div className="text-primary text-2xl animate-pulse">⚡</div>
+          <p className="text-muted-foreground text-sm">Loading ZEN 3D...</p>
+        </div>
       </div>
     );
   }
@@ -157,16 +177,25 @@ export const CanvasStage = () => {
         camera={{ position: [0, 0, 5], fov: camera.fov }}
         style={{ background: themeConfig.sceneBackground, width: '100%', height: '100%' }}
         gl={{
-          antialias: true,
+          antialias: !isMobile,
           alpha: true,
-          powerPreference: 'high-performance',
+          powerPreference: isMobile ? 'default' : 'high-performance',
           toneMapping: THREE.ACESFilmicToneMapping,
           toneMappingExposure: 1.2,
           outputColorSpace: THREE.SRGBColorSpace,
         }}
-        shadows
-        dpr={typeof window !== 'undefined' ? Math.min(window.devicePixelRatio, 2) : 1}
+        shadows={!isMobile}
+        dpr={isMobile ? 1 : Math.min(window.devicePixelRatio, 2)}
         resize={{ scroll: false, debounce: { scroll: 0, resize: 100 } }}
+        onCreated={({ gl }) => {
+          // Detect WebGL failures
+          try {
+            gl.getContext();
+          } catch (e) {
+            console.error('WebGL Error:', e);
+            setHasWebGLError(true);
+          }
+        }}
       >
       <Suspense fallback={null}>
         <ambientLight intensity={lighting.envIntensity} />
@@ -189,14 +218,20 @@ export const CanvasStage = () => {
         
         <SpaceGradient />
         
-        {/* Ultra High Quality Background Effects - Always Active */}
-        <GalaxyClusters />
+        {/* Essential background - always visible */}
         <AmbientStars />
-        <NebulaClouds />
-        <CosmicAsteroids />
-        <MeteorTrails />
-        <QuantumRift />
-        <CrystalFormation />
+        
+        {/* Advanced effects - desktop only for performance */}
+        {!isMobile && (
+          <Suspense fallback={null}>
+            <GalaxyClusters />
+            <NebulaClouds />
+            <CosmicAsteroids />
+            <MeteorTrails />
+            <QuantumRift />
+            <CrystalFormation />
+          </Suspense>
+        )}
         
         <GeometrySwitcher 
           texture={codeTexture.getTexture()}
@@ -205,10 +240,10 @@ export const CanvasStage = () => {
         <Particles />
         <InteractiveCharacters />
         
-        {/* Spawn Effects with Sparks */}
-        {showSpawnEffect && (
-          <>
-            <Sparkles position={new THREE.Vector3(0, 0, 0)} count={50} />
+        {/* Spawn Effects - only on desktop or after initial mobile load */}
+        {showSpawnEffect && !isMobile && (
+          <Suspense fallback={null}>
+            <Sparkles position={new THREE.Vector3(0, 0, 0)} count={30} />
             <SpawnFlash 
               position={new THREE.Vector3(0, 0, 0)} 
               onComplete={() => {}} 
@@ -217,7 +252,7 @@ export const CanvasStage = () => {
               position={new THREE.Vector3(0, 0, 0)} 
               onComplete={() => {}} 
             />
-          </>
+          </Suspense>
         )}
         
         <CameraManager isZoomEnabled={isZoomEnabled} isMobile={isMobile} />

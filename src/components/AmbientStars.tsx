@@ -9,7 +9,7 @@ export const AmbientStars = () => {
   const frameCount = useRef(0);
   
   const [positions, colors, sizes, baseSizes] = useMemo(() => {
-    const count = isMobile ? 1000 : 2500; // Reduced count
+    const count = isMobile ? 800 : 2500; // Much more aggressive mobile reduction
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const sizes = new Float32Array(count);
