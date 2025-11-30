@@ -13,6 +13,22 @@ const Index = () => {
   const isMobile = useIsMobile();
   const store = useStore();
   const [levaHidden, setLevaHidden] = useState(true);
+  const [canvasReady, setCanvasReady] = useState(false);
+  
+  // Defer Canvas initialization to improve TTI
+  useEffect(() => {
+    const initCanvas = () => {
+      setCanvasReady(true);
+    };
+    
+    // Use requestIdleCallback to defer until main thread is idle
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(initCanvas, { timeout: 100 });
+    } else {
+      // Fallback: small delay to let page become interactive first
+      setTimeout(initCanvas, 100);
+    }
+  }, []);
   
   // Geometry controls
   useControls('Geometry', {
@@ -355,16 +371,26 @@ const Index = () => {
   
   return (
     <div className="relative w-full h-screen overflow-hidden">
-      <Leva hidden={levaHidden} />
-      <Suspense fallback={<div className="absolute inset-0 bg-background flex items-center justify-center">
-        <div className="text-primary animate-pulse">Loading...</div>
-      </div>}>
-        <CanvasStage />
-        <CodeSettings onToggleLeva={() => setLevaHidden(!levaHidden)} levaHidden={levaHidden} />
-        <AutoplayController />
-      </Suspense>
+      {/* Lightweight placeholder shown immediately for fast TTI */}
+      {!canvasReady && (
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e27] via-[#1a1a3e] to-[#0d0d1f] flex items-center justify-center">
+          <div className="text-primary text-2xl font-bold animate-pulse">ZEN</div>
+        </div>
+      )}
       
-      {/* Footer */}
+      {/* Defer heavy components until page is interactive */}
+      {canvasReady && (
+        <>
+          <Leva hidden={levaHidden} />
+          <Suspense fallback={null}>
+            <CanvasStage />
+            <CodeSettings onToggleLeva={() => setLevaHidden(!levaHidden)} levaHidden={levaHidden} />
+            <AutoplayController />
+          </Suspense>
+        </>
+      )}
+      
+      {/* Footer - always visible for immediate interactivity */}
       <div className="fixed bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 z-10 font-code text-xs">
         <div className="bg-card/80 backdrop-blur-sm px-2 sm:px-4 py-1.5 sm:py-2 rounded border border-border flex flex-col sm:flex-row items-center gap-1 sm:gap-4">
           <a 
