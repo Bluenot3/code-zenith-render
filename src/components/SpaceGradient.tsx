@@ -1,9 +1,11 @@
 import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export const SpaceGradient = () => {
   const meshRef = useRef<THREE.Mesh>(null);
+  const isMobile = useIsMobile();
   
   const gradientShader = {
     vertexShader: `
@@ -83,7 +85,7 @@ export const SpaceGradient = () => {
   
   return (
     <mesh ref={meshRef} renderOrder={-100}>
-      <sphereGeometry args={[200, 64, 64]} />
+      <sphereGeometry args={isMobile ? [200, 16, 16] : [200, 32, 32]} />
       <shaderMaterial
         vertexShader={gradientShader.vertexShader}
         fragmentShader={gradientShader.fragmentShader}

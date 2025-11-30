@@ -159,7 +159,7 @@ export const GeometrySwitcher = ({ texture }: GeometrySwitcherProps) => {
       case 'sphere':
         return (
           <mesh {...props}>
-            <sphereGeometry args={[geometry.size, 64, 64]} />
+            <sphereGeometry args={isMobile ? [geometry.size, 32, 32] : [geometry.size, 64, 64]} />
             <MaterialSwitcher 
               texture={texture}
               material={material}
@@ -175,7 +175,7 @@ export const GeometrySwitcher = ({ texture }: GeometrySwitcherProps) => {
       case 'torus':
         return (
           <mesh {...props}>
-            <torusGeometry args={[geometry.size, geometry.size * 0.4, 32, 100]} />
+            <torusGeometry args={isMobile ? [geometry.size, geometry.size * 0.4, 16, 48] : [geometry.size, geometry.size * 0.4, 32, 100]} />
             <MaterialSwitcher 
               texture={texture}
               material={material}
@@ -191,7 +191,7 @@ export const GeometrySwitcher = ({ texture }: GeometrySwitcherProps) => {
       case 'cylinder':
         return (
           <mesh {...props}>
-            <cylinderGeometry args={[geometry.size, geometry.size, geometry.size * 2, 32]} />
+            <cylinderGeometry args={isMobile ? [geometry.size, geometry.size, geometry.size * 2, 16] : [geometry.size, geometry.size, geometry.size * 2, 32]} />
             <MaterialSwitcher 
               texture={texture}
               material={material}
@@ -239,7 +239,7 @@ export const GeometrySwitcher = ({ texture }: GeometrySwitcherProps) => {
       case 'torusKnot':
         return (
           <mesh {...props}>
-            <torusKnotGeometry args={[geometry.size * 0.6, geometry.size * 0.2, 128, 16]} />
+            <torusKnotGeometry args={isMobile ? [geometry.size * 0.6, geometry.size * 0.2, 64, 8] : [geometry.size * 0.6, geometry.size * 0.2, 128, 16]} />
             <MaterialSwitcher 
               texture={texture}
               material={material}

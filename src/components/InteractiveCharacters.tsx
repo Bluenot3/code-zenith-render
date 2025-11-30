@@ -3,6 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Text } from '@react-three/drei';
 import { SpawnFlash, ShockwaveRing, Sparkles } from './SpawnEffects';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   noise3D,
   getSpiralVelocity,
@@ -37,16 +38,18 @@ interface Effect {
   position: THREE.Vector3;
 }
 
-const MAX_CHARACTERS = 500;
 const BOUNDARY = { x: 20, y: 15, z: 20 };
 
 export const InteractiveCharacters = () => {
+  const isMobile = useIsMobile();
+  const MAX_CHARACTERS = isMobile ? 200 : 500;
   const [characters, setCharacters] = useState<Character[]>([]);
   const [effects, setEffects] = useState<Effect[]>([]);
   const groupRef = useRef<THREE.Group>(null);
   const nextId = useRef(0);
   const nextEffectId = useRef(0);
   const timeRef = useRef(0);
+  const frameCount = useRef(0);
   const { mouse, camera } = useThree();
 
   const specialChars = [
@@ -150,6 +153,11 @@ export const InteractiveCharacters = () => {
   };
 
   useFrame((state, delta) => {
+    frameCount.current++;
+    
+    // Skip frames on mobile for better performance
+    if (isMobile && frameCount.current % 2 !== 0) return;
+    
     timeRef.current += delta;
     
     // Get mouse position in 3D world space

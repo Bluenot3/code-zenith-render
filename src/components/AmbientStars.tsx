@@ -9,7 +9,7 @@ export const AmbientStars = () => {
   const frameCount = useRef(0);
   
   const [positions, colors, sizes, baseSizes] = useMemo(() => {
-    const count = isMobile ? 800 : 2500; // Much more aggressive mobile reduction
+    const count = isMobile ? 400 : 2500; // Further reduced for mobile
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const sizes = new Float32Array(count);
@@ -72,22 +72,25 @@ export const AmbientStars = () => {
     
     frameCount.current++;
     
-    // Only update twinkling every 3 frames
-    if (frameCount.current % 3 === 0) {
-      const geo = starsRef.current.geometry;
-      const sizes = geo.attributes.size.array as Float32Array;
-      const time = state.clock.elapsedTime;
-      
-      // Optimized twinkling - update subset of stars
-      for (let i = 0; i < sizes.length; i += 3) { // Skip every 3rd star
-        // Simplified twinkling
-        const twinkle = Math.sin(time * 0.8 + i * 0.05);
-        sizes[i] = baseSizes[i] * (0.8 + Math.abs(twinkle) * 0.4);
-        if (i + 1 < sizes.length) sizes[i + 1] = baseSizes[i + 1] * (0.8 + Math.abs(Math.sin(time * 0.9 + i)) * 0.4);
-        if (i + 2 < sizes.length) sizes[i + 2] = baseSizes[i + 2] * (0.8 + Math.abs(Math.sin(time * 0.7 + i)) * 0.4);
+    // Skip twinkling entirely on mobile for better performance
+    if (!isMobile) {
+      // Only update twinkling every 4 frames on desktop
+      if (frameCount.current % 4 === 0) {
+        const geo = starsRef.current.geometry;
+        const sizes = geo.attributes.size.array as Float32Array;
+        const time = state.clock.elapsedTime;
+        
+        // Optimized twinkling - update subset of stars
+        for (let i = 0; i < sizes.length; i += 3) { // Skip every 3rd star
+          // Simplified twinkling
+          const twinkle = Math.sin(time * 0.8 + i * 0.05);
+          sizes[i] = baseSizes[i] * (0.8 + Math.abs(twinkle) * 0.4);
+          if (i + 1 < sizes.length) sizes[i + 1] = baseSizes[i + 1] * (0.8 + Math.abs(Math.sin(time * 0.9 + i)) * 0.4);
+          if (i + 2 < sizes.length) sizes[i + 2] = baseSizes[i + 2] * (0.8 + Math.abs(Math.sin(time * 0.7 + i)) * 0.4);
+        }
+        
+        geo.attributes.size.needsUpdate = true;
       }
-      
-      geo.attributes.size.needsUpdate = true;
     }
     
     // Very slow rotation for parallax effect

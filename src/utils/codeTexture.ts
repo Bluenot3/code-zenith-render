@@ -11,6 +11,8 @@ export class CodeTextureGenerator {
   private cursorBlink = 0;
   private lastUpdate = 0;
   private animationFrame: number | null = null;
+  private isVisible = true;
+  private isMobile = false;
   
   private config = {
     width: 2048,
@@ -29,10 +31,20 @@ export class CodeTextureGenerator {
   };
   
   constructor(inputText: string) {
+    // Detect mobile
+    this.isMobile = window.innerWidth < 768;
+    
+    // Reduce resolution on mobile
+    const resolution = this.isMobile ? 1024 : 2048;
+    
     this.canvas = document.createElement('canvas');
-    this.canvas.width = this.config.width;
-    this.canvas.height = this.config.height;
+    this.canvas.width = resolution;
+    this.canvas.height = resolution;
     this.ctx = this.canvas.getContext('2d')!;
+    
+    // Update config width/height
+    this.config.width = resolution;
+    this.config.height = resolution;
     
     this.texture = new THREE.CanvasTexture(this.canvas);
     this.texture.anisotropy = 16;
@@ -45,7 +57,17 @@ export class CodeTextureGenerator {
     this.setInputText(inputText);
     this.lastUpdate = Date.now();
     this.render(); // Initial render to make code immediately visible
+    this.setupVisibilityDetection();
     this.start();
+  }
+  
+  private setupVisibilityDetection() {
+    // Page visibility API
+    const handleVisibilityChange = () => {
+      this.isVisible = !document.hidden;
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
   }
   
   setInputText(text: string) {
@@ -125,6 +147,9 @@ export class CodeTextureGenerator {
   }
   
   private render() {
+    // Skip rendering if not visible
+    if (!this.isVisible) return;
+    
     const now = Date.now();
     const delta = Math.max(16, now - this.lastUpdate); // Ensure minimum delta
     this.lastUpdate = now;
@@ -162,8 +187,9 @@ export class CodeTextureGenerator {
     this.ctx.font = `${adjustedFontSize}px ${fontFamily}, monospace`;
     this.ctx.textBaseline = 'top';
     
-    // Continuous scroll animation
-    this.scrollOffset += (scrollSpeed / 10) * (delta / 16);
+    // Continuous scroll animation - slower on mobile
+    const scrollMultiplier = this.isMobile ? 0.5 : 1;
+    this.scrollOffset += (scrollSpeed / 10) * (delta / 16) * scrollMultiplier;
     if (this.scrollOffset > lineHeightPx) {
       this.scrollOffset = 0;
     }
