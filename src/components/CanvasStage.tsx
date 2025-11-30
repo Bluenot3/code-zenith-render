@@ -47,12 +47,40 @@ export const CanvasStage = () => {
   const [codeTexture, setCodeTexture] = useState<CodeTextureGenerator | null>(null);
   const [isFullyLoaded, setIsFullyLoaded] = useState(false);
   const [hasWebGLError, setHasWebGLError] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const isPausedRef = useRef(false);
   const [showSpawnEffect, setShowSpawnEffect] = useState(true);
   const [isZoomEnabled, setIsZoomEnabled] = useState(false);
   const lastTapTimeRef = useRef(0);
   const tapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Visibility detection - pause rendering when not visible
+  useEffect(() => {
+    // Intersection Observer for viewport visibility
+    const observer = new IntersectionObserver(
+      (entries) => {
+        setIsVisible(entries[0].isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
+    
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+    
+    // Page visibility API
+    const handleVisibilityChange = () => {
+      setIsVisible(!document.hidden);
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      observer.disconnect();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
   
   useEffect(() => {
     const themeConfig = applyTheme(theme.preset);
@@ -174,6 +202,7 @@ export const CanvasStage = () => {
   return (
     <div ref={containerRef} style={{ width: '100%', height: '100%', position: 'relative' }}>
       <Canvas
+        frameloop={isVisible ? "always" : "demand"}
         camera={{ position: [0, 0, 5], fov: camera.fov }}
         style={{ background: themeConfig.sceneBackground, width: '100%', height: '100%' }}
         gl={{
@@ -203,18 +232,22 @@ export const CanvasStage = () => {
           position={[10, 10, 5]} 
           intensity={lighting.keyIntensity} 
           color={themeConfig.codeTextColor}
-          castShadow 
+          castShadow={!isMobile} 
         />
-        <directionalLight 
-          position={[-10, -10, -5]} 
-          intensity={lighting.fillIntensity}
-          color={themeConfig.codeTextColor}
-        />
-        <pointLight 
-          position={[0, 5, 5]} 
-          intensity={lighting.rimIntensity} 
-          color={themeConfig.particleColor} 
-        />
+        {!isMobile && (
+          <>
+            <directionalLight 
+              position={[-10, -10, -5]} 
+              intensity={lighting.fillIntensity}
+              color={themeConfig.codeTextColor}
+            />
+            <pointLight 
+              position={[0, 5, 5]} 
+              intensity={lighting.rimIntensity} 
+              color={themeConfig.particleColor} 
+            />
+          </>
+        )}
         
         <SpaceGradient />
         
@@ -272,7 +305,7 @@ export const CanvasStage = () => {
           maxDistance={isMobile ? 15 : 20}
         />
         
-        <Environment preset="city" />
+        {!isMobile && <Environment preset="city" />}
       </Suspense>
     </Canvas>
     </div>
