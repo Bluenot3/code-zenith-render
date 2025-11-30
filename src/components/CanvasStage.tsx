@@ -57,17 +57,23 @@ export const CanvasStage = () => {
   
   // Visibility detection - pause rendering when not visible
   useEffect(() => {
+    if (!containerRef.current) return;
+    
+    // Start visible by default
+    setIsVisible(true);
+    
     // Intersection Observer for viewport visibility
     const observer = new IntersectionObserver(
       (entries) => {
-        setIsVisible(entries[0].isIntersecting);
+        if (entries[0]) {
+          setIsVisible(entries[0].isIntersecting);
+        }
       },
-      { threshold: 0.1 }
+      { threshold: 0.01, rootMargin: '100px' }
     );
     
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
+    const currentContainer = containerRef.current;
+    observer.observe(currentContainer);
     
     // Page visibility API
     const handleVisibilityChange = () => {
