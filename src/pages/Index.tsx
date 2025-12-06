@@ -3,12 +3,12 @@ import { useControls, button, folder, Leva } from 'leva';
 import { useStore } from '@/state/useStore';
 import { toast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
+import ChristmasLights from '@/components/ChristmasLights';
 
 // Lazy load heavy components to reduce initial JS execution time
 const CanvasStage = lazy(() => import('@/components/CanvasStage').then(m => ({ default: m.CanvasStage })));
 const CodeSettings = lazy(() => import('@/components/CodeSettings').then(m => ({ default: m.CodeSettings })));
 const AutoplayController = lazy(() => import('@/components/AutoplayController').then(m => ({ default: m.AutoplayController })));
-
 const Index = () => {
   const isMobile = useIsMobile();
   const store = useStore();
@@ -371,6 +371,8 @@ const Index = () => {
   
   return (
     <div className="relative w-full h-screen overflow-hidden">
+      {/* Festive Christmas lights wrapped around wreath border */}
+      <ChristmasLights />
       {/* Lightweight placeholder shown immediately for fast TTI */}
       {!canvasReady && (
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e27] via-[#1a1a3e] to-[#0d0d1f] flex items-center justify-center">
