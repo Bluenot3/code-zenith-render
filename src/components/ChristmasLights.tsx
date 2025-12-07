@@ -1,484 +1,229 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 
 const ChristmasLights: React.FC = () => {
-  // Generate lights for each edge with more density
-  const lights = useMemo(() => {
-    const colors = [
-      { main: '#ff1744', glow: '#ff5252', name: 'red' },
-      { main: '#00e676', glow: '#69f0ae', name: 'green' },
-      { main: '#ffea00', glow: '#ffff00', name: 'yellow' },
-      { main: '#2979ff', glow: '#82b1ff', name: 'blue' },
-      { main: '#ff4081', glow: '#ff80ab', name: 'pink' },
-      { main: '#ffffff', glow: '#ffffff', name: 'white' },
-    ];
-    
-    const allLights: { x: number; y: number; color: typeof colors[0]; delay: number; edge: string }[] = [];
-    
-    // Top edge - more lights
-    for (let i = 0; i < 40; i++) {
-      allLights.push({
-        x: (i / 39) * 100,
-        y: 0,
-        color: colors[i % colors.length],
-        delay: i * 0.12,
-        edge: 'top'
-      });
-    }
-    
-    // Right edge
-    for (let i = 0; i < 28; i++) {
-      allLights.push({
-        x: 100,
-        y: (i / 27) * 100,
-        color: colors[(i + 2) % colors.length],
-        delay: (40 + i) * 0.12,
-        edge: 'right'
-      });
-    }
-    
-    // Bottom edge
-    for (let i = 0; i < 40; i++) {
-      allLights.push({
-        x: 100 - (i / 39) * 100,
-        y: 100,
-        color: colors[(i + 4) % colors.length],
-        delay: (68 + i) * 0.12,
-        edge: 'bottom'
-      });
-    }
-    
-    // Left edge
-    for (let i = 0; i < 28; i++) {
-      allLights.push({
-        x: 0,
-        y: 100 - (i / 27) * 100,
-        color: colors[i % colors.length],
-        delay: (108 + i) * 0.12,
-        edge: 'left'
-      });
-    }
-    
-    return allLights;
-  }, []);
-
-  // Generate pine needle clusters for garland
-  const pineNeedles = useMemo(() => {
-    const needles: { x: number; y: number; rotation: number; scale: number; edge: string }[] = [];
-    
-    // Top edge needles
-    for (let i = 0; i < 60; i++) {
-      needles.push({
-        x: (i / 59) * 100,
-        y: Math.random() * 2,
-        rotation: Math.random() * 360,
-        scale: 0.6 + Math.random() * 0.6,
-        edge: 'top'
-      });
-    }
-    
-    // Bottom edge
-    for (let i = 0; i < 60; i++) {
-      needles.push({
-        x: (i / 59) * 100,
-        y: 98 + Math.random() * 2,
-        rotation: Math.random() * 360,
-        scale: 0.6 + Math.random() * 0.6,
-        edge: 'bottom'
-      });
-    }
-    
-    // Left edge
-    for (let i = 0; i < 40; i++) {
-      needles.push({
-        x: Math.random() * 2,
-        y: (i / 39) * 100,
-        rotation: Math.random() * 360,
-        scale: 0.6 + Math.random() * 0.6,
-        edge: 'left'
-      });
-    }
-    
-    // Right edge
-    for (let i = 0; i < 40; i++) {
-      needles.push({
-        x: 98 + Math.random() * 2,
-        y: (i / 39) * 100,
-        rotation: Math.random() * 360,
-        scale: 0.6 + Math.random() * 0.6,
-        edge: 'right'
-      });
-    }
-    
-    return needles;
-  }, []);
-
-  // Generate holly berries
-  const berries = useMemo(() => {
-    const b: { x: number; y: number; size: number }[] = [];
-    
-    // Scatter berries along edges
-    for (let i = 0; i < 30; i++) {
-      const edge = Math.floor(Math.random() * 4);
-      let x, y;
-      
-      if (edge === 0) { x = Math.random() * 100; y = Math.random() * 3; }
-      else if (edge === 1) { x = 97 + Math.random() * 3; y = Math.random() * 100; }
-      else if (edge === 2) { x = Math.random() * 100; y = 97 + Math.random() * 3; }
-      else { x = Math.random() * 3; y = Math.random() * 100; }
-      
-      b.push({ x, y, size: 4 + Math.random() * 4 });
-    }
-    
-    return b;
-  }, []);
+  const lights = Array.from({ length: 14 }, (_, i) => ({
+    id: i,
+    color: ['#ff3333', '#00cc44', '#ffcc00', '#ff6600', '#00aaff', '#ff66cc'][i % 6],
+    glow: ['#ff6666', '#33ff77', '#ffdd44', '#ff9944', '#44ccff', '#ff99dd'][i % 6],
+    delay: i * 0.18,
+  }));
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
-      {/* Pine Garland Base - Top */}
-      <div className="absolute top-0 left-0 right-0 h-10">
-        <div className="absolute inset-0" style={{
-          background: 'linear-gradient(180deg, rgba(20, 83, 45, 0.95) 0%, rgba(22, 101, 52, 0.8) 40%, rgba(21, 128, 61, 0.4) 70%, transparent 100%)',
-          boxShadow: 'inset 0 0 20px rgba(34, 197, 94, 0.3), 0 4px 12px rgba(0, 0, 0, 0.4)'
-        }} />
-        {/* Pine texture overlay */}
-        <div className="absolute inset-0" style={{
-          backgroundImage: `repeating-linear-gradient(
-            45deg,
-            transparent,
-            transparent 2px,
-            rgba(34, 197, 94, 0.15) 2px,
-            rgba(34, 197, 94, 0.15) 4px
-          ), repeating-linear-gradient(
-            -45deg,
-            transparent,
-            transparent 2px,
-            rgba(22, 163, 74, 0.1) 2px,
-            rgba(22, 163, 74, 0.1) 4px
-          )`
-        }} />
-      </div>
-      
-      {/* Pine Garland Base - Bottom */}
-      <div className="absolute bottom-0 left-0 right-0 h-10">
-        <div className="absolute inset-0" style={{
-          background: 'linear-gradient(0deg, rgba(20, 83, 45, 0.95) 0%, rgba(22, 101, 52, 0.8) 40%, rgba(21, 128, 61, 0.4) 70%, transparent 100%)',
-          boxShadow: 'inset 0 0 20px rgba(34, 197, 94, 0.3), 0 -4px 12px rgba(0, 0, 0, 0.4)'
-        }} />
-        <div className="absolute inset-0" style={{
-          backgroundImage: `repeating-linear-gradient(
-            45deg,
-            transparent,
-            transparent 2px,
-            rgba(34, 197, 94, 0.15) 2px,
-            rgba(34, 197, 94, 0.15) 4px
-          ), repeating-linear-gradient(
-            -45deg,
-            transparent,
-            transparent 2px,
-            rgba(22, 163, 74, 0.1) 2px,
-            rgba(22, 163, 74, 0.1) 4px
-          )`
-        }} />
-      </div>
-      
-      {/* Pine Garland Base - Left */}
-      <div className="absolute top-0 bottom-0 left-0 w-10">
-        <div className="absolute inset-0" style={{
-          background: 'linear-gradient(90deg, rgba(20, 83, 45, 0.95) 0%, rgba(22, 101, 52, 0.8) 40%, rgba(21, 128, 61, 0.4) 70%, transparent 100%)',
-          boxShadow: 'inset 0 0 20px rgba(34, 197, 94, 0.3), 4px 0 12px rgba(0, 0, 0, 0.4)'
-        }} />
-        <div className="absolute inset-0" style={{
-          backgroundImage: `repeating-linear-gradient(
-            45deg,
-            transparent,
-            transparent 2px,
-            rgba(34, 197, 94, 0.15) 2px,
-            rgba(34, 197, 94, 0.15) 4px
-          )`
-        }} />
-      </div>
-      
-      {/* Pine Garland Base - Right */}
-      <div className="absolute top-0 bottom-0 right-0 w-10">
-        <div className="absolute inset-0" style={{
-          background: 'linear-gradient(-90deg, rgba(20, 83, 45, 0.95) 0%, rgba(22, 101, 52, 0.8) 40%, rgba(21, 128, 61, 0.4) 70%, transparent 100%)',
-          boxShadow: 'inset 0 0 20px rgba(34, 197, 94, 0.3), -4px 0 12px rgba(0, 0, 0, 0.4)'
-        }} />
-        <div className="absolute inset-0" style={{
-          backgroundImage: `repeating-linear-gradient(
-            -45deg,
-            transparent,
-            transparent 2px,
-            rgba(34, 197, 94, 0.15) 2px,
-            rgba(34, 197, 94, 0.15) 4px
-          )`
-        }} />
-      </div>
-
-      {/* Pine Needle Clusters */}
-      {pineNeedles.map((needle, i) => (
-        <div
-          key={`needle-${i}`}
-          className="absolute"
+    <div className="fixed top-0 left-1/2 -translate-x-1/2 z-40 pointer-events-none">
+      {/* Wreath Container */}
+      <div className="relative w-40 h-20 mt-1">
+        {/* Pine wreath base - left arc */}
+        <div 
+          className="absolute left-0 top-3 w-20 h-14"
           style={{
-            left: `${needle.x}%`,
-            top: `${needle.y}%`,
-            transform: `rotate(${needle.rotation}deg) scale(${needle.scale})`,
-          }}
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16">
-            <g fill="none" stroke="rgba(34, 197, 94, 0.8)" strokeWidth="0.8">
-              <line x1="8" y1="0" x2="8" y2="16" />
-              <line x1="4" y1="4" x2="12" y2="12" />
-              <line x1="12" y1="4" x2="4" y2="12" />
-              <line x1="2" y1="8" x2="14" y2="8" />
-            </g>
-          </svg>
-        </div>
-      ))}
-
-      {/* Holly Berries */}
-      {berries.map((berry, i) => (
-        <div
-          key={`berry-${i}`}
-          className="absolute rounded-full"
-          style={{
-            left: `${berry.x}%`,
-            top: `${berry.y}%`,
-            width: `${berry.size}px`,
-            height: `${berry.size}px`,
-            background: 'radial-gradient(ellipse at 30% 30%, #ff6b6b, #dc2626 50%, #991b1b 100%)',
-            boxShadow: `
-              0 0 ${berry.size}px rgba(220, 38, 38, 0.6),
-              inset -1px -1px 2px rgba(0, 0, 0, 0.3),
-              inset 1px 1px 2px rgba(255, 255, 255, 0.4)
+            background: `
+              radial-gradient(ellipse 100% 80% at 100% 50%, 
+                transparent 38%, 
+                #0d3d0d 39%, 
+                #1a5c1a 45%,
+                #0f4a0f 55%,
+                #1a5c1a 65%,
+                #0d3d0d 72%,
+                transparent 73%
+              )
             `,
+            filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.6))',
           }}
         />
-      ))}
+        {/* Pine wreath base - right arc */}
+        <div 
+          className="absolute right-0 top-3 w-20 h-14"
+          style={{
+            background: `
+              radial-gradient(ellipse 100% 80% at 0% 50%, 
+                transparent 38%, 
+                #0d3d0d 39%, 
+                #1a5c1a 45%,
+                #0f4a0f 55%,
+                #1a5c1a 65%,
+                #0d3d0d 72%,
+                transparent 73%
+              )
+            `,
+            filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.6))',
+          }}
+        />
+        
+        {/* Pine needle texture */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: `
+              repeating-linear-gradient(60deg, transparent, transparent 1px, rgba(34,139,34,0.2) 1px, rgba(34,139,34,0.2) 2px),
+              repeating-linear-gradient(-60deg, transparent, transparent 1px, rgba(20,100,20,0.15) 1px, rgba(20,100,20,0.15) 2px)
+            `,
+            maskImage: 'radial-gradient(ellipse 85% 65% at 50% 55%, black 25%, transparent 65%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 85% 65% at 50% 55%, black 25%, transparent 65%)',
+          }}
+        />
 
-      {/* Gold Ribbon Accents - Corners */}
-      {[
-        { top: '0', left: '0', rotate: '45deg' },
-        { top: '0', right: '0', rotate: '-45deg' },
-        { bottom: '0', left: '0', rotate: '-45deg' },
-        { bottom: '0', right: '0', rotate: '45deg' }
-      ].map((pos, i) => (
-        <div
-          key={`ribbon-${i}`}
-          className="absolute w-20 h-20"
-          style={{ ...pos }}
-        >
+        {/* Elegant red bow */}
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-1">
+          {/* Bow left loop */}
           <div 
-            className="absolute"
+            className="absolute -left-5 -top-2 w-5 h-4 rounded-full"
             style={{
-              width: '60px',
-              height: '8px',
-              background: 'linear-gradient(180deg, #ffd700 0%, #b8860b 50%, #daa520 100%)',
-              boxShadow: '0 2px 8px rgba(255, 215, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.5)',
-              transform: `rotate(${pos.rotate})`,
-              top: '20px',
-              left: '10px',
-              borderRadius: '2px'
+              background: 'linear-gradient(135deg, #cc2222 0%, #8b0000 40%, #660000 100%)',
+              boxShadow: 'inset -2px -2px 4px rgba(0,0,0,0.4), inset 2px 2px 3px rgba(255,100,100,0.3), 0 2px 4px rgba(0,0,0,0.3)',
+              transform: 'rotate(-25deg)',
+            }}
+          />
+          {/* Bow right loop */}
+          <div 
+            className="absolute -right-5 -top-2 w-5 h-4 rounded-full"
+            style={{
+              background: 'linear-gradient(45deg, #cc2222 0%, #8b0000 40%, #660000 100%)',
+              boxShadow: 'inset 2px -2px 4px rgba(0,0,0,0.4), inset -2px 2px 3px rgba(255,100,100,0.3), 0 2px 4px rgba(0,0,0,0.3)',
+              transform: 'rotate(25deg)',
+            }}
+          />
+          {/* Bow center knot */}
+          <div 
+            className="relative w-4 h-4 rounded-full z-10"
+            style={{
+              background: 'radial-gradient(circle at 35% 35%, #ee3333, #aa0000 50%, #660000)',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,150,150,0.4)',
+            }}
+          />
+          {/* Bow tails */}
+          <div 
+            className="absolute left-0.5 top-3 w-2.5 h-5"
+            style={{
+              background: 'linear-gradient(to bottom, #bb1111, #770000)',
+              clipPath: 'polygon(40% 0%, 100% 0%, 85% 100%, 15% 100%)',
+              transform: 'rotate(-12deg)',
+              boxShadow: 'inset -1px 0 2px rgba(0,0,0,0.3)',
+            }}
+          />
+          <div 
+            className="absolute right-0.5 top-3 w-2.5 h-5"
+            style={{
+              background: 'linear-gradient(to bottom, #bb1111, #770000)',
+              clipPath: 'polygon(0% 0%, 60% 0%, 85% 100%, 15% 100%)',
+              transform: 'rotate(12deg)',
+              boxShadow: 'inset 1px 0 2px rgba(0,0,0,0.3)',
             }}
           />
         </div>
-      ))}
 
-      {/* Christmas Lights with realistic bulb shapes */}
-      {lights.map((light, i) => {
-        const isVertical = light.edge === 'left' || light.edge === 'right';
-        const offset = light.edge === 'top' ? 16 : light.edge === 'bottom' ? -16 : 0;
-        const offsetX = light.edge === 'left' ? 16 : light.edge === 'right' ? -16 : 0;
-        
-        return (
+        {/* Holly berries scattered on wreath */}
+        {[
+          { x: '18%', y: '30%' },
+          { x: '78%', y: '30%' },
+          { x: '30%', y: '22%' },
+          { x: '66%', y: '22%' },
+          { x: '24%', y: '45%' },
+          { x: '72%', y: '45%' },
+        ].map((pos, i) => (
           <div
-            key={`light-${i}`}
-            className="absolute"
+            key={i}
+            className="absolute w-2.5 h-2.5 rounded-full"
             style={{
-              left: light.x === 100 ? 'auto' : `calc(${light.x}% + ${offsetX}px)`,
-              right: light.x === 100 ? '16px' : 'auto',
-              top: light.y === 100 ? 'auto' : `calc(${light.y}% + ${offset}px)`,
-              bottom: light.y === 100 ? '16px' : 'auto',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 60
+              left: pos.x,
+              top: pos.y,
+              background: 'radial-gradient(circle at 30% 30%, #ff5555, #cc0000 45%, #880000)',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.5), inset 0 -1px 2px rgba(0,0,0,0.3), inset 1px 1px 2px rgba(255,200,200,0.4)',
             }}
-          >
-            {/* Wire connecting to next light */}
-            <svg
+          />
+        ))}
+
+        {/* Wire string for lights - follows wreath arc */}
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 160 80" fill="none">
+          <path
+            d="M 8 42 Q 40 6, 80 6 Q 120 6, 152 42"
+            stroke="#1a1a1a"
+            strokeWidth="1.5"
+            fill="none"
+            style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.6))' }}
+          />
+        </svg>
+
+        {/* Christmas light bulbs along the wire */}
+        {lights.map((light, i) => {
+          const t = (i + 0.5) / lights.length;
+          const x = 8 + t * 144;
+          const arcY = 42 - Math.sin(t * Math.PI) * 36;
+          const y = arcY + 5;
+          
+          return (
+            <div
+              key={light.id}
               className="absolute"
               style={{
-                width: isVertical ? '4px' : '30px',
-                height: isVertical ? '30px' : '4px',
-                left: isVertical ? '50%' : '100%',
-                top: isVertical ? '100%' : '50%',
+                left: `${(x / 160) * 100}%`,
+                top: `${(y / 80) * 100}%`,
                 transform: 'translate(-50%, -50%)',
-                zIndex: -1
               }}
             >
-              <path
-                d={isVertical 
-                  ? "M2,0 Q4,15 2,30" 
-                  : "M0,2 Q15,4 30,2"
-                }
-                stroke="#1a1a1a"
-                strokeWidth="2"
-                fill="none"
-              />
-            </svg>
-            
-            {/* Bulb socket/cap */}
-            <div
-              className="absolute"
-              style={{
-                width: '8px',
-                height: '6px',
-                background: 'linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 50%, #3a3a3a 100%)',
-                borderRadius: '2px 2px 0 0',
-                top: '-3px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.2)'
-              }}
-            />
-            
-            {/* Main bulb with realistic glass effect */}
-            <div
-              className="relative"
-              style={{
-                width: '14px',
-                height: '18px',
-                borderRadius: '50% 50% 50% 50% / 40% 40% 60% 60%',
-                background: `
-                  radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.9) 0%, transparent 25%),
-                  radial-gradient(ellipse at 50% 50%, ${light.color.main} 0%, ${light.color.main}dd 60%, ${light.color.main}88 100%)
-                `,
-                boxShadow: `
-                  0 0 20px ${light.color.glow},
-                  0 0 40px ${light.color.glow}88,
-                  0 0 60px ${light.color.glow}44,
-                  inset 0 -4px 8px rgba(0,0,0,0.3),
-                  inset 0 2px 4px rgba(255,255,255,0.4)
-                `,
-                animation: 'bulbTwinkle 2s ease-in-out infinite',
-                animationDelay: `${light.delay}s`,
-              }}
-            >
-              {/* Inner glow filament effect */}
-              <div
-                className="absolute"
+              {/* Bulb socket */}
+              <div 
+                className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-2 h-1.5"
                 style={{
-                  width: '4px',
-                  height: '6px',
-                  background: `radial-gradient(ellipse, ${light.color.glow} 0%, transparent 70%)`,
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  filter: 'blur(1px)',
-                  animation: 'filamentGlow 2s ease-in-out infinite',
+                  background: 'linear-gradient(to bottom, #555, #2a2a2a, #444)',
+                  borderRadius: '1px 1px 0 0',
+                  boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.15)',
+                }}
+              />
+              {/* Glass bulb */}
+              <div
+                className="w-3 h-4 relative"
+                style={{
+                  borderRadius: '50% 50% 50% 50% / 35% 35% 65% 65%',
+                  background: `
+                    radial-gradient(ellipse at 35% 25%, rgba(255,255,255,0.85) 0%, transparent 30%),
+                    radial-gradient(ellipse at 50% 50%, ${light.color} 0%, ${light.color}cc 50%, ${light.color}88 100%)
+                  `,
+                  boxShadow: `
+                    0 0 8px ${light.glow},
+                    0 0 16px ${light.glow}99,
+                    0 0 24px ${light.glow}55,
+                    inset 0 -3px 6px rgba(0,0,0,0.25),
+                    inset 0 2px 3px rgba(255,255,255,0.35)
+                  `,
+                  animation: `twinkle 2.5s ease-in-out infinite`,
+                  animationDelay: `${light.delay}s`,
+                }}
+              >
+                {/* Filament glow */}
+                <div
+                  className="absolute top-1/2 left-1/2 w-1.5 h-2"
+                  style={{
+                    transform: 'translate(-50%, -50%)',
+                    background: `radial-gradient(ellipse, ${light.glow} 0%, transparent 70%)`,
+                    filter: 'blur(0.5px)',
+                    animation: `glow 2.5s ease-in-out infinite`,
+                    animationDelay: `${light.delay}s`,
+                  }}
+                />
+              </div>
+              {/* Light glow halo */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: `radial-gradient(circle, ${light.glow}50 0%, transparent 65%)`,
+                  transform: 'scale(2.5)',
+                  animation: `twinkle 2.5s ease-in-out infinite`,
                   animationDelay: `${light.delay}s`,
                 }}
               />
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
 
-      {/* Decorative bow clusters at corners */}
-      {[
-        { top: '4px', left: '4px' },
-        { top: '4px', right: '4px' },
-        { bottom: '4px', left: '4px' },
-        { bottom: '4px', right: '4px' }
-      ].map((pos, i) => (
-        <div
-          key={`bow-${i}`}
-          className="absolute"
-          style={{ ...pos, width: '40px', height: '40px' }}
-        >
-          {/* Bow loops */}
-          <div style={{
-            position: 'absolute',
-            width: '20px',
-            height: '14px',
-            background: 'linear-gradient(135deg, #dc2626 0%, #991b1b 50%, #7f1d1d 100%)',
-            borderRadius: '50%',
-            top: '8px',
-            left: '2px',
-            transform: 'rotate(-30deg)',
-            boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.3)'
-          }} />
-          <div style={{
-            position: 'absolute',
-            width: '20px',
-            height: '14px',
-            background: 'linear-gradient(45deg, #dc2626 0%, #991b1b 50%, #7f1d1d 100%)',
-            borderRadius: '50%',
-            top: '8px',
-            right: '2px',
-            transform: 'rotate(30deg)',
-            boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.3)'
-          }} />
-          {/* Bow center knot */}
-          <div style={{
-            position: 'absolute',
-            width: '12px',
-            height: '12px',
-            background: 'radial-gradient(ellipse at 30% 30%, #ef4444, #b91c1c 60%, #7f1d1d 100%)',
-            borderRadius: '50%',
-            top: '10px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.3)'
-          }} />
-          {/* Bow tails */}
-          <div style={{
-            position: 'absolute',
-            width: '8px',
-            height: '18px',
-            background: 'linear-gradient(180deg, #dc2626 0%, #991b1b 100%)',
-            borderRadius: '0 0 4px 4px',
-            top: '20px',
-            left: '12px',
-            transform: 'rotate(-15deg)',
-            boxShadow: 'inset -1px 0 2px rgba(0,0,0,0.2)'
-          }} />
-          <div style={{
-            position: 'absolute',
-            width: '8px',
-            height: '16px',
-            background: 'linear-gradient(180deg, #dc2626 0%, #991b1b 100%)',
-            borderRadius: '0 0 4px 4px',
-            top: '20px',
-            right: '12px',
-            transform: 'rotate(15deg)',
-            boxShadow: 'inset 1px 0 2px rgba(0,0,0,0.2)'
-          }} />
-        </div>
-      ))}
-
-      {/* CSS Animations */}
       <style>{`
-        @keyframes bulbTwinkle {
-          0%, 100% { 
-            opacity: 1; 
-            filter: brightness(1) saturate(1);
-          }
-          50% { 
-            opacity: 0.7; 
-            filter: brightness(0.8) saturate(0.9);
-          }
+        @keyframes twinkle {
+          0%, 100% { opacity: 1; filter: brightness(1); }
+          50% { opacity: 0.65; filter: brightness(0.85); }
         }
-        
-        @keyframes filamentGlow {
-          0%, 100% { 
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-          }
-          50% { 
-            opacity: 0.5;
-            transform: translate(-50%, -50%) scale(0.8);
-          }
+        @keyframes glow {
+          0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+          50% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.85); }
         }
       `}</style>
     </div>
