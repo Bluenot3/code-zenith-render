@@ -10,74 +10,73 @@ export const GalaxyClusters = () => {
   const frameCount = useRef(0);
   
   const galaxies = useMemo(() => {
-    const galaxyCount = isMobile ? 3 : 6; // Reduced count
+    const galaxyCount = isMobile ? 4 : 8;
     const galaxyData = [];
     
     for (let g = 0; g < galaxyCount; g++) {
-      const particleCount = isMobile ? 600 : 1200; // Reduced particles
+      const particleCount = isMobile ? 800 : 1600;
       const positions = new Float32Array(particleCount * 3);
       const colors = new Float32Array(particleCount * 3);
       const sizes = new Float32Array(particleCount);
       
-      // Galaxy position - far in the background
-      const galaxyDistance = 80 + Math.random() * 60;
+      const galaxyDistance = 70 + Math.random() * 70;
       const galaxyAngle = (g / galaxyCount) * Math.PI * 2;
-      const galaxyElevation = (Math.random() - 0.5) * 40;
+      const galaxyElevation = (Math.random() - 0.5) * 50;
       
       const galaxyCenterX = Math.cos(galaxyAngle) * galaxyDistance;
       const galaxyCenterY = galaxyElevation;
       const galaxyCenterZ = Math.sin(galaxyAngle) * galaxyDistance;
       
-      // Galaxy color theme
+      // Vibrant galaxy color themes
       const galaxyColorThemes = [
-        { core: new THREE.Color('#ffd700'), outer: new THREE.Color('#4169e1') }, // Gold-blue
-        { core: new THREE.Color('#ff1493'), outer: new THREE.Color('#9370db') }, // Pink-purple
-        { core: new THREE.Color('#00ced1'), outer: new THREE.Color('#191970') }, // Cyan-navy
-        { core: new THREE.Color('#ff6347'), outer: new THREE.Color('#8b008b') }, // Orange-purple
-        { core: new THREE.Color('#98fb98'), outer: new THREE.Color('#2f4f4f') }, // Green-dark
-        { core: new THREE.Color('#f0e68c'), outer: new THREE.Color('#483d8b') }, // Yellow-slate
-        { core: new THREE.Color('#ff69b4'), outer: new THREE.Color('#000080') }, // Hot pink-navy
-        { core: new THREE.Color('#87ceeb'), outer: new THREE.Color('#1a1a2e') }, // Sky blue-dark
+        { core: new THREE.Color('#ffe066'), mid: new THREE.Color('#ff9933'), outer: new THREE.Color('#3366ff') },
+        { core: new THREE.Color('#ff66aa'), mid: new THREE.Color('#cc44aa'), outer: new THREE.Color('#6633cc') },
+        { core: new THREE.Color('#66ffee'), mid: new THREE.Color('#33ccbb'), outer: new THREE.Color('#1a3366') },
+        { core: new THREE.Color('#ff7744'), mid: new THREE.Color('#ff5522'), outer: new THREE.Color('#660066') },
+        { core: new THREE.Color('#aaffaa'), mid: new THREE.Color('#66cc66'), outer: new THREE.Color('#224422') },
+        { core: new THREE.Color('#ffee88'), mid: new THREE.Color('#ffcc44'), outer: new THREE.Color('#4444aa') },
+        { core: new THREE.Color('#ff88cc'), mid: new THREE.Color('#cc66aa'), outer: new THREE.Color('#220044') },
+        { core: new THREE.Color('#88ddff'), mid: new THREE.Color('#44aacc'), outer: new THREE.Color('#112233') },
       ];
       
       const colorTheme = galaxyColorThemes[g % galaxyColorThemes.length];
       
-      // Create spiral galaxy structure
       for (let i = 0; i < particleCount; i++) {
         const i3 = i * 3;
         
-        // Spiral arm parameters
-        const armIndex = Math.floor(Math.random() * 3); // 3 spiral arms
-        const armAngle = (armIndex / 3) * Math.PI * 2;
-        const distanceFromCenter = Math.pow(Math.random(), 0.7) * 12;
-        const spiralAngle = armAngle + distanceFromCenter * 0.5;
+        const armIndex = Math.floor(Math.random() * 4); // 4 spiral arms
+        const armAngle = (armIndex / 4) * Math.PI * 2;
+        const distanceFromCenter = Math.pow(Math.random(), 0.65) * 15;
+        const spiralAngle = armAngle + distanceFromCenter * 0.55;
         
-        // Add randomness to spiral
-        const spreadAngle = (Math.random() - 0.5) * 0.8;
-        const spreadRadius = (Math.random() - 0.5) * 2;
+        const spreadAngle = (Math.random() - 0.5) * 0.7;
+        const spreadRadius = (Math.random() - 0.5) * 2.2;
         
         const x = Math.cos(spiralAngle + spreadAngle) * (distanceFromCenter + spreadRadius);
         const z = Math.sin(spiralAngle + spreadAngle) * (distanceFromCenter + spreadRadius);
-        const y = (Math.random() - 0.5) * (1.5 - distanceFromCenter * 0.1); // Flatter near center
+        const y = (Math.random() - 0.5) * (1.8 - distanceFromCenter * 0.08);
         
         positions[i3] = galaxyCenterX + x;
         positions[i3 + 1] = galaxyCenterY + y;
         positions[i3 + 2] = galaxyCenterZ + z;
         
-        // Color gradient from core to outer arms
-        const distanceRatio = distanceFromCenter / 12;
-        const color = colorTheme.core.clone().lerp(colorTheme.outer, distanceRatio);
+        // Three-color gradient for richer appearance
+        const distanceRatio = distanceFromCenter / 15;
+        let color;
+        if (distanceRatio < 0.4) {
+          color = colorTheme.core.clone().lerp(colorTheme.mid, distanceRatio / 0.4);
+        } else {
+          color = colorTheme.mid.clone().lerp(colorTheme.outer, (distanceRatio - 0.4) / 0.6);
+        }
         
-        // Add some brightness variation
-        const brightness = 0.7 + Math.random() * 0.3;
+        const brightness = 0.75 + Math.random() * 0.35;
         color.multiplyScalar(brightness);
         
         colors[i3] = color.r;
         colors[i3 + 1] = color.g;
         colors[i3 + 2] = color.b;
         
-        // Size - smaller further from center
-        sizes[i] = (1 - distanceRatio * 0.5) * (Math.random() * 0.3 + 0.1);
+        sizes[i] = (1 - distanceRatio * 0.4) * (Math.random() * 0.4 + 0.12);
       }
       
       galaxyData.push({
@@ -85,10 +84,10 @@ export const GalaxyClusters = () => {
         colors,
         sizes,
         center: new THREE.Vector3(galaxyCenterX, galaxyCenterY, galaxyCenterZ),
-        rotationSpeed: (Math.random() - 0.5) * 0.0005,
+        rotationSpeed: (Math.random() - 0.5) * 0.0006,
         rotationAxis: new THREE.Vector3(
           Math.random() - 0.5,
-          0.5 + Math.random() * 0.5,
+          0.6 + Math.random() * 0.4,
           Math.random() - 0.5
         ).normalize(),
       });
@@ -101,18 +100,15 @@ export const GalaxyClusters = () => {
     const time = state.clock.elapsedTime;
     frameCount.current++;
     
-    // Update every other frame
     if (frameCount.current % 2 !== 0) return;
     
     galaxies.forEach((galaxy, index) => {
       const points = galaxyRefs.current[index];
       if (!points) return;
       
-      // Rotate galaxy around its axis
       points.rotateOnAxis(galaxy.rotationAxis, galaxy.rotationSpeed);
       
-      // Subtle pulsing
-      const pulse = 1 + Math.sin(time * 0.5 + index) * 0.05;
+      const pulse = 1 + Math.sin(time * 0.4 + index * 0.8) * 0.06;
       points.scale.setScalar(pulse);
     });
   });
@@ -147,10 +143,10 @@ export const GalaxyClusters = () => {
             />
           </bufferGeometry>
           <pointsMaterial
-            size={0.15}
+            size={0.2}
             vertexColors
             transparent
-            opacity={0.8}
+            opacity={0.9}
             sizeAttenuation
             blending={THREE.AdditiveBlending}
             depthWrite={false}

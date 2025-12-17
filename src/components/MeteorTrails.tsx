@@ -20,22 +20,23 @@ export const MeteorTrails = () => {
   const groupRef = useRef<THREE.Group>(null);
   const frameCount = useRef(0);
   
-  // Shared materials for better performance
+  // High-quality shared materials
   const sharedMaterials = useMemo(() => {
     const colorPalette = [
-      '#ff6600', '#ff0066', '#00ffff', '#ffff00', 
-      '#00ff88', '#8800ff', '#ff3300', '#ffffff'
+      '#ff5500', '#ff0055', '#00ffee', '#ffee00', 
+      '#00ff77', '#9900ff', '#ff2200', '#ffffff',
+      '#ff8800', '#00aaff', '#ff00aa', '#aaff00'
     ];
     
     return colorPalette.map(color => ({
       head: new THREE.MeshPhysicalMaterial({
         color,
         emissive: color,
-        emissiveIntensity: 4.5,
+        emissiveIntensity: 5.5,
         transparent: true,
         opacity: 1,
-        metalness: 0.9,
-        roughness: 0.1,
+        metalness: 0.95,
+        roughness: 0.05,
         clearcoat: 1,
         clearcoatRoughness: 0,
         toneMapped: false,
@@ -43,7 +44,7 @@ export const MeteorTrails = () => {
       glow: new THREE.MeshBasicMaterial({
         color,
         transparent: true,
-        opacity: 0.5,
+        opacity: 0.6,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
         toneMapped: false,
@@ -51,7 +52,7 @@ export const MeteorTrails = () => {
       trail: new THREE.LineBasicMaterial({
         color,
         transparent: true,
-        opacity: 0.4,
+        opacity: 0.5,
         linewidth: 1,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
@@ -59,17 +60,17 @@ export const MeteorTrails = () => {
     }));
   }, []);
   
-  // Initialize meteors with variety
+  // Initialize meteors
   useMemo(() => {
-    const meteorCount = isMobile ? 30 : 60; // Reduced count
+    const meteorCount = isMobile ? 40 : 80;
     meteorsRef.current = Array.from({ length: meteorCount }, () => {
       const materialIndex = Math.floor(Math.random() * sharedMaterials.length);
-      const startX = (Math.random() - 0.5) * 60;
-      const startY = (Math.random() - 0.5) * 60;
-      const startZ = (Math.random() - 0.5) * 60;
+      const startX = (Math.random() - 0.5) * 70;
+      const startY = (Math.random() - 0.5) * 70;
+      const startZ = (Math.random() - 0.5) * 70;
       
-      const speed = Math.random() * 0.25 + 0.12;
-      const size = Math.random() * 0.15 + 0.1;
+      const speed = Math.random() * 0.3 + 0.14;
+      const size = Math.random() * 0.18 + 0.12;
       
       return {
         position: new THREE.Vector3(startX, startY, startZ),
@@ -82,7 +83,7 @@ export const MeteorTrails = () => {
         color: new THREE.Color(sharedMaterials[materialIndex].head.color),
         size,
         speed,
-        glowIntensity: Math.random() * 2 + 3,
+        glowIntensity: Math.random() * 2.5 + 3.5,
       };
     });
   }, [isMobile, sharedMaterials]);
@@ -90,34 +91,30 @@ export const MeteorTrails = () => {
   useFrame(() => {
     if (!groupRef.current) return;
     
-    // Update every frame but reduce geometry quality updates
     frameCount.current++;
-    const updateGeometry = frameCount.current % 2 === 0; // Update geometry every other frame
+    const updateGeometry = frameCount.current % 2 === 0;
     
     meteorsRef.current.forEach((meteor, meteorIndex) => {
-      // Update position
       meteor.position.add(meteor.velocity);
       
-      // Add to trail
       meteor.trail.push(meteor.position.clone());
-      const maxTrailLength = Math.floor(meteor.speed * 100 + 20);
+      const maxTrailLength = Math.floor(meteor.speed * 120 + 25);
       if (meteor.trail.length > maxTrailLength) {
         meteor.trail.shift();
       }
       
-      // Reset if out of bounds
-      const bounds = 35;
+      const bounds = 40;
       if (
         Math.abs(meteor.position.x) > bounds ||
         Math.abs(meteor.position.y) > bounds ||
         Math.abs(meteor.position.z) > bounds
       ) {
         meteor.position.set(
-          (Math.random() - 0.5) * 60,
-          (Math.random() - 0.5) * 60,
-          (Math.random() - 0.5) * 60
+          (Math.random() - 0.5) * 70,
+          (Math.random() - 0.5) * 70,
+          (Math.random() - 0.5) * 70
         );
-        const newSpeed = Math.random() * 0.2 + 0.1;
+        const newSpeed = Math.random() * 0.25 + 0.12;
         meteor.velocity.set(
           (Math.random() - 0.5) * newSpeed,
           (Math.random() - 0.5) * newSpeed,
@@ -127,12 +124,11 @@ export const MeteorTrails = () => {
         meteor.trail = [];
       }
       
-      // Update or create meteor head mesh
       const headKey = `head-${meteorIndex}`;
       let headMesh = meshesRef.current.get(headKey) as THREE.Mesh;
       
       if (!headMesh) {
-        const geometry = new THREE.SphereGeometry(meteor.size, 16, 16); // Reduced quality
+        const geometry = new THREE.SphereGeometry(meteor.size, 20, 20);
         const materialIndex = Math.floor(Math.random() * sharedMaterials.length);
         headMesh = new THREE.Mesh(geometry, sharedMaterials[materialIndex].head);
         meshesRef.current.set(headKey, headMesh);
@@ -140,12 +136,11 @@ export const MeteorTrails = () => {
       }
       headMesh.position.copy(meteor.position);
       
-      // Update or create outer glow
       const glowKey = `glow-${meteorIndex}`;
       let glowMesh = meshesRef.current.get(glowKey) as THREE.Mesh;
       
       if (!glowMesh) {
-        const glowGeometry = new THREE.SphereGeometry(meteor.size * 2.5, 12, 12); // Reduced quality
+        const glowGeometry = new THREE.SphereGeometry(meteor.size * 3, 16, 16);
         const materialIndex = Math.floor(Math.random() * sharedMaterials.length);
         glowMesh = new THREE.Mesh(glowGeometry, sharedMaterials[materialIndex].glow);
         meshesRef.current.set(glowKey, glowMesh);
@@ -153,7 +148,6 @@ export const MeteorTrails = () => {
       }
       glowMesh.position.copy(meteor.position);
       
-      // Update or create trail (only if needed)
       if (updateGeometry && meteor.trail.length > 3) {
         const trailKey = `trail-${meteorIndex}`;
         let trailLine = meshesRef.current.get(trailKey) as THREE.Line;
@@ -166,7 +160,6 @@ export const MeteorTrails = () => {
           groupRef.current.add(trailLine);
         }
         
-        // Update trail geometry
         const positions = new Float32Array(meteor.trail.length * 3);
         meteor.trail.forEach((point, i) => {
           positions[i * 3] = point.x;

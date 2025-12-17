@@ -9,30 +9,50 @@ export const Particles = () => {
   const pointsRef = useRef<THREE.Points>(null);
   const particles = useStore((state) => state.particles);
   const theme = useStore((state) => state.theme);
+  const frameCount = useRef(0);
   
   const [positions, colors, sizes] = useMemo(() => {
-    // Much more aggressive mobile reduction
-    const actualDensity = isMobile ? Math.floor(particles.density * 0.15) : particles.density;
+    const actualDensity = isMobile ? Math.floor(particles.density * 0.2) : particles.density;
     const count = actualDensity;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const sizes = new Float32Array(count);
     
-    const color = new THREE.Color(theme.background);
-    const glowColor = color.clone().offsetHSL(0, 0, 0.3);
+    const baseColor = new THREE.Color(theme.background);
+    
+    // Enhanced color palette for richer visuals
+    const colorPalette = [
+      baseColor.clone().offsetHSL(0, 0.2, 0.4),
+      baseColor.clone().offsetHSL(0.1, 0.3, 0.35),
+      baseColor.clone().offsetHSL(-0.1, 0.25, 0.45),
+      baseColor.clone().offsetHSL(0.05, 0.4, 0.3),
+    ];
     
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
       
-      positions[i3] = (Math.random() - 0.5) * 20;
-      positions[i3 + 1] = (Math.random() - 0.5) * 20;
-      positions[i3 + 2] = (Math.random() - 0.5) * 20;
+      // Layered distribution for depth
+      const layer = Math.random();
+      const radius = 5 + layer * 15;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.random() * Math.PI;
       
-      colors[i3] = glowColor.r;
-      colors[i3 + 1] = glowColor.g;
-      colors[i3 + 2] = glowColor.b;
+      positions[i3] = radius * Math.sin(phi) * Math.cos(theta);
+      positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+      positions[i3 + 2] = radius * Math.cos(phi);
       
-      sizes[i] = Math.random() * 0.2 + 0.05;
+      // Use varied colors from palette
+      const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+      const brightness = 0.8 + Math.random() * 0.4;
+      
+      colors[i3] = color.r * brightness;
+      colors[i3 + 1] = color.g * brightness;
+      colors[i3 + 2] = color.b * brightness;
+      
+      // Varied sizes with some larger bright particles
+      sizes[i] = Math.random() < 0.9 
+        ? Math.random() * 0.25 + 0.08 
+        : Math.random() * 0.5 + 0.3;
     }
     
     return [positions, colors, sizes];
@@ -41,18 +61,23 @@ export const Particles = () => {
   useFrame((state) => {
     if (!pointsRef.current) return;
     
+    frameCount.current++;
+    // Update every other frame for performance
+    if (frameCount.current % 2 !== 0) return;
+    
     const geo = pointsRef.current.geometry;
     const positions = geo.attributes.position.array as Float32Array;
     const sizes = geo.attributes.size.array as Float32Array;
+    const time = state.clock.elapsedTime;
     
     for (let i = 0; i < positions.length; i += 3) {
       if (particles.orbitMode) {
-        const angle = state.clock.elapsedTime * 0.1;
+        const angle = time * 0.1;
         const radius = 10;
         positions[i] = Math.cos(angle + i) * radius;
         positions[i + 2] = Math.sin(angle + i) * radius;
       } else {
-        positions[i + 1] -= 0.01 * particles.driftSpeed;
+        positions[i + 1] -= 0.012 * particles.driftSpeed;
         if (positions[i + 1] < -10) {
           positions[i + 1] = 10;
         }
@@ -60,7 +85,8 @@ export const Particles = () => {
       
       if (particles.twinkle) {
         const sizeIndex = i / 3;
-        sizes[sizeIndex] = Math.abs(Math.sin(state.clock.elapsedTime + i)) * 0.2 + 0.05;
+        const baseFactor = 0.15 + Math.abs(Math.sin(time * 1.2 + i * 0.3)) * 0.2;
+        sizes[sizeIndex] = baseFactor;
       }
     }
     
@@ -93,13 +119,14 @@ export const Particles = () => {
         />
       </bufferGeometry>
       <pointsMaterial
-        size={0.03}
+        size={0.04}
         vertexColors
         transparent
-        opacity={0.4}
+        opacity={0.6}
         sizeAttenuation
         blending={THREE.AdditiveBlending}
         depthWrite={false}
+        toneMapped={false}
       />
     </points>
   );
