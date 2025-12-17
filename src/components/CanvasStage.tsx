@@ -35,6 +35,11 @@ const EnergyOrbs = lazy(() => import('./EnergyOrbs').then(m => ({ default: m.Ene
 const PlasmaWisps = lazy(() => import('./PlasmaWisps').then(m => ({ default: m.PlasmaWisps })));
 const CosmicFireflies = lazy(() => import('./CosmicFireflies').then(m => ({ default: m.CosmicFireflies })));
 const StarClusters = lazy(() => import('./StarClusters').then(m => ({ default: m.StarClusters })));
+// Deep background effects
+const ShootingStars = lazy(() => import('./ShootingStars').then(m => ({ default: m.ShootingStars })));
+const DeepSpaceGlow = lazy(() => import('./DeepSpaceGlow').then(m => ({ default: m.DeepSpaceGlow })));
+const DistantGalaxies = lazy(() => import('./DistantGalaxies').then(m => ({ default: m.DistantGalaxies })));
+const CosmicAurora = lazy(() => import('./CosmicAurora').then(m => ({ default: m.CosmicAurora })));
 
 export const CanvasStage = () => {
   const isMobile = useIsMobile();
@@ -280,6 +285,11 @@ export const CanvasStage = () => {
             <PlasmaWisps />
             <CosmicFireflies />
             <StarClusters />
+            {/* Deep background effects */}
+            <ShootingStars />
+            <DeepSpaceGlow />
+            <DistantGalaxies />
+            <CosmicAurora />
           </Suspense>
         )}
         
