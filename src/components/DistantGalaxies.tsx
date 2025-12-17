@@ -6,6 +6,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 export const DistantGalaxies = () => {
   const groupRef = useRef<THREE.Group>(null);
   const isMobile = useIsMobile();
+  const frameCount = useRef(0);
   
   const galaxyCount = isMobile ? 4 : 12;
   
@@ -72,7 +73,10 @@ export const DistantGalaxies = () => {
 
   useFrame((state) => {
     if (!groupRef.current) return;
-    if (isMobile && state.clock.elapsedTime % 5 < 4.9) return;
+    
+    frameCount.current++;
+    // Smooth updates every 2 frames
+    if (frameCount.current % 2 !== 0) return;
     
     groupRef.current.children.forEach((child, i) => {
       if (child instanceof THREE.Points) {
@@ -89,6 +93,7 @@ export const DistantGalaxies = () => {
           position={galaxy.position}
           rotation={galaxy.rotation}
           renderOrder={-80}
+          frustumCulled={false}
         >
           <bufferGeometry>
             <bufferAttribute
@@ -108,10 +113,11 @@ export const DistantGalaxies = () => {
             size={0.8}
             vertexColors
             transparent
-            opacity={0.6}
+            opacity={0.7}
             blending={THREE.AdditiveBlending}
             depthWrite={false}
             sizeAttenuation
+            toneMapped={false}
           />
         </points>
       ))}

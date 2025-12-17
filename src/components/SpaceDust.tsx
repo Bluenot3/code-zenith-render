@@ -8,8 +8,8 @@ export const SpaceDust = () => {
   const pointsRef = useRef<THREE.Points>(null);
   const frameCount = useRef(0);
   
-  const [positions, colors, sizes, velocities] = useMemo(() => {
-    const count = isMobile ? 400 : 2000;
+  const { positions, colors, sizes, velocities, count } = useMemo(() => {
+    const count = isMobile ? 400 : 2500;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const sizes = new Float32Array(count);
@@ -32,9 +32,9 @@ export const SpaceDust = () => {
       positions[i3 + 2] = (Math.random() - 0.5) * 80;
       
       // Gentle drift velocities
-      velocities[i3] = (Math.random() - 0.5) * 0.008;
-      velocities[i3 + 1] = (Math.random() - 0.5) * 0.008;
-      velocities[i3 + 2] = (Math.random() - 0.5) * 0.008;
+      velocities[i3] = (Math.random() - 0.5) * 0.006;
+      velocities[i3 + 1] = (Math.random() - 0.5) * 0.006;
+      velocities[i3 + 2] = (Math.random() - 0.5) * 0.006;
       
       // Soft dust colors
       const color = dustColors[Math.floor(Math.random() * dustColors.length)];
@@ -43,65 +43,69 @@ export const SpaceDust = () => {
       colors[i3 + 2] = color.b;
       
       // Very small sizes for fine dust
-      sizes[i] = Math.random() * 0.08 + 0.02;
+      sizes[i] = Math.random() * 0.06 + 0.02;
     }
     
-    return [positions, colors, sizes, velocities];
+    return { positions, colors, sizes, velocities, count };
   }, [isMobile]);
   
   useFrame((state) => {
     if (!pointsRef.current) return;
     
     frameCount.current++;
-    if (frameCount.current % 2 !== 0) return;
+    // Smooth updates every frame for fluid dust movement
+    if (isMobile && frameCount.current % 2 !== 0) return;
     
     const geo = pointsRef.current.geometry;
     const pos = geo.attributes.position.array as Float32Array;
     const time = state.clock.elapsedTime;
     
+    const bounds = 40;
     for (let i = 0; i < pos.length; i += 3) {
       // Gentle floating motion with turbulence
-      pos[i] += velocities[i] + Math.sin(time * 0.2 + i) * 0.001;
-      pos[i + 1] += velocities[i + 1] + Math.cos(time * 0.15 + i) * 0.001;
+      pos[i] += velocities[i] + Math.sin(time * 0.2 + i) * 0.0008;
+      pos[i + 1] += velocities[i + 1] + Math.cos(time * 0.15 + i) * 0.0008;
       pos[i + 2] += velocities[i + 2];
       
-      // Wrap around bounds
-      const bounds = 40;
-      if (Math.abs(pos[i]) > bounds) pos[i] *= -0.95;
-      if (Math.abs(pos[i + 1]) > bounds) pos[i + 1] *= -0.95;
-      if (Math.abs(pos[i + 2]) > bounds) pos[i + 2] *= -0.95;
+      // Smooth wrap around bounds
+      if (pos[i] > bounds) pos[i] = -bounds;
+      if (pos[i] < -bounds) pos[i] = bounds;
+      if (pos[i + 1] > bounds) pos[i + 1] = -bounds;
+      if (pos[i + 1] < -bounds) pos[i + 1] = bounds;
+      if (pos[i + 2] > bounds) pos[i + 2] = -bounds;
+      if (pos[i + 2] < -bounds) pos[i + 2] = bounds;
     }
     
     geo.attributes.position.needsUpdate = true;
   });
   
   return (
-    <points ref={pointsRef} renderOrder={-2}>
+    <points ref={pointsRef} renderOrder={-2} frustumCulled={false}>
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          count={positions.length / 3}
+          count={count}
           array={positions}
           itemSize={3}
         />
         <bufferAttribute
           attach="attributes-color"
-          count={colors.length / 3}
+          count={count}
           array={colors}
           itemSize={3}
         />
         <bufferAttribute
           attach="attributes-size"
-          count={sizes.length}
+          count={count}
           array={sizes}
           itemSize={1}
         />
       </bufferGeometry>
       <pointsMaterial
-        size={0.06}
+        size={0.05}
         vertexColors
         transparent
-        opacity={0.4}
+        opacity={0.45}
         sizeAttenuation
         blending={THREE.AdditiveBlending}
         depthWrite={false}

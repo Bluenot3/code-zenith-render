@@ -6,6 +6,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 export const DeepSpaceGlow = () => {
   const meshRef = useRef<THREE.Points>(null);
   const isMobile = useIsMobile();
+  const frameCount = useRef(0);
   
   const glowCount = isMobile ? 15 : 40;
   
@@ -45,7 +46,10 @@ export const DeepSpaceGlow = () => {
 
   useFrame((state) => {
     if (!meshRef.current) return;
-    if (isMobile && state.clock.elapsedTime % 4 < 3.9) return;
+    
+    frameCount.current++;
+    // Smooth rotation - every 2 frames
+    if (frameCount.current % 2 !== 0) return;
     
     const time = state.clock.elapsedTime * 0.05;
     meshRef.current.rotation.y = time;
@@ -53,7 +57,7 @@ export const DeepSpaceGlow = () => {
   });
 
   return (
-    <points ref={meshRef} renderOrder={-90}>
+    <points ref={meshRef} renderOrder={-90} frustumCulled={false}>
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
@@ -72,10 +76,11 @@ export const DeepSpaceGlow = () => {
         size={80}
         vertexColors
         transparent
-        opacity={0.15}
+        opacity={0.18}
         blending={THREE.AdditiveBlending}
         depthWrite={false}
         sizeAttenuation
+        toneMapped={false}
       />
     </points>
   );

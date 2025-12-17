@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useCallback } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -6,6 +6,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 export const ShootingStars = () => {
   const groupRef = useRef<THREE.Group>(null);
   const isMobile = useIsMobile();
+  const frameCount = useRef(0);
   
   const starCount = isMobile ? 8 : 25;
   
@@ -31,12 +32,22 @@ export const ShootingStars = () => {
     }));
   }, [starCount]);
 
-  const trailGeometry = useMemo(() => new THREE.BufferGeometry(), []);
-  const trailPositions = useMemo(() => new Float32Array(starCount * 6), [starCount]);
-  const trailColors = useMemo(() => new Float32Array(starCount * 6), [starCount]);
+  // Pre-allocate buffers for smooth updates
+  const { trailGeometry, trailPositions, trailColors } = useMemo(() => {
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(starCount * 6);
+    const colors = new Float32Array(starCount * 6);
+    
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    
+    return { trailGeometry: geometry, trailPositions: positions, trailColors: colors };
+  }, [starCount]);
 
   useFrame((state) => {
-    if (isMobile && state.clock.elapsedTime % 3 < 2.95) return;
+    frameCount.current++;
+    // Smooth updates - every frame for desktop, every 2 for mobile
+    if (isMobile && frameCount.current % 2 !== 0) return;
     
     const time = state.clock.elapsedTime;
     
@@ -79,21 +90,20 @@ export const ShootingStars = () => {
       }
     });
     
-    trailGeometry.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
-    trailGeometry.setAttribute('color', new THREE.BufferAttribute(trailColors, 3));
     trailGeometry.attributes.position.needsUpdate = true;
     trailGeometry.attributes.color.needsUpdate = true;
   });
 
   return (
     <group ref={groupRef}>
-      <lineSegments geometry={trailGeometry}>
+      <lineSegments geometry={trailGeometry} frustumCulled={false}>
         <lineBasicMaterial
           vertexColors
           transparent
-          opacity={0.9}
+          opacity={0.95}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
+          toneMapped={false}
         />
       </lineSegments>
     </group>
