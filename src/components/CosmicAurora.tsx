@@ -6,6 +6,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 export const CosmicAurora = () => {
   const meshRef = useRef<THREE.Mesh>(null);
   const isMobile = useIsMobile();
+  const frameCount = useRef(0);
 
   const auroraShader = useMemo(() => ({
     vertexShader: `
@@ -68,10 +69,10 @@ export const CosmicAurora = () => {
         
         vec3 auroraColor = color1 * band1 + color2 * band2 + color3 * band3;
         
-        float noise = fbm(uv * 4.0 + time * 0.1);
-        auroraColor *= 0.8 + noise * 0.4;
+        float fbmNoise = fbm(uv * 4.0 + time * 0.1);
+        auroraColor *= 0.8 + fbmNoise * 0.4;
         
-        float alpha = (band1 + band2 + band3) * 0.15;
+        float alpha = (band1 + band2 + band3) * 0.18;
         alpha *= smoothstep(0.0, 0.2, uv.x) * smoothstep(1.0, 0.8, uv.x);
         
         gl_FragColor = vec4(auroraColor, alpha);
@@ -87,14 +88,17 @@ export const CosmicAurora = () => {
 
   useFrame((state) => {
     if (!meshRef.current) return;
-    if (isMobile && state.clock.elapsedTime % 3 < 2.95) return;
+    
+    frameCount.current++;
+    // Smooth shader updates every frame
+    if (isMobile && frameCount.current % 2 !== 0) return;
     
     const material = meshRef.current.material as THREE.ShaderMaterial;
     material.uniforms.time.value = state.clock.elapsedTime * 0.5;
   });
 
   return (
-    <mesh ref={meshRef} position={[0, 80, -180]} rotation={[0.3, 0, 0]} renderOrder={-85}>
+    <mesh ref={meshRef} position={[0, 80, -180]} rotation={[0.3, 0, 0]} renderOrder={-85} frustumCulled={false}>
       <planeGeometry args={[300, 80, 1, 1]} />
       <shaderMaterial
         vertexShader={auroraShader.vertexShader}
@@ -104,6 +108,7 @@ export const CosmicAurora = () => {
         blending={THREE.AdditiveBlending}
         depthWrite={false}
         side={THREE.DoubleSide}
+        toneMapped={false}
       />
     </mesh>
   );
