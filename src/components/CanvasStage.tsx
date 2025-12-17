@@ -29,6 +29,12 @@ const CrystalFormation = lazy(() => import('./CrystalFormation').then(m => ({ de
 const Sparkles = lazy(() => import('./SpawnEffects').then(m => ({ default: m.Sparkles })));
 const SpawnFlash = lazy(() => import('./SpawnEffects').then(m => ({ default: m.SpawnFlash })));
 const ShockwaveRing = lazy(() => import('./SpawnEffects').then(m => ({ default: m.ShockwaveRing })));
+// New detailed particle systems
+const SpaceDust = lazy(() => import('./SpaceDust').then(m => ({ default: m.SpaceDust })));
+const EnergyOrbs = lazy(() => import('./EnergyOrbs').then(m => ({ default: m.EnergyOrbs })));
+const PlasmaWisps = lazy(() => import('./PlasmaWisps').then(m => ({ default: m.PlasmaWisps })));
+const CosmicFireflies = lazy(() => import('./CosmicFireflies').then(m => ({ default: m.CosmicFireflies })));
+const StarClusters = lazy(() => import('./StarClusters').then(m => ({ default: m.StarClusters })));
 
 export const CanvasStage = () => {
   const isMobile = useIsMobile();
@@ -269,6 +275,11 @@ export const CanvasStage = () => {
             <MeteorTrails />
             <QuantumRift />
             <CrystalFormation />
+            <SpaceDust />
+            <EnergyOrbs />
+            <PlasmaWisps />
+            <CosmicFireflies />
+            <StarClusters />
           </Suspense>
         )}
         

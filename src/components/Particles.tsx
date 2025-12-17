@@ -20,20 +20,34 @@ export const Particles = () => {
     
     const baseColor = new THREE.Color(theme.background);
     
-    // Enhanced color palette for richer visuals
+    // Rich multi-spectrum color palette for maximum visual impact
     const colorPalette = [
-      baseColor.clone().offsetHSL(0, 0.2, 0.4),
-      baseColor.clone().offsetHSL(0.1, 0.3, 0.35),
-      baseColor.clone().offsetHSL(-0.1, 0.25, 0.45),
-      baseColor.clone().offsetHSL(0.05, 0.4, 0.3),
+      baseColor.clone().offsetHSL(0, 0.3, 0.5),
+      baseColor.clone().offsetHSL(0.1, 0.4, 0.45),
+      baseColor.clone().offsetHSL(-0.1, 0.35, 0.5),
+      baseColor.clone().offsetHSL(0.05, 0.5, 0.4),
+      baseColor.clone().offsetHSL(0.15, 0.45, 0.48),
+      baseColor.clone().offsetHSL(-0.05, 0.4, 0.52),
+      new THREE.Color('#00ffff').offsetHSL(0, 0.2, 0.1),
+      new THREE.Color('#ff00ff').offsetHSL(0, 0.2, 0.1),
+      new THREE.Color('#ffff00').offsetHSL(0, 0.2, 0.1),
     ];
     
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
       
-      // Layered distribution for depth
+      // Multi-layered spherical distribution for rich 3D depth
       const layer = Math.random();
-      const radius = 5 + layer * 15;
+      const layerType = Math.floor(layer * 4);
+      let radius;
+      
+      switch (layerType) {
+        case 0: radius = 3 + Math.random() * 4; break;  // Inner layer
+        case 1: radius = 7 + Math.random() * 5; break;  // Mid layer
+        case 2: radius = 12 + Math.random() * 6; break; // Outer layer
+        default: radius = 18 + Math.random() * 8; break; // Far layer
+      }
+      
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.random() * Math.PI;
       
@@ -41,18 +55,23 @@ export const Particles = () => {
       positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
       positions[i3 + 2] = radius * Math.cos(phi);
       
-      // Use varied colors from palette
+      // Use varied colors from enhanced palette
       const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
-      const brightness = 0.8 + Math.random() * 0.4;
+      const brightness = 0.75 + Math.random() * 0.5;
       
       colors[i3] = color.r * brightness;
       colors[i3 + 1] = color.g * brightness;
       colors[i3 + 2] = color.b * brightness;
       
-      // Varied sizes with some larger bright particles
-      sizes[i] = Math.random() < 0.9 
-        ? Math.random() * 0.25 + 0.08 
-        : Math.random() * 0.5 + 0.3;
+      // Varied sizes with dramatic distribution
+      const sizeRoll = Math.random();
+      if (sizeRoll < 0.7) {
+        sizes[i] = Math.random() * 0.2 + 0.05;  // Fine particles
+      } else if (sizeRoll < 0.9) {
+        sizes[i] = Math.random() * 0.4 + 0.2;   // Medium particles
+      } else {
+        sizes[i] = Math.random() * 0.7 + 0.4;   // Large bright particles
+      }
     }
     
     return [positions, colors, sizes];
