@@ -9,18 +9,18 @@ export const AmbientStars = () => {
   const frameCount = useRef(0);
   
   const [positions, colors, sizes, baseSizes] = useMemo(() => {
-    const count = isMobile ? 400 : 2500; // Further reduced for mobile
+    const count = isMobile ? 600 : 3500;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const sizes = new Float32Array(count);
-    const baseSizes = new Float32Array(count); // Store base sizes
+    const baseSizes = new Float32Array(count);
     
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
       
-      // Multi-layered sphere distribution for depth
+      // Multi-layered sphere distribution for rich depth
       const layer = Math.random();
-      const radius = 50 + Math.pow(layer, 2) * 100; // Non-linear distribution for depth
+      const radius = 45 + Math.pow(layer, 1.5) * 120;
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.random() * Math.PI;
       
@@ -28,40 +28,51 @@ export const AmbientStars = () => {
       positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
       positions[i3 + 2] = radius * Math.cos(phi);
       
-      // Rich color palette - blues, whites, hints of pink/yellow for realism
+      // Rich realistic star color palette
       const starType = Math.random();
       let r, g, b;
-      if (starType < 0.5) {
-        // Blue-white stars (hot)
-        r = 0.9 + Math.random() * 0.1;
-        g = 0.95 + Math.random() * 0.05;
+      if (starType < 0.35) {
+        // Blue-white hot stars
+        r = 0.85 + Math.random() * 0.15;
+        g = 0.92 + Math.random() * 0.08;
         b = 1.0;
-      } else if (starType < 0.8) {
-        // Pure white stars
-        const brightness = 0.95 + Math.random() * 0.05;
+      } else if (starType < 0.6) {
+        // Pure white/silver stars
+        const brightness = 0.92 + Math.random() * 0.08;
         r = g = b = brightness;
-      } else if (starType < 0.95) {
-        // Yellow-white stars (cooler)
+      } else if (starType < 0.8) {
+        // Yellow-gold stars
         r = 1.0;
-        g = 0.95 + Math.random() * 0.05;
-        b = 0.85 + Math.random() * 0.1;
+        g = 0.92 + Math.random() * 0.08;
+        b = 0.78 + Math.random() * 0.12;
+      } else if (starType < 0.92) {
+        // Orange-amber stars
+        r = 1.0;
+        g = 0.75 + Math.random() * 0.15;
+        b = 0.55 + Math.random() * 0.15;
       } else {
-        // Red-orange stars (coolest)
+        // Deep red giants
         r = 1.0;
-        g = 0.7 + Math.random() * 0.2;
-        b = 0.6 + Math.random() * 0.2;
+        g = 0.5 + Math.random() * 0.2;
+        b = 0.4 + Math.random() * 0.15;
       }
       
       colors[i3] = r;
       colors[i3 + 1] = g;
       colors[i3 + 2] = b;
       
-      // Variable sizes with some very large bright stars
-      const baseSize = Math.random() < 0.95 
-        ? Math.random() * 0.4 + 0.1 
-        : Math.random() * 1.2 + 0.8;
+      // Variable sizes with dramatic bright stars
+      const sizeRoll = Math.random();
+      let baseSize;
+      if (sizeRoll < 0.8) {
+        baseSize = Math.random() * 0.35 + 0.1;
+      } else if (sizeRoll < 0.95) {
+        baseSize = Math.random() * 0.8 + 0.5;
+      } else {
+        baseSize = Math.random() * 1.5 + 1.0; // Rare bright stars
+      }
       sizes[i] = baseSize;
-      baseSizes[i] = baseSize; // Store base size
+      baseSizes[i] = baseSize;
     }
     
     return [positions, colors, sizes, baseSizes];
@@ -72,29 +83,23 @@ export const AmbientStars = () => {
     
     frameCount.current++;
     
-    // Skip twinkling entirely on mobile for better performance
-    if (!isMobile) {
-      // Only update twinkling every 4 frames on desktop
-      if (frameCount.current % 4 === 0) {
-        const geo = starsRef.current.geometry;
-        const sizes = geo.attributes.size.array as Float32Array;
-        const time = state.clock.elapsedTime;
-        
-        // Optimized twinkling - update subset of stars
-        for (let i = 0; i < sizes.length; i += 3) { // Skip every 3rd star
-          // Simplified twinkling
-          const twinkle = Math.sin(time * 0.8 + i * 0.05);
-          sizes[i] = baseSizes[i] * (0.8 + Math.abs(twinkle) * 0.4);
-          if (i + 1 < sizes.length) sizes[i + 1] = baseSizes[i + 1] * (0.8 + Math.abs(Math.sin(time * 0.9 + i)) * 0.4);
-          if (i + 2 < sizes.length) sizes[i + 2] = baseSizes[i + 2] * (0.8 + Math.abs(Math.sin(time * 0.7 + i)) * 0.4);
-        }
-        
-        geo.attributes.size.needsUpdate = true;
+    // Efficient twinkling - desktop only
+    if (!isMobile && frameCount.current % 3 === 0) {
+      const geo = starsRef.current.geometry;
+      const sizes = geo.attributes.size.array as Float32Array;
+      const time = state.clock.elapsedTime;
+      
+      // Update subset for performance
+      for (let i = 0; i < sizes.length; i += 2) {
+        const twinkle = Math.sin(time * 0.6 + i * 0.04);
+        sizes[i] = baseSizes[i] * (0.75 + Math.abs(twinkle) * 0.5);
       }
+      
+      geo.attributes.size.needsUpdate = true;
     }
     
-    // Very slow rotation for parallax effect
-    starsRef.current.rotation.y += 0.00005;
+    // Subtle parallax rotation
+    starsRef.current.rotation.y += 0.00004;
     starsRef.current.rotation.x += 0.00002;
   });
   
@@ -121,10 +126,10 @@ export const AmbientStars = () => {
         />
       </bufferGeometry>
       <pointsMaterial
-        size={0.2}
+        size={0.25}
         vertexColors
         transparent
-        opacity={0.95}
+        opacity={0.98}
         sizeAttenuation
         blending={THREE.AdditiveBlending}
         depthWrite={false}

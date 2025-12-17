@@ -10,32 +10,30 @@ export const NebulaClouds = () => {
   const frameCount = useRef(0);
   
   const clouds = useMemo(() => {
-    const cloudCount = isMobile ? 4 : 7; // Reduced count
+    const cloudCount = isMobile ? 5 : 9;
     const cloudData = [];
     
     for (let cloudIndex = 0; cloudIndex < cloudCount; cloudIndex++) {
-      const particleCount = isMobile ? 500 : 1000; // Reduced particles
+      const particleCount = isMobile ? 700 : 1400;
       const positions = new Float32Array(particleCount * 3);
       const colors = new Float32Array(particleCount * 3);
       const sizes = new Float32Array(particleCount);
       
-      // Cloud center position
-      const centerX = (Math.random() - 0.5) * 40;
-      const centerY = (Math.random() - 0.5) * 40;
-      const centerZ = (Math.random() - 0.5) * 40;
+      const centerX = (Math.random() - 0.5) * 50;
+      const centerY = (Math.random() - 0.5) * 50;
+      const centerZ = (Math.random() - 0.5) * 50;
       
-      // Enhanced cosmic color palette
+      // Vibrant cosmic color palettes
       const colorPalettes = [
-        [new THREE.Color('#ff6b9d'), new THREE.Color('#c06c84')],
-        [new THREE.Color('#6b5b95'), new THREE.Color('#88d8b0')],
-        [new THREE.Color('#feb236'), new THREE.Color('#ff6f91')],
-        [new THREE.Color('#4ecdc4'), new THREE.Color('#44a08d')],
-        [new THREE.Color('#f38181'), new THREE.Color('#aa4465')],
-        [new THREE.Color('#667eea'), new THREE.Color('#764ba2')],
-        [new THREE.Color('#00d4ff'), new THREE.Color('#090979')],
-        [new THREE.Color('#f093fb'), new THREE.Color('#f5576c')],
-        [new THREE.Color('#4facfe'), new THREE.Color('#00f2fe')],
-        [new THREE.Color('#fa709a'), new THREE.Color('#fee140')],
+        [new THREE.Color('#ff3366'), new THREE.Color('#ff6699'), new THREE.Color('#cc0044')],
+        [new THREE.Color('#6633ff'), new THREE.Color('#9966ff'), new THREE.Color('#3300cc')],
+        [new THREE.Color('#00ffcc'), new THREE.Color('#33ffdd'), new THREE.Color('#00cc99')],
+        [new THREE.Color('#ffaa00'), new THREE.Color('#ffcc44'), new THREE.Color('#ff8800')],
+        [new THREE.Color('#ff0099'), new THREE.Color('#ff44bb'), new THREE.Color('#cc0077')],
+        [new THREE.Color('#00aaff'), new THREE.Color('#44ccff'), new THREE.Color('#0077cc')],
+        [new THREE.Color('#ff5500'), new THREE.Color('#ff7744'), new THREE.Color('#cc3300')],
+        [new THREE.Color('#aa00ff'), new THREE.Color('#cc44ff'), new THREE.Color('#7700cc')],
+        [new THREE.Color('#00ff66'), new THREE.Color('#44ff88'), new THREE.Color('#00cc44')],
       ];
       
       const palette = colorPalettes[cloudIndex % colorPalettes.length];
@@ -43,29 +41,35 @@ export const NebulaClouds = () => {
       for (let i = 0; i < particleCount; i++) {
         const i3 = i * 3;
         
-        // Create volumetric cloud shape using gaussian distribution
+        // Volumetric cloud with gaussian distribution
         const spreadX = (Math.random() - 0.5) * 2;
         const spreadY = (Math.random() - 0.5) * 2;
         const spreadZ = (Math.random() - 0.5) * 2;
         
         const radius = Math.sqrt(spreadX * spreadX + spreadY * spreadY + spreadZ * spreadZ);
-        const density = Math.exp(-radius * radius / 2);
+        const density = Math.exp(-radius * radius / 1.8);
         
-        const scale = 8;
+        const scale = 10;
         positions[i3] = centerX + spreadX * scale;
         positions[i3 + 1] = centerY + spreadY * scale;
         positions[i3 + 2] = centerZ + spreadZ * scale;
         
-        // Color gradient within cloud
+        // Rich color blending with 3 colors
         const colorMix = Math.random();
-        const color = palette[0].clone().lerp(palette[1], colorMix);
+        let color;
+        if (colorMix < 0.4) {
+          color = palette[0].clone().lerp(palette[1], colorMix / 0.4);
+        } else {
+          color = palette[1].clone().lerp(palette[2], (colorMix - 0.4) / 0.6);
+        }
         
-        colors[i3] = color.r;
-        colors[i3 + 1] = color.g;
-        colors[i3 + 2] = color.b;
+        // Boost brightness
+        const brightness = 0.9 + Math.random() * 0.3;
+        colors[i3] = Math.min(1, color.r * brightness);
+        colors[i3 + 1] = Math.min(1, color.g * brightness);
+        colors[i3 + 2] = Math.min(1, color.b * brightness);
         
-        // Size based on density
-        sizes[i] = density * (Math.random() * 0.6 + 0.3);
+        sizes[i] = density * (Math.random() * 0.8 + 0.4);
       }
       
       cloudData.push({
@@ -74,11 +78,11 @@ export const NebulaClouds = () => {
         sizes,
         center: new THREE.Vector3(centerX, centerY, centerZ),
         driftSpeed: new THREE.Vector3(
-          (Math.random() - 0.5) * 0.01,
-          (Math.random() - 0.5) * 0.01,
-          (Math.random() - 0.5) * 0.01
+          (Math.random() - 0.5) * 0.012,
+          (Math.random() - 0.5) * 0.012,
+          (Math.random() - 0.5) * 0.012
         ),
-        rotationSpeed: (Math.random() - 0.5) * 0.001,
+        rotationSpeed: (Math.random() - 0.5) * 0.0015,
         pulsePhase: Math.random() * Math.PI * 2,
       });
     }
@@ -90,7 +94,6 @@ export const NebulaClouds = () => {
     const time = state.clock.elapsedTime;
     frameCount.current++;
     
-    // Only update every other frame for better performance
     if (frameCount.current % 2 !== 0) return;
     
     clouds.forEach((cloud, index) => {
@@ -101,37 +104,31 @@ export const NebulaClouds = () => {
       const positions = geometry.attributes.position.array as Float32Array;
       const sizes = geometry.attributes.size.array as Float32Array;
       
-      // Drift the cloud
       cloud.center.add(cloud.driftSpeed);
       
-      // Gentle expansion and contraction
-      const breathe = 1 + Math.sin(time * 0.3 + cloud.pulsePhase) * 0.05;
+      const breathe = 1 + Math.sin(time * 0.35 + cloud.pulsePhase) * 0.06;
       
-      // Update particle positions with subtle swirling
       for (let i = 0; i < positions.length; i += 3) {
         const baseX = positions[i] - cloud.center.x;
         const baseY = positions[i + 1] - cloud.center.y;
         const baseZ = positions[i + 2] - cloud.center.z;
         
-        // Add swirling motion
         const swirl = time * cloud.rotationSpeed;
         const distance = Math.sqrt(baseX * baseX + baseZ * baseZ);
         const angle = Math.atan2(baseZ, baseX) + swirl;
         
         positions[i] = cloud.center.x + Math.cos(angle) * distance * breathe;
-        positions[i + 1] = cloud.center.y + baseY * breathe + Math.sin(time * 0.2 + i) * 0.1;
+        positions[i + 1] = cloud.center.y + baseY * breathe + Math.sin(time * 0.25 + i) * 0.12;
         positions[i + 2] = cloud.center.z + Math.sin(angle) * distance * breathe;
         
-        // Subtle size pulsing
         const sizeIndex = i / 3;
-        const baseSizeFactor = Math.exp(-distance / 16);
-        sizes[sizeIndex] = baseSizeFactor * (0.4 + Math.sin(time + i * 0.1) * 0.2);
+        const baseSizeFactor = Math.exp(-distance / 18);
+        sizes[sizeIndex] = baseSizeFactor * (0.45 + Math.sin(time * 0.8 + i * 0.1) * 0.25);
       }
       
       geometry.attributes.position.needsUpdate = true;
       geometry.attributes.size.needsUpdate = true;
       
-      // Very slow rotation
       points.rotation.y += cloud.rotationSpeed;
     });
   });
@@ -166,10 +163,10 @@ export const NebulaClouds = () => {
             />
           </bufferGeometry>
           <pointsMaterial
-            size={0.8}
+            size={1.0}
             vertexColors
             transparent
-            opacity={0.75}
+            opacity={0.85}
             sizeAttenuation
             blending={THREE.AdditiveBlending}
             depthWrite={false}
