@@ -9,6 +9,12 @@ interface GlowState {
   section: 'top' | 'left' | 'right' | null;
 }
 
+// Color configurations for each section
+const sectionColors = {
+  left: { r: 59, g: 130, b: 246 }, // Blue
+  right: { r: 239, g: 68, b: 68 }, // Red
+};
+
 export const AeroPodNav = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [glow, setGlow] = useState<GlowState>({ x: 0, y: 0, intensity: 0, section: null });
@@ -24,7 +30,6 @@ export const AeroPodNav = () => {
         const delta = (now - lastUpdateRef.current) / 1000;
         lastUpdateRef.current = now;
         
-        // Increase intensity over time (reaches max ~1.0 after 60 seconds)
         intensityRef.current = Math.min(1, intensityRef.current + delta * 0.0167);
         setGlow(prev => ({ ...prev, intensity: intensityRef.current }));
         
@@ -40,7 +45,6 @@ export const AeroPodNav = () => {
         }
       };
     } else {
-      // Fade out when not hovering
       intensityRef.current = Math.max(0, intensityRef.current - 0.02);
       if (intensityRef.current > 0) {
         const fadeOut = () => {
@@ -72,13 +76,11 @@ export const AeroPodNav = () => {
     setGlow(prev => ({ ...prev, section: null }));
   }, []);
 
-  // Calculate spillover glow for adjacent sections
   const getSpilloverIntensity = (targetSection: 'top' | 'left' | 'right') => {
     if (!glow.section || glow.section === targetSection) return 0;
     
     const baseSpillover = glow.intensity * 0.3;
     
-    // Calculate distance-based spillover
     if (glow.section === 'top') {
       if (glow.y > 70) return baseSpillover * (glow.y - 70) / 30;
     } else if (glow.section === 'left' && targetSection === 'right') {
@@ -92,15 +94,52 @@ export const AeroPodNav = () => {
     return 0;
   };
 
-  const getGlowStyle = (section: 'top' | 'left' | 'right') => {
-    const isActive = glow.section === section;
-    const spillover = getSpilloverIntensity(section);
+  // Multi-color gradient for top section
+  const getTopGlowStyle = () => {
+    const isActive = glow.section === 'top';
+    const spillover = getSpilloverIntensity('top');
     const activeIntensity = isActive ? glow.intensity : spillover;
     
     if (activeIntensity <= 0) return {};
     
-    const glowColor = `rgba(59, 130, 246, ${0.15 + activeIntensity * 0.6})`;
-    const glowColor2 = `rgba(59, 130, 246, ${activeIntensity * 0.4})`;
+    if (isActive) {
+      return {
+        background: `
+          radial-gradient(
+            circle at ${glow.x}% ${glow.y}%,
+            rgba(59, 130, 246, ${0.2 + activeIntensity * 0.5}) 0%,
+            rgba(239, 68, 68, ${0.15 + activeIntensity * 0.4}) 25%,
+            rgba(234, 179, 8, ${0.15 + activeIntensity * 0.4}) 50%,
+            rgba(34, 197, 94, ${0.1 + activeIntensity * 0.3}) 75%,
+            transparent 100%
+          )
+        `,
+        boxShadow: `
+          inset 0 0 ${30 + activeIntensity * 40}px rgba(59, 130, 246, ${activeIntensity * 0.2}),
+          inset 0 0 ${20 + activeIntensity * 30}px rgba(239, 68, 68, ${activeIntensity * 0.15}),
+          inset 0 0 ${15 + activeIntensity * 25}px rgba(234, 179, 8, ${activeIntensity * 0.15}),
+          inset 0 0 ${10 + activeIntensity * 20}px rgba(34, 197, 94, ${activeIntensity * 0.1}),
+          0 0 ${20 + activeIntensity * 30}px rgba(59, 130, 246, ${activeIntensity * 0.15})
+        `,
+      };
+    } else {
+      return {
+        background: `linear-gradient(to bottom, rgba(59, 130, 246, ${spillover * 0.15}), rgba(234, 179, 8, ${spillover * 0.1}))`,
+        boxShadow: `inset 0 0 ${spillover * 30}px rgba(59, 130, 246, ${spillover * 0.2})`,
+      };
+    }
+  };
+
+  const getGlowStyle = (section: 'left' | 'right') => {
+    const isActive = glow.section === section;
+    const spillover = getSpilloverIntensity(section);
+    const activeIntensity = isActive ? glow.intensity : spillover;
+    const color = sectionColors[section];
+    
+    if (activeIntensity <= 0) return {};
+    
+    const glowColor = `rgba(${color.r}, ${color.g}, ${color.b}, ${0.15 + activeIntensity * 0.6})`;
+    const glowColor2 = `rgba(${color.r}, ${color.g}, ${color.b}, ${activeIntensity * 0.4})`;
     const bgOpacity = activeIntensity * 0.25;
     
     if (isActive) {
@@ -110,35 +149,22 @@ export const AeroPodNav = () => {
             circle at ${glow.x}% ${glow.y}%,
             ${glowColor} 0%,
             ${glowColor2} ${20 + (1 - activeIntensity) * 30}%,
-            rgba(59, 130, 246, ${activeIntensity * 0.1}) ${50 + (1 - activeIntensity) * 30}%,
+            rgba(${color.r}, ${color.g}, ${color.b}, ${activeIntensity * 0.1}) ${50 + (1 - activeIntensity) * 30}%,
             transparent 80%
           ),
-          linear-gradient(to bottom, rgba(59, 130, 246, ${bgOpacity * 0.3}), rgba(59, 130, 246, ${bgOpacity * 0.5}))
+          linear-gradient(to bottom, rgba(${color.r}, ${color.g}, ${color.b}, ${bgOpacity * 0.3}), rgba(${color.r}, ${color.g}, ${color.b}, ${bgOpacity * 0.5}))
         `,
         boxShadow: `
-          inset 0 0 ${30 + activeIntensity * 40}px rgba(59, 130, 246, ${activeIntensity * 0.3}),
-          0 0 ${20 + activeIntensity * 30}px rgba(59, 130, 246, ${activeIntensity * 0.2})
+          inset 0 0 ${30 + activeIntensity * 40}px rgba(${color.r}, ${color.g}, ${color.b}, ${activeIntensity * 0.3}),
+          0 0 ${20 + activeIntensity * 30}px rgba(${color.r}, ${color.g}, ${color.b}, ${activeIntensity * 0.2})
         `,
       };
     } else {
       return {
-        background: `linear-gradient(to bottom, rgba(59, 130, 246, ${spillover * 0.15}), rgba(59, 130, 246, ${spillover * 0.2}))`,
-        boxShadow: `inset 0 0 ${spillover * 30}px rgba(59, 130, 246, ${spillover * 0.2})`,
+        background: `linear-gradient(to bottom, rgba(${color.r}, ${color.g}, ${color.b}, ${spillover * 0.15}), rgba(${color.r}, ${color.g}, ${color.b}, ${spillover * 0.2}))`,
+        boxShadow: `inset 0 0 ${spillover * 30}px rgba(${color.r}, ${color.g}, ${color.b}, ${spillover * 0.2})`,
       };
     }
-  };
-
-  const getTextGlow = (section: 'top' | 'left' | 'right') => {
-    const isActive = glow.section === section;
-    const spillover = getSpilloverIntensity(section);
-    const intensity = isActive ? glow.intensity : spillover;
-    
-    if (intensity <= 0) return {};
-    
-    return {
-      textShadow: `0 0 ${10 + intensity * 20}px rgba(59, 130, 246, ${intensity * 0.8})`,
-      color: `rgb(${59 + (1 - intensity) * 40}, ${130 - intensity * 30}, ${246})`,
-    };
   };
 
   const getIconGlow = (section: 'top' | 'left' | 'right') => {
@@ -146,11 +172,19 @@ export const AeroPodNav = () => {
     const spillover = getSpilloverIntensity(section);
     const intensity = isActive ? glow.intensity : spillover;
     
-    if (intensity <= 0) return {};
+    if (intensity <= 0) return { color: '#6b7280' };
     
+    if (section === 'top') {
+      return {
+        filter: `drop-shadow(0 0 ${8 + intensity * 15}px rgba(59, 130, 246, ${0.5 + intensity * 0.5})) drop-shadow(0 0 ${5 + intensity * 10}px rgba(234, 179, 8, ${0.3 + intensity * 0.3}))`,
+        color: '#6b7280',
+      };
+    }
+    
+    const color = sectionColors[section];
     return {
-      filter: `drop-shadow(0 0 ${8 + intensity * 15}px rgba(59, 130, 246, ${0.5 + intensity * 0.5}))`,
-      color: `rgb(${59 + (1 - intensity) * 40}, ${130 - intensity * 30}, ${246})`,
+      filter: `drop-shadow(0 0 ${8 + intensity * 15}px rgba(${color.r}, ${color.g}, ${color.b}, ${0.5 + intensity * 0.5}))`,
+      color: '#6b7280',
     };
   };
 
@@ -166,16 +200,20 @@ export const AeroPodNav = () => {
         )}
         style={{
           boxShadow: glow.intensity > 0.1 
-            ? `0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08), 0 0 ${glow.intensity * 40}px rgba(59, 130, 246, ${glow.intensity * 0.3})`
+            ? glow.section === 'top'
+              ? `0 8px 32px rgba(0,0,0,0.12), 0 0 ${glow.intensity * 30}px rgba(59, 130, 246, ${glow.intensity * 0.2}), 0 0 ${glow.intensity * 25}px rgba(234, 179, 8, ${glow.intensity * 0.15})`
+              : glow.section === 'left'
+                ? `0 8px 32px rgba(0,0,0,0.12), 0 0 ${glow.intensity * 40}px rgba(59, 130, 246, ${glow.intensity * 0.3})`
+                : `0 8px 32px rgba(0,0,0,0.12), 0 0 ${glow.intensity * 40}px rgba(239, 68, 68, ${glow.intensity * 0.3})`
             : undefined
         }}
       >
         {/* Inner Container */}
         <div className="bg-gradient-to-b from-white to-[#f5f6f7] rounded-[22px] overflow-hidden">
           
-          {/* Top Section - AI Pioneer Program */}
+          {/* Top Section - AI Literacy */}
           <a
-            href="https://aipioneer.zen.ai"
+            href="https://www.zenai.world/zenmembers/my/my-account"
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
@@ -190,40 +228,24 @@ export const AeroPodNav = () => {
             {/* Dynamic glow overlay */}
             <div 
               className="absolute inset-0 pointer-events-none transition-all duration-100"
-              style={getGlowStyle('top')}
+              style={getTopGlowStyle()}
             />
             
             <div className="relative z-10 flex items-center justify-center gap-2.5 mb-1.5">
               <GraduationCap 
                 className="w-6 h-6 transition-all duration-200"
-                style={{
-                  ...getIconGlow('top'),
-                  color: glow.section === 'top' || getSpilloverIntensity('top') > 0 
-                    ? undefined 
-                    : '#4a5568'
-                }}
+                style={getIconGlow('top')}
               />
               <span 
-                className="font-bold text-base tracking-wide transition-all duration-200"
-                style={{
-                  ...getTextGlow('top'),
-                  color: glow.section === 'top' || getSpilloverIntensity('top') > 0 
-                    ? undefined 
-                    : '#2d3748'
-                }}
+                className="font-bold text-base tracking-wide transition-all duration-200 text-[#2d3748]"
               >
                 AI Literacy
               </span>
             </div>
             <span 
-              className="relative z-10 text-xs uppercase tracking-[0.2em] font-medium transition-all duration-200"
-              style={{
-                color: glow.section === 'top' 
-                  ? `rgba(59, 130, 246, ${0.7 + glow.intensity * 0.3})` 
-                  : '#6b7a3d'
-              }}
+              className="relative z-10 text-xs uppercase tracking-[0.2em] font-medium transition-all duration-200 text-[#6b7a3d]"
             >
-              Program
+              Learn
             </span>
           </a>
 
@@ -251,32 +273,12 @@ export const AeroPodNav = () => {
               <div className="relative z-10 flex flex-col items-center gap-1.5">
                 <Globe 
                   className="w-6 h-6 mb-1 transition-all duration-200"
-                  style={{
-                    ...getIconGlow('left'),
-                    color: glow.section === 'left' || getSpilloverIntensity('left') > 0 
-                      ? undefined 
-                      : '#6b7280'
-                  }}
+                  style={getIconGlow('left')}
                 />
-                <span 
-                  className="font-bold text-sm transition-all duration-200"
-                  style={{
-                    ...getTextGlow('left'),
-                    color: glow.section === 'left' || getSpilloverIntensity('left') > 0 
-                      ? undefined 
-                      : '#374151'
-                  }}
-                >
+                <span className="font-bold text-sm transition-all duration-200 text-[#374151]">
                   ZENAI
                 </span>
-                <span 
-                  className="text-[10px] uppercase tracking-[0.15em] font-medium transition-all duration-200"
-                  style={{
-                    color: glow.section === 'left' 
-                      ? `rgba(59, 130, 246, ${0.6 + glow.intensity * 0.4})` 
-                      : '#9ca3af'
-                  }}
-                >
+                <span className="text-[10px] uppercase tracking-[0.15em] font-medium transition-all duration-200 text-[#9ca3af]">
                   World
                 </span>
               </div>
@@ -303,32 +305,12 @@ export const AeroPodNav = () => {
               <div className="relative z-10 flex flex-col items-center gap-1.5">
                 <Gamepad2 
                   className="w-6 h-6 mb-1 transition-all duration-200"
-                  style={{
-                    ...getIconGlow('right'),
-                    color: glow.section === 'right' || getSpilloverIntensity('right') > 0 
-                      ? undefined 
-                      : '#6b7280'
-                  }}
+                  style={getIconGlow('right')}
                 />
-                <span 
-                  className="font-bold text-sm transition-all duration-200"
-                  style={{
-                    ...getTextGlow('right'),
-                    color: glow.section === 'right' || getSpilloverIntensity('right') > 0 
-                      ? undefined 
-                      : '#374151'
-                  }}
-                >
+                <span className="font-bold text-sm transition-all duration-200 text-[#374151]">
                   ARENA
                 </span>
-                <span 
-                  className="text-[10px] uppercase tracking-[0.15em] font-medium transition-all duration-200"
-                  style={{
-                    color: glow.section === 'right' 
-                      ? `rgba(59, 130, 246, ${0.6 + glow.intensity * 0.4})` 
-                      : '#9ca3af'
-                  }}
-                >
+                <span className="text-[10px] uppercase tracking-[0.15em] font-medium transition-all duration-200 text-[#9ca3af]">
                   Enter
                 </span>
               </div>
