@@ -212,7 +212,7 @@ export const AeroPodNav = () => {
                     : '#2d3748'
                 }}
               >
-                AI PIONEER
+                AI Literacy
               </span>
             </div>
             <span 
