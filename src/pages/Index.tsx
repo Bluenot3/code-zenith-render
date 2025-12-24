@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useState } from "react";
 import { useStore } from "@/state/useStore";
+import { MechButton } from "@/components/ui/MechButton";
 
 // Lazy load heavy components to reduce initial JS execution time
 const CanvasStage = lazy(() =>
@@ -132,26 +133,13 @@ const Index = () => {
       )}
 
       {/* Footer - always visible for immediate interactivity */}
-      <div className="fixed bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 z-10 font-code text-xs">
-        <div className="bg-card/80 backdrop-blur-sm px-2 sm:px-4 py-1.5 sm:py-2 rounded border border-border flex flex-col sm:flex-row items-center gap-1 sm:gap-4">
-          <a
-            href="https://zenarena.ai"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary hover:text-primary/80 transition-colors text-[10px] sm:text-xs touch-manipulation"
-          >
-            ZEN Arena
-          </a>
-          <span className="text-muted-foreground hidden sm:inline">|</span>
-          <a
-            href="https://aipioneer.zen.ai"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary hover:text-primary/80 transition-colors text-[10px] sm:text-xs touch-manipulation"
-          >
-            AI Pioneer Program
-          </a>
-        </div>
+      <div className="fixed bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 sm:gap-4">
+        <MechButton href="https://zenarena.ai">
+          ZEN Arena
+        </MechButton>
+        <MechButton href="https://aipioneer.zen.ai">
+          AI Pioneer Program
+        </MechButton>
       </div>
     </div>
   );
