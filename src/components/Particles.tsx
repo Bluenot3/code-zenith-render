@@ -56,13 +56,8 @@ export const Particles = () => {
       colors[i3 + 1] = color.g * brightness;
       colors[i3 + 2] = color.b * brightness;
       
-      // Much finer particles
-      const sizeRoll = Math.random();
-      if (sizeRoll < 0.8) {
-        sizes[i] = Math.random() * 0.08 + 0.02;
-      } else {
-        sizes[i] = Math.random() * 0.15 + 0.08;
-      }
+      // Ultra fine dust-like particles
+      sizes[i] = Math.random() * 0.015 + 0.005;
     }
     
     return [positions, colors, sizes];
@@ -120,10 +115,10 @@ export const Particles = () => {
         />
       </bufferGeometry>
       <pointsMaterial
-        size={0.025}
+        size={0.008}
         vertexColors
         transparent
-        opacity={0.5}
+        opacity={0.6}
         sizeAttenuation
         blending={THREE.AdditiveBlending}
         depthWrite={false}

@@ -37,8 +37,8 @@ export const SpaceDust = () => {
       colors[i3 + 1] = color.g;
       colors[i3 + 2] = color.b;
       
-      // Ultra fine dust
-      sizes[i] = Math.random() * 0.03 + 0.01;
+      // Tiny dust specks
+      sizes[i] = Math.random() * 0.008 + 0.002;
     }
     
     return { positions, colors, sizes, velocities, count };
@@ -95,10 +95,10 @@ export const SpaceDust = () => {
         />
       </bufferGeometry>
       <pointsMaterial
-        size={0.02}
+        size={0.004}
         vertexColors
         transparent
-        opacity={0.35}
+        opacity={0.4}
         sizeAttenuation
         blending={THREE.AdditiveBlending}
         depthWrite={false}
