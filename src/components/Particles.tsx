@@ -11,9 +11,11 @@ export const Particles = () => {
   const theme = useStore((state) => state.theme);
   const frameCount = useRef(0);
   
+  const count = useMemo(() => {
+    return isMobile ? Math.floor(particles.density * 0.15) : Math.floor(particles.density * 0.7);
+  }, [isMobile, particles.density]);
+  
   const [positions, colors, sizes] = useMemo(() => {
-    const actualDensity = isMobile ? Math.floor(particles.density * 0.15) : Math.floor(particles.density * 0.7);
-    const count = actualDensity;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const sizes = new Float32Array(count);
@@ -57,14 +59,14 @@ export const Particles = () => {
       // Much finer particles
       const sizeRoll = Math.random();
       if (sizeRoll < 0.8) {
-        sizes[i] = Math.random() * 0.08 + 0.02;  // Very fine
+        sizes[i] = Math.random() * 0.08 + 0.02;
       } else {
-        sizes[i] = Math.random() * 0.15 + 0.08;  // Small
+        sizes[i] = Math.random() * 0.15 + 0.08;
       }
     }
     
     return [positions, colors, sizes];
-  }, [particles.density, theme.background, isMobile]);
+  }, [count, theme.background]);
   
   useFrame((state) => {
     if (!pointsRef.current) return;
@@ -96,23 +98,23 @@ export const Particles = () => {
   if (!particles.enabled) return null;
   
   return (
-    <points ref={pointsRef} renderOrder={-1}>
+    <points ref={pointsRef} key={`particles-${count}`} renderOrder={-1}>
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          count={positions.length / 3}
+          count={count}
           array={positions}
           itemSize={3}
         />
         <bufferAttribute
           attach="attributes-color"
-          count={colors.length / 3}
+          count={count}
           array={colors}
           itemSize={3}
         />
         <bufferAttribute
           attach="attributes-size"
-          count={sizes.length}
+          count={count}
           array={sizes}
           itemSize={1}
         />
