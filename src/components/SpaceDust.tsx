@@ -73,7 +73,7 @@ export const SpaceDust = () => {
   });
   
   return (
-    <points ref={pointsRef} renderOrder={-2} frustumCulled={false}>
+    <points ref={pointsRef} key={`dust-${count}`} renderOrder={-2} frustumCulled={false}>
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
