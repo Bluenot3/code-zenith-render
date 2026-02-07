@@ -39,14 +39,14 @@ export const SpaceDust = () => {
       colors[i3 + 1] = color.g;
       colors[i3 + 2] = color.b;
 
-      // Much larger, varied sizes
+      // Fine, delicate sizes
       const sizeRoll = Math.random();
       if (sizeRoll < 0.6) {
-        sizes[i] = 1.0 + Math.random() * 2.0;
+        sizes[i] = 0.3 + Math.random() * 0.5;
       } else if (sizeRoll < 0.9) {
-        sizes[i] = 2.5 + Math.random() * 2.5;
+        sizes[i] = 0.6 + Math.random() * 0.6;
       } else {
-        sizes[i] = 4.0 + Math.random() * 3.0;
+        sizes[i] = 1.0 + Math.random() * 0.8;
       }
     }
 
@@ -111,10 +111,10 @@ export const SpaceDust = () => {
       </bufferGeometry>
 
       <SoftPointsMaterial
-        baseSize={isMobile ? 2.0 : 3.0}
-        opacity={0.45}
-        attenuation={isMobile ? 100 : 150}
-        maxSize={isMobile ? 14 : 22}
+        baseSize={isMobile ? 1.0 : 1.5}
+        opacity={0.4}
+        attenuation={isMobile ? 60 : 100}
+        maxSize={isMobile ? 6 : 10}
       />
     </points>
   );
