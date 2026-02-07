@@ -39,6 +39,9 @@ export const GeometrySwitcher = ({ texture }: GeometrySwitcherProps) => {
     if (animation.orbit) {
       meshRef.current.position.x = Math.cos(state.clock.elapsedTime * animation.speed) * 2;
       meshRef.current.position.z = Math.sin(state.clock.elapsedTime * animation.speed) * 2;
+    } else {
+      // Move ZEN closer to camera (positive Z = closer)
+      meshRef.current.position.z = 1.5;
     }
   });
   
