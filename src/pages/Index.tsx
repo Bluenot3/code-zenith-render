@@ -1,7 +1,7 @@
-import { Suspense, lazy, useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState, useTransition, startTransition } from "react";
 import { useStore } from "@/state/useStore";
 
-// Lazy load heavy components to reduce initial JS execution time
+// Lazy load heavy components with chunked imports to reduce main-thread blocking
 const CanvasStage = lazy(() =>
   import("@/components/CanvasStage").then((m) => ({ default: m.CanvasStage }))
 );
@@ -19,20 +19,63 @@ const LevaPanel = lazy(() =>
   import("@/components/LevaPanel").then((m) => ({ default: m.LevaPanel }))
 );
 
+// Yield to main thread to prevent long tasks
+const yieldToMain = (): Promise<void> => {
+  return new Promise((resolve) => {
+    if ('scheduler' in window && 'yield' in (window as any).scheduler) {
+      (window as any).scheduler.yield().then(resolve);
+    } else {
+      setTimeout(resolve, 0);
+    }
+  });
+};
+
 const Index = () => {
   const store = useStore();
   const [levaHidden, setLevaHidden] = useState(true);
   const [canvasReady, setCanvasReady] = useState(false);
+  const [uiReady, setUiReady] = useState(false);
+  const [, startUITransition] = useTransition();
 
-  // Defer Canvas initialization to improve TTI
+  // Staged initialization to break up main-thread work
   useEffect(() => {
-    const initCanvas = () => setCanvasReady(true);
-
-    if ("requestIdleCallback" in window) {
-      (window as any).requestIdleCallback(initCanvas, { timeout: 100 });
-    } else {
-      setTimeout(initCanvas, 100);
-    }
+    let mounted = true;
+    
+    const initializeStaged = async () => {
+      // Stage 1: Wait for browser idle time before starting heavy work
+      await new Promise<void>((resolve) => {
+        if ("requestIdleCallback" in window) {
+          (window as any).requestIdleCallback(() => resolve(), { timeout: 300 });
+        } else {
+          setTimeout(resolve, 150);
+        }
+      });
+      
+      if (!mounted) return;
+      
+      // Stage 2: Initialize canvas in a non-blocking transition
+      await yieldToMain();
+      if (!mounted) return;
+      
+      startTransition(() => {
+        setCanvasReady(true);
+      });
+      
+      // Stage 3: Delay UI controls to further reduce initial blocking
+      await yieldToMain();
+      await new Promise<void>((resolve) => setTimeout(resolve, 200));
+      
+      if (!mounted) return;
+      startUITransition(() => {
+        setUiReady(true);
+      });
+    };
+    
+    initializeStaged();
+    
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // Keyboard shortcuts
@@ -111,24 +154,29 @@ const Index = () => {
         </div>
       )}
 
-      {/* Defer heavy components until page is interactive */}
+      {/* Stage 1: Canvas loads first after idle */}
       {canvasReady && (
-        <>
-          <Suspense fallback={null}>
-            <CanvasStage />
-            <CodeSettings
-              onToggleLeva={() => setLevaHidden(!levaHidden)}
-              levaHidden={levaHidden}
-            />
-            <AutoplayController />
-          </Suspense>
+        <Suspense fallback={null}>
+          <CanvasStage />
+        </Suspense>
+      )}
+      
+      {/* Stage 2: UI controls load after canvas is ready */}
+      {uiReady && (
+        <Suspense fallback={null}>
+          <CodeSettings
+            onToggleLeva={() => setLevaHidden(!levaHidden)}
+            levaHidden={levaHidden}
+          />
+          <AutoplayController />
+        </Suspense>
+      )}
 
-          {!levaHidden && (
-            <Suspense fallback={null}>
-              <LevaPanel />
-            </Suspense>
-          )}
-        </>
+      {/* Stage 3: Leva only when explicitly requested */}
+      {uiReady && !levaHidden && (
+        <Suspense fallback={null}>
+          <LevaPanel />
+        </Suspense>
       )}
 
     </div>

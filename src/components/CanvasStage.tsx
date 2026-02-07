@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState, useRef, lazy } from 'react';
+import { Suspense, useEffect, useState, useRef, lazy, startTransition } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -19,7 +19,7 @@ import { useStore } from '@/state/useStore';
 import { applyTheme } from '@/utils/themes';
 import * as THREE from 'three';
 
-// Lazy load heavy effects - only load on desktop
+// Lazy load heavy effects with deferred loading - only load on desktop after main content
 const GalaxyClusters = lazy(() => import('./GalaxyClusters').then(m => ({ default: m.GalaxyClusters })));
 const NebulaClouds = lazy(() => import('./NebulaClouds').then(m => ({ default: m.NebulaClouds })));
 const CosmicAsteroids = lazy(() => import('./CosmicAsteroids').then(m => ({ default: m.CosmicAsteroids })));
@@ -62,9 +62,23 @@ export const CanvasStage = () => {
   const isPausedRef = useRef(false);
   const [showSpawnEffect, setShowSpawnEffect] = useState(true);
   const [isZoomEnabled, setIsZoomEnabled] = useState(false);
+  const [backgroundEffectsReady, setBackgroundEffectsReady] = useState(false);
   const lastTapTimeRef = useRef(0);
   const tapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Defer background effects loading to reduce main-thread blocking
+  useEffect(() => {
+    if (!isFullyLoaded || isMobile) return;
+    
+    const timer = setTimeout(() => {
+      startTransition(() => {
+        setBackgroundEffectsReady(true);
+      });
+    }, 500); // Load background effects 500ms after main content
+    
+    return () => clearTimeout(timer);
+  }, [isFullyLoaded, isMobile]);
   
   // Visibility detection - pause rendering when not visible
   useEffect(() => {
@@ -271,8 +285,8 @@ export const CanvasStage = () => {
         {/* Essential background - always visible */}
         <AmbientStars />
         
-        {/* Advanced effects - desktop only for performance */}
-        {!isMobile && (
+        {/* Advanced effects - desktop only, loaded after main content to reduce blocking */}
+        {!isMobile && backgroundEffectsReady && (
           <Suspense fallback={null}>
             <GalaxyClusters />
             <NebulaClouds />
