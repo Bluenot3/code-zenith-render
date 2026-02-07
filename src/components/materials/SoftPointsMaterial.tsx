@@ -46,7 +46,7 @@ export function SoftPointsMaterial({
 
           vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
 
-          // High-end crystal sizing with perspective
+          // Ultra high-end crystal sizing with enhanced perspective
           float pointSize = size * uBaseSize * (uAttenuation / max(0.001, -mvPosition.z));
           pointSize = clamp(pointSize, 0.0, uMaxSize);
           vSize = pointSize;
@@ -61,65 +61,108 @@ export function SoftPointsMaterial({
         uniform float uOpacity;
         uniform float uTime;
 
+        // Noise function for organic variation
+        float hash(vec2 p) {
+          return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+        }
+
         void main() {
           vec2 uv = gl_PointCoord - vec2(0.5);
           float dist = length(uv);
+          float angle = atan(uv.y, uv.x);
           
-          // Discard outside circle
+          // Soft edge discard with anti-aliasing
           if (dist > 0.5) discard;
           
-          // === CRYSTAL/GLASS EFFECT ===
+          // === ULTRA HIGH-END CRYSTAL/DIAMOND EFFECT ===
           
-          // 1. Smooth outer edge with crystal-like falloff
+          // 1. Multi-layer outer glow with depth
           float outerGlow = 1.0 - smoothstep(0.0, 0.5, dist);
-          outerGlow = pow(outerGlow, 0.8);
+          outerGlow = pow(outerGlow, 0.6);
           
-          // 2. Sharp inner core (crystal center)
-          float innerCore = 1.0 - smoothstep(0.0, 0.15, dist);
-          innerCore = pow(innerCore, 2.0);
+          float softHalo = 1.0 - smoothstep(0.3, 0.5, dist);
+          softHalo = pow(softHalo, 1.5) * 0.3;
           
-          // 3. Mid-ring refraction band (glass-like caustic)
-          float ring1 = smoothstep(0.15, 0.2, dist) * (1.0 - smoothstep(0.25, 0.35, dist));
-          float ring2 = smoothstep(0.32, 0.38, dist) * (1.0 - smoothstep(0.42, 0.48, dist));
-          float refraction = (ring1 + ring2 * 0.5) * 0.6;
+          // 2. Diamond-cut inner core with facets
+          float innerCore = 1.0 - smoothstep(0.0, 0.12, dist);
+          innerCore = pow(innerCore, 1.8);
           
-          // 4. Subtle highlight offset (simulates light refraction)
-          vec2 highlightOffset = vec2(-0.12, 0.12);
+          // Faceted inner shine (hexagonal pattern simulation)
+          float facets = abs(sin(angle * 6.0)) * 0.15 + 0.85;
+          innerCore *= facets;
+          
+          // 3. Multiple refraction rings (diamond-like caustics)
+          float ring1 = smoothstep(0.10, 0.14, dist) * (1.0 - smoothstep(0.18, 0.24, dist));
+          float ring2 = smoothstep(0.24, 0.28, dist) * (1.0 - smoothstep(0.32, 0.38, dist));
+          float ring3 = smoothstep(0.38, 0.42, dist) * (1.0 - smoothstep(0.46, 0.50, dist));
+          float refraction = (ring1 * 0.8 + ring2 * 0.5 + ring3 * 0.3);
+          
+          // Angular variation in rings
+          refraction *= (0.7 + 0.3 * abs(sin(angle * 4.0 + dist * 8.0)));
+          
+          // 4. Primary highlight (main light source reflection)
+          vec2 highlightOffset = vec2(-0.10, 0.10);
           float highlightDist = length(uv - highlightOffset);
-          float highlight = 1.0 - smoothstep(0.0, 0.18, highlightDist);
-          highlight = pow(highlight, 3.0) * 0.8;
+          float highlight = 1.0 - smoothstep(0.0, 0.16, highlightDist);
+          highlight = pow(highlight, 2.5);
           
-          // 5. Secondary smaller highlight
-          vec2 highlight2Offset = vec2(0.08, -0.15);
+          // 5. Secondary highlight (secondary light bounce)
+          vec2 highlight2Offset = vec2(0.07, -0.12);
           float highlight2Dist = length(uv - highlight2Offset);
-          float highlight2 = 1.0 - smoothstep(0.0, 0.1, highlight2Dist);
-          highlight2 = pow(highlight2, 4.0) * 0.4;
+          float highlight2 = 1.0 - smoothstep(0.0, 0.09, highlight2Dist);
+          highlight2 = pow(highlight2, 3.5) * 0.6;
           
-          // 6. Prismatic color shift for glass effect
+          // 6. Tertiary micro-highlights (sparkle points)
+          vec2 spark1 = vec2(0.15, 0.08);
+          vec2 spark2 = vec2(-0.08, -0.14);
+          vec2 spark3 = vec2(0.12, -0.06);
+          float sparkle1 = 1.0 - smoothstep(0.0, 0.04, length(uv - spark1));
+          float sparkle2 = 1.0 - smoothstep(0.0, 0.035, length(uv - spark2));
+          float sparkle3 = 1.0 - smoothstep(0.0, 0.03, length(uv - spark3));
+          float sparkles = (pow(sparkle1, 4.0) + pow(sparkle2, 4.0) + pow(sparkle3, 4.0)) * 0.5;
+          
+          // 7. Rainbow prismatic dispersion
           vec3 prismColor = vColor;
-          prismColor.r += ring1 * 0.15;
-          prismColor.g += ring2 * 0.1;
-          prismColor.b += refraction * 0.12;
+          float prismAngle = angle + dist * 3.0;
+          prismColor.r += sin(prismAngle) * 0.12 + ring1 * 0.18;
+          prismColor.g += sin(prismAngle + 2.094) * 0.10 + ring2 * 0.14;
+          prismColor.b += sin(prismAngle + 4.188) * 0.14 + ring3 * 0.16;
           
-          // 7. Combine all layers
-          float alpha = outerGlow * 0.5;
-          alpha += innerCore * 0.4;
-          alpha += refraction * 0.3;
-          alpha += highlight * 0.6;
-          alpha += highlight2 * 0.3;
+          // 8. Combine alpha layers with enhanced depth
+          float alpha = outerGlow * 0.45;
+          alpha += softHalo;
+          alpha += innerCore * 0.5;
+          alpha += refraction * 0.35;
+          alpha += highlight * 0.7;
+          alpha += highlight2 * 0.4;
+          alpha += sparkles * 0.8;
           
-          // 8. Final color with crystal clarity
+          // 9. Final color with diamond brilliance
           vec3 finalColor = prismColor;
-          finalColor += vec3(1.0) * (highlight + highlight2) * 0.5; // White highlights
-          finalColor += vec3(1.0) * innerCore * 0.3; // Bright center
           
-          // 9. Edge glow for depth
-          float edgeGlow = smoothstep(0.35, 0.48, dist) * (1.0 - smoothstep(0.48, 0.5, dist));
-          finalColor += vColor * edgeGlow * 0.4;
+          // Pure white highlights for maximum brilliance
+          finalColor += vec3(1.0) * highlight * 0.7;
+          finalColor += vec3(1.0) * highlight2 * 0.5;
+          finalColor += vec3(1.0) * sparkles * 0.9;
+          finalColor += vec3(1.0) * innerCore * 0.4;
           
-          // 10. Apply overall opacity with crystal clarity boost
-          alpha *= uOpacity * 1.2;
+          // Subtle color in refraction bands
+          finalColor += prismColor * refraction * 0.5;
+          
+          // 10. Crystal edge rim light
+          float rimLight = smoothstep(0.38, 0.48, dist) * (1.0 - smoothstep(0.48, 0.5, dist));
+          finalColor += (vColor + vec3(0.3)) * rimLight * 0.5;
+          
+          // 11. Inner glow warmth
+          float innerGlow = 1.0 - smoothstep(0.0, 0.3, dist);
+          finalColor += vColor * innerGlow * 0.15;
+          
+          // 12. Apply opacity with enhanced crystal clarity
+          alpha *= uOpacity * 1.3;
           alpha = clamp(alpha, 0.0, 1.0);
+          
+          // Boost overall brightness for gem-like appearance
+          finalColor = finalColor * 1.1 + vec3(0.02);
           
           gl_FragColor = vec4(finalColor, alpha);
         }

@@ -1,6 +1,5 @@
 import { Suspense, lazy, useEffect, useState } from "react";
 import { useStore } from "@/state/useStore";
-import { AeroPodNav } from "@/components/ui/AeroPodNav";
 
 // Lazy load heavy components to reduce initial JS execution time
 const CanvasStage = lazy(() =>
@@ -132,10 +131,6 @@ const Index = () => {
         </>
       )}
 
-      {/* Footer - always visible for immediate interactivity */}
-      <div className="fixed bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 z-10">
-        <AeroPodNav />
-      </div>
     </div>
   );
 };
