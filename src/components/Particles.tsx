@@ -46,14 +46,14 @@ export const Particles = () => {
       colors[i3 + 1] = color.g * brightness;
       colors[i3 + 2] = color.b * brightness;
 
-      // Much larger, varied particle sizes for premium look
+      // Fine, detailed particle sizes
       const sizeRoll = Math.random();
       if (sizeRoll < 0.7) {
-        sizes[i] = 1.5 + Math.random() * 2.5;
+        sizes[i] = 0.4 + Math.random() * 0.6;
       } else if (sizeRoll < 0.95) {
-        sizes[i] = 3.0 + Math.random() * 3.0;
+        sizes[i] = 0.8 + Math.random() * 0.8;
       } else {
-        sizes[i] = 5.0 + Math.random() * 4.0;
+        sizes[i] = 1.2 + Math.random() * 1.0;
       }
     }
 
@@ -110,10 +110,10 @@ export const Particles = () => {
       </bufferGeometry>
 
       <SoftPointsMaterial
-        baseSize={isMobile ? 2.5 : 3.5}
-        opacity={0.6}
-        attenuation={isMobile ? 120 : 180}
-        maxSize={isMobile ? 18 : 28}
+        baseSize={isMobile ? 1.2 : 1.8}
+        opacity={0.55}
+        attenuation={isMobile ? 80 : 120}
+        maxSize={isMobile ? 8 : 12}
       />
     </points>
   );
