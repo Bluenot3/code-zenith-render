@@ -24,26 +24,29 @@ export const SpaceDust = () => {
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
 
-      positions[i3] = (Math.random() - 0.5) * 70;
-      positions[i3 + 1] = (Math.random() - 0.5) * 70;
-      positions[i3 + 2] = (Math.random() - 0.5) * 70;
+      // Spread across wide field, starting deep in scene
+      positions[i3] = (Math.random() - 0.5) * 60;
+      positions[i3 + 1] = (Math.random() - 0.5) * 60;
+      positions[i3 + 2] = -100 + Math.random() * 120;
 
-      // Velocities are in world-units / second (we apply delta-time in the frame loop)
-      velocities[i3] = (Math.random() - 0.5) * 0.11;
-      velocities[i3 + 1] = (Math.random() - 0.5) * 0.11;
-      velocities[i3 + 2] = (Math.random() - 0.5) * 0.11;
+      // Forward velocity (towards camera) with slight drift
+      velocities[i3] = (Math.random() - 0.5) * 0.3;
+      velocities[i3 + 1] = (Math.random() - 0.5) * 0.3;
+      velocities[i3 + 2] = 1.5 + Math.random() * 1.0; // Main forward flow
 
       const color = dustColors[Math.floor(Math.random() * dustColors.length)];
       colors[i3] = color.r;
       colors[i3 + 1] = color.g;
       colors[i3 + 2] = color.b;
 
-      // Tiny, varied per-sprite sizes (actually used by the shader material)
+      // Much larger, varied sizes
       const sizeRoll = Math.random();
-      if (sizeRoll < 0.9) {
-        sizes[i] = 0.22 + Math.random() * 0.38;
+      if (sizeRoll < 0.6) {
+        sizes[i] = 1.0 + Math.random() * 2.0;
+      } else if (sizeRoll < 0.9) {
+        sizes[i] = 2.5 + Math.random() * 2.5;
       } else {
-        sizes[i] = 0.45 + Math.random() * 0.45;
+        sizes[i] = 4.0 + Math.random() * 3.0;
       }
     }
 
@@ -53,24 +56,27 @@ export const SpaceDust = () => {
   useFrame((_, delta) => {
     if (!pointsRef.current) return;
 
-    // Always-on micro-rotation for smooth “alive” feeling.
-    pointsRef.current.rotation.y += delta * 0.006;
-
     const geo = pointsRef.current.geometry;
     const pos = geo.attributes.position.array as Float32Array;
 
-    const bounds = 35;
     for (let i = 0; i < pos.length; i += 3) {
+      // Smooth drift on X/Y, main flow on Z (toward camera)
       pos[i] += velocities[i] * delta;
       pos[i + 1] += velocities[i + 1] * delta;
       pos[i + 2] += velocities[i + 2] * delta;
 
-      if (pos[i] > bounds) pos[i] = -bounds;
-      else if (pos[i] < -bounds) pos[i] = bounds;
-      if (pos[i + 1] > bounds) pos[i + 1] = -bounds;
-      else if (pos[i + 1] < -bounds) pos[i + 1] = bounds;
-      if (pos[i + 2] > bounds) pos[i + 2] = -bounds;
-      else if (pos[i + 2] < -bounds) pos[i + 2] = bounds;
+      // Reset to back when passing camera
+      if (pos[i + 2] > 25) {
+        pos[i + 2] = -100;
+        pos[i] = (Math.random() - 0.5) * 60;
+        pos[i + 1] = (Math.random() - 0.5) * 60;
+      }
+
+      // Gentle X/Y bounds
+      if (pos[i] > 35) pos[i] = -35;
+      else if (pos[i] < -35) pos[i] = 35;
+      if (pos[i + 1] > 35) pos[i + 1] = -35;
+      else if (pos[i + 1] < -35) pos[i + 1] = 35;
     }
 
     geo.attributes.position.needsUpdate = true;
@@ -105,12 +111,11 @@ export const SpaceDust = () => {
       </bufferGeometry>
 
       <SoftPointsMaterial
-        baseSize={isMobile ? 0.85 : 0.95}
-        opacity={0.35}
-        attenuation={isMobile ? 44 : 52}
-        maxSize={isMobile ? 2.0 : 2.4}
+        baseSize={isMobile ? 2.0 : 3.0}
+        opacity={0.45}
+        attenuation={isMobile ? 100 : 150}
+        maxSize={isMobile ? 14 : 22}
       />
     </points>
   );
 };
-

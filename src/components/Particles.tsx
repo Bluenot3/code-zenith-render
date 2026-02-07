@@ -34,28 +34,10 @@ export const Particles = () => {
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
 
-      const layer = Math.random();
-      const layerType = Math.floor(layer * 3);
-      let radius;
-
-      switch (layerType) {
-        case 0:
-          radius = 4 + Math.random() * 5;
-          break;
-        case 1:
-          radius = 9 + Math.random() * 6;
-          break;
-        default:
-          radius = 15 + Math.random() * 8;
-          break;
-      }
-
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.random() * Math.PI;
-
-      positions[i3] = radius * Math.sin(phi) * Math.cos(theta);
-      positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-      positions[i3 + 2] = radius * Math.cos(phi);
+      // Spread across full depth, starting far back
+      positions[i3] = (Math.random() - 0.5) * 40;
+      positions[i3 + 1] = (Math.random() - 0.5) * 40;
+      positions[i3 + 2] = -80 + Math.random() * 100; // Start deep in scene
 
       const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
       const brightness = 0.8 + Math.random() * 0.4;
@@ -64,42 +46,39 @@ export const Particles = () => {
       colors[i3 + 1] = color.g * brightness;
       colors[i3 + 2] = color.b * brightness;
 
-      // Ultra-fine, per-particle sprite size (actually used by our shader material)
+      // Much larger, varied particle sizes for premium look
       const sizeRoll = Math.random();
-      if (sizeRoll < 0.9) {
-        sizes[i] = 0.32 + Math.random() * 0.46;
+      if (sizeRoll < 0.7) {
+        sizes[i] = 1.5 + Math.random() * 2.5;
+      } else if (sizeRoll < 0.95) {
+        sizes[i] = 3.0 + Math.random() * 3.0;
       } else {
-        sizes[i] = 0.55 + Math.random() * 0.55;
+        sizes[i] = 5.0 + Math.random() * 4.0;
       }
     }
 
     return [positions, colors, sizes];
   }, [count, theme.background]);
 
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (!pointsRef.current) return;
-
-    const time = state.clock.elapsedTime;
-
-    // Orbit mode: rotate the whole field for buttery-smooth motion with minimal CPU.
-    if (particles.orbitMode) {
-      pointsRef.current.rotation.y = time * 0.06;
-      pointsRef.current.rotation.x = Math.sin(time * 0.12) * 0.08;
-      return;
-    }
-
-    // Subtle continuous rotation to enhance perceived detail.
-    pointsRef.current.rotation.y += delta * 0.02;
 
     const geo = pointsRef.current.geometry;
     const pos = geo.attributes.position.array as Float32Array;
 
-    // Slow, smooth drift (delta-time based so it feels consistent across devices).
-    const driftPerSec = 0.14 * particles.driftSpeed;
+    // Slow, smooth flow from back to front (towards camera)
+    const flowSpeed = 2.5 * particles.driftSpeed;
 
     for (let i = 0; i < pos.length; i += 3) {
-      pos[i + 1] -= delta * driftPerSec;
-      if (pos[i + 1] < -10) pos[i + 1] = 10;
+      // Move toward camera (positive Z)
+      pos[i + 2] += delta * flowSpeed;
+      
+      // Reset to back when passing camera
+      if (pos[i + 2] > 25) {
+        pos[i + 2] = -80;
+        pos[i] = (Math.random() - 0.5) * 40;
+        pos[i + 1] = (Math.random() - 0.5) * 40;
+      }
     }
 
     geo.attributes.position.needsUpdate = true;
@@ -131,11 +110,10 @@ export const Particles = () => {
       </bufferGeometry>
 
       <SoftPointsMaterial
-        // Slightly smaller on mobile (keeps the refined dust aesthetic)
-        baseSize={isMobile ? 0.95 : 1.05}
-        opacity={0.55}
-        attenuation={isMobile ? 52 : 60}
-        maxSize={isMobile ? 2.6 : 3.2}
+        baseSize={isMobile ? 2.5 : 3.5}
+        opacity={0.6}
+        attenuation={isMobile ? 120 : 180}
+        maxSize={isMobile ? 18 : 28}
       />
     </points>
   );
