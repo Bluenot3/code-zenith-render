@@ -40,6 +40,8 @@ const ShootingStars = lazy(() => import('./ShootingStars').then(m => ({ default:
 const DeepSpaceGlow = lazy(() => import('./DeepSpaceGlow').then(m => ({ default: m.DeepSpaceGlow })));
 const DistantGalaxies = lazy(() => import('./DistantGalaxies').then(m => ({ default: m.DistantGalaxies })));
 const CosmicAurora = lazy(() => import('./CosmicAurora').then(m => ({ default: m.CosmicAurora })));
+// Ambient liquid glass rings (desktop only, near-zero cost)
+const LiquidRings = lazy(() => import('./LiquidRings').then(m => ({ default: m.LiquidRings })));
 
 export const CanvasStage = () => {
   const isMobile = useIsMobile();
@@ -304,6 +306,8 @@ export const CanvasStage = () => {
             <DeepSpaceGlow />
             <DistantGalaxies />
             <CosmicAurora />
+            {/* Ambient liquid glass rings */}
+            <LiquidRings />
           </Suspense>
         )}
         
